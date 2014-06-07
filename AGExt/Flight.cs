@@ -85,6 +85,9 @@ namespace ActionGroupsExtended
         private string ActivatedGroups = "";
         public static bool loadFinished = false;
         private bool AGXShow = true;
+        private int RightClickDelay = 0;
+        private bool RightLickPartAdded = false;
+        private List<int> ActiveActions = new List<int>();
 
 
 
@@ -404,26 +407,26 @@ namespace ActionGroupsExtended
                 }
             }
            
-            List<int> ActiveActions = new List<int>();
-            for (int i = 1; i <= 250; i = i + 1)
-            {
-                if(CurrentVesselActions.Any(a => a.group == i))
-                {
+            
+            //for (int i = 1; i <= 250; i = i + 1)
+            //{
+            //    if(CurrentVesselActions.Any(a => a.group == i))
+            //    {
                  
-                    ActiveActions.Add(i);
+            //        ActiveActions.Add(i);
                    
 
                    
-                }
-                if (ActiveActions.Count > 0)
-                {
-                    ActiveKeys.Clear();
-                    foreach (int i2 in ActiveActions)
-                    {
-                        ActiveKeys.Add(AGXguiKeys[i2]);
-                    }
-                }
-            }
+            //    }
+            //    if (ActiveActions.Count > 0)
+            //    {
+            //        ActiveKeys.Clear();
+            //        foreach (int i2 in ActiveActions)
+            //        {
+            //            ActiveKeys.Add(AGXguiKeys[i2]);
+            //        }
+            //    }
+            //}
 
             GUI.Box(new Rect(5, 25, 190, Math.Min(410,10+(20*Math.Max(1,ActiveActions.Count)))), "");
             FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 200, Math.Min(400,20+(20*(ActiveActions.Count-1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActions.Count))));
@@ -1448,6 +1451,17 @@ namespace ActionGroupsExtended
         public void Update()
         {
 
+
+            //UIPartActionWindow UIPartsListThing = new UIPartActionWindow();
+            //UIPartsListThing = (UIPartActionWindow)FindObjectOfType(typeof(UIPartActionWindow));
+            //try
+            //{
+            //    print(UIPartsListThing.part.name); //finds part right-clicked on
+            //}
+            //catch
+            //{
+            //    print("nope!");
+            //}
            
             //    ActionsCheck:
             //if (CurrentVesselActions.Count > 0)
@@ -1484,6 +1498,30 @@ namespace ActionGroupsExtended
                 }
             }
 
+            ActiveActions.Clear();
+            for (int i = 1; i <= 250; i = i + 1)
+            {
+                if (CurrentVesselActions.Any(a => a.group == i))
+                {
+
+                    ActiveActions.Add(i);
+
+
+
+                }
+                ActiveKeys.Clear();
+                if (ActiveActions.Count > 0)
+                {
+
+                    foreach (int i2 in ActiveActions)
+                    {
+                        ActiveKeys.Add(AGXguiKeys[i2]);
+                    }
+                }
+
+
+            }
+
             foreach (KeyCode KC in ActiveKeys)
             {
                 if(Input.GetKeyDown(KC))
@@ -1509,6 +1547,44 @@ namespace ActionGroupsExtended
             
         }
 
+            if (RightClickDelay < 3)
+            {
+                if (RightClickDelay == 2)
+                {
+                    UIPartActionWindow UIPartsListThing = new UIPartActionWindow();
+                    UIPartsListThing = (UIPartActionWindow)FindObjectOfType(typeof(UIPartActionWindow));
+                    //UnityEngine.Object[] TempObj = FindObjectsOfType(typeof(UIPartActionWindow));
+                    //print(TempObj.Length);
+                    try
+                    {
+                        if (UIPartsListThing != null)
+                        {
+                            AddSelectedPart(UIPartsListThing.part);
+                        }
+                       // print(UIPartsListThing.part.name); //finds part right-clicked on
+                        RightLickPartAdded = true;
+                    }
+                    catch
+                    {
+                       // print("nope!");
+                        RightLickPartAdded = true;
+                    }
+                }
+                
+                    RightClickDelay = RightClickDelay + 1;
+                
+
+            }
+
+            
+            
+            if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
+            {
+                RightClickDelay = 0;
+                RightLickPartAdded = false;
+
+            }
+
 
             bool RootPartExists = new bool();
             try
@@ -1530,6 +1606,7 @@ namespace ActionGroupsExtended
                 if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //load keyset also
                 {
                     print("Root part changed, AGX reloading");
+                    loadFinished = false;
                     foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
                     {
                         CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
@@ -1553,100 +1630,17 @@ namespace ActionGroupsExtended
 
 
                     AGXRoot = FlightGlobals.ActiveVessel.rootPart;
-
+                    loadFinished = true;
+                    //print("LoadFin true");
+                     
                 }
 
                
 
-               // return;
-
-
-
-
-                //ShowSelectedWin = false; //temp bypass
-
-                //if (ShowSelectedWin)
-                //{
-
-
-
-                //    if (FlightGlobals.ActiveVessel.parts != null) //on first run, list is null
-                //    {
-
-
-                //        if (FlightGlobals.ActiveVessel.parts.Count > 0) //are there parts selected?
-                //        {
-
-
-                //            if (PreviousSelectedPart != FlightGlobals.ActiveVessel.rootPart) //has selected part changed?
-                //            {
-
-                //                if (!AGEditorSelectedParts.Any(p => p.AGPart == EditorActionGroups.Instance.GetSelectedParts().First())) //make sure selected part is not already in AGEdSelParts
-                //                {
-
-                //                    if (AGEditorSelectedParts.Count == 0) //no items in Selected Parts list, so just add selection
-                //                    {
-                //                        AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
-
-
-                //                    }
-                //                    else if (AGEditorSelectedParts.First().AGPart.name == EditorActionGroups.Instance.GetSelectedParts().First().name) //selected part matches first part already in selected parts list, so just add selected part
-                //                    {
-                //                        AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
-
-
-                //                    }
-                //                    else //part does not match first part in list, clear list before adding part
-                //                    {
-
-                //                        AGEditorSelectedParts.Clear();
-                //                        AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
-
-
-
-                //                    }
-                //                }
-                //                PreviousSelectedPart = EditorActionGroups.Instance.GetSelectedParts().First(); //remember selected part so logic does not run unitl another part selected
-                //            }
-
-                //        }
-                //    }
-
-                //}
-
-
-
-
-
-                //try
-                //{
-                //    if (FlightGlobals.ActiveVessel.Parts.Count >= 1)
-                //    {
-                     
-                //            ShipListOk = true;
-                //    }
-                  
-                //}
-                //catch
-                //{
               
-                //    ShipListOk = false;
-                //}
-
-           
-
-
-
-
-
-                //if (ShipListOk)
-                //{
-                   
-                  
-                 
-                //}
               
             }
+            
         }
         //public static void ClearAction(BaseAction act)
         //{
@@ -1796,6 +1790,7 @@ namespace ActionGroupsExtended
             {
                 SaveStringNames = str;
             }
+            //print(p.partName + " " + SaveStringNames);
             return SaveStringNames;
         }
 
