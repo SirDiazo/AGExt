@@ -150,7 +150,7 @@ namespace ActionGroupsExtended
     }
     public void OnDestroy()
     {
-        if (CallBacksSet && HighLogic.LoadedSceneIsEditor)
+        if (CallBacksSet)
         {
             this.part.OnEditorDetach -= PartOnDetach;
             this.part.OnEditorAttach -= PartOnAttach;
@@ -163,13 +163,19 @@ namespace ActionGroupsExtended
         public void Update()
 {
 
-    if (!CallBacksSet && HighLogic.LoadedSceneIsEditor)
+    if (!CallBacksSet && HighLogic.LoadedSceneIsEditor) //set callbacks to handle placing symmetry parts with actions assigned
     {
         this.part.OnEditorDetach += PartOnDetach;
         this.part.OnEditorAttach += PartOnAttach;
         CallBacksSet = true;
-        
     }
+    if (CallBacksSet && !HighLogic.LoadedSceneIsEditor) //remove callbacks now that we are not in editor
+    {
+        this.part.OnEditorDetach -= PartOnDetach;
+        this.part.OnEditorAttach -= PartOnAttach;
+        CallBacksSet = false;
+    }
+
     //print(this.part.name + " " + this.part.isConnected);
     if (partAGActions != null)
     {
