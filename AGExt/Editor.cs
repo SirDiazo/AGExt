@@ -90,8 +90,8 @@ namespace ActionGroupsExtended
         public void Start()
         {
             //foreach (Part p in 
-           
 
+            
             KSPActs[1] = KSPActionGroup.Custom01;
             KSPActs[2] = KSPActionGroup.Custom02;
             KSPActs[3] = KSPActionGroup.Custom03;
@@ -341,46 +341,58 @@ namespace ActionGroupsExtended
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group]))
                     {
-                        AGXAction agtemp = new AGXAction();
-                        agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                        foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                        int ToDel = 0;
+                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
                         {
-                            int agcnt = new int();
-                            agcnt = 0;
-                            foreach (AGXAction agxact in agpm.partAGActions)
+                            
+                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                             {
-                                if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                {
-                                    agpm.partAGActions.RemoveAt(agcnt);
-                                    goto BreakOut;
-                                }
-                                agcnt = agcnt + 1;
+                                
+                                CurrentVesselActions.RemoveAt(ToDel);
+                                goto BreakOutA;
                             }
+                            ToDel = ToDel + 1;
                         }
-                    BreakOut:
-                        print("ActionDeleted");
+                    BreakOutA:
+                        SaveCurrentVesselActions();
+                      
+                        //AGXAction agtemp = new AGXAction();
+                        //agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
+                        //foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                        //{
+                        //    int agcnt = new int();
+                        //    agcnt = 0;
+                        //    foreach (AGXAction agxact in agpm.partAGActions)
+                        //    {
+                        //        if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
+                        //        {
+                        //            agpm.partAGActions.RemoveAt(agcnt);
+                        //            print("ActionDeleted");
+                        //            goto BreakOut;
+                        //        }
+                        //        agcnt = agcnt + 1;
+                        //    }
+                        //}
+                    
                     }
-
+                
                         if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title))
                         {
-                            AGXAction agtemp = new AGXAction();
-                            agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                            foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                            int ToDel = 0;
+                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
                             {
-                                int agcnt = new int();
-                                agcnt = 0;
-                                foreach (AGXAction agxact in agpm.partAGActions)
+
+                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                                 {
-                                    if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                    {
-                                        agpm.partAGActions.RemoveAt(agcnt);
-                                        goto BreakOut;
-                                    }
-                                    agcnt = agcnt + 1;
+                                    
+                                    CurrentVesselActions.RemoveAt(ToDel);
+                                    goto BreakOutB;
                                 }
+                                ToDel = ToDel + 1;
                             }
-                        BreakOut:
-                            print("ActionDeleted");
+                        BreakOutB:
+                            SaveCurrentVesselActions();
+                            
                         }
 
 
@@ -388,48 +400,42 @@ namespace ActionGroupsExtended
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName))
                             {
-                                AGXAction agtemp = new AGXAction();
-                                agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                                foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                                int ToDel = 0;
+                                foreach (AGXAction AGXToRemove in CurrentVesselActions)
                                 {
-                                    int agcnt = new int();
-                                    agcnt = 0;
-                                    foreach (AGXAction agxact in agpm.partAGActions)
+
+                                    if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                                     {
-                                        if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                        {
-                                            agpm.partAGActions.RemoveAt(agcnt);
-                                            goto BreakOut;
-                                        }
-                                        agcnt = agcnt + 1;
+                                       
+                                        CurrentVesselActions.RemoveAt(ToDel);
+                                        goto BreakOutC;
                                     }
+                                    ToDel = ToDel + 1;
                                 }
-                            BreakOut:
-                                print("ActionDeleted");
+                            BreakOutC:
+                                SaveCurrentVesselActions();
+                               
                             }
                         }
                         catch
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "error"))
                             {
-                                AGXAction agtemp = new AGXAction();
-                                agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                                foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                                int ToDel = 0;
+                                foreach (AGXAction AGXToRemove in CurrentVesselActions)
                                 {
-                                    int agcnt = new int();
-                                    agcnt = 0;
-                                    foreach (AGXAction agxact in agpm.partAGActions)
+
+                                    if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                                     {
-                                        if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                        {
-                                            agpm.partAGActions.RemoveAt(agcnt);
-                                            goto BreakOut;
-                                        }
-                                        agcnt = agcnt + 1;
+                                      
+                                        CurrentVesselActions.RemoveAt(ToDel);
+                                        goto BreakOutD;
                                     }
+                                    ToDel = ToDel + 1;
                                 }
-                            BreakOut:
-                                print("ActionDeleted");
+                            BreakOutD:
+                                SaveCurrentVesselActions();
+                                
                             }
                         }
 
@@ -437,6 +443,8 @@ namespace ActionGroupsExtended
                         GUI.skin.button.alignment = TxtAnch4;
                         RowCnt = RowCnt + 1;
                     }
+           
+                
                 }
             
             else
@@ -667,9 +675,36 @@ namespace ActionGroupsExtended
 
                 AGExtNode.SetValue("KeySet" + CurrentKeySet.ToString(), SaveString);
                 AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-
+                if (CurrentKeySet == 1)
+                {
+                    SaveDefaultCustomKeys();
+                }
               
             
+        }
+        public static void SaveDefaultCustomKeys()
+        {
+            GameSettings.CustomActionGroup1.primary = AGXguiKeys[1]; //copy keys to KSP itself
+            GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
+            GameSettings.CustomActionGroup3.primary = AGXguiKeys[3];
+            GameSettings.CustomActionGroup4.primary = AGXguiKeys[4];
+            GameSettings.CustomActionGroup5.primary = AGXguiKeys[5];
+            GameSettings.CustomActionGroup6.primary = AGXguiKeys[6];
+            GameSettings.CustomActionGroup7.primary = AGXguiKeys[7];
+            GameSettings.CustomActionGroup8.primary = AGXguiKeys[8];
+            GameSettings.CustomActionGroup9.primary = AGXguiKeys[9];
+            GameSettings.CustomActionGroup10.primary = AGXguiKeys[10];
+            GameSettings.SaveSettings(); //save keys to disk
+            GameSettings.CustomActionGroup1.primary = KeyCode.None; //unbind keys so they don't conflict
+            GameSettings.CustomActionGroup2.primary = KeyCode.None;
+            GameSettings.CustomActionGroup3.primary = KeyCode.None;
+            GameSettings.CustomActionGroup4.primary = KeyCode.None;
+            GameSettings.CustomActionGroup5.primary = KeyCode.None;
+            GameSettings.CustomActionGroup6.primary = KeyCode.None;
+            GameSettings.CustomActionGroup7.primary = KeyCode.None;
+            GameSettings.CustomActionGroup8.primary = KeyCode.None;
+            GameSettings.CustomActionGroup9.primary = KeyCode.None;
+            GameSettings.CustomActionGroup10.primary = KeyCode.None;
         }
         public void KeyCodeWindow(int WindowID)
         {
@@ -876,7 +911,7 @@ namespace ActionGroupsExtended
 
                                 Checking.RemoveAll(p => p.prt != AGEditorSelectedParts.ElementAt(PrtCnt).AGPart);
                                 
-                                Checking.RemoveAll(p => p.ba.guiName != PartActionsList.ElementAt(ActionsCount - 1).guiName);
+                                Checking.RemoveAll(p => p.ba != PartActionsList.ElementAt(ActionsCount - 1));
                               
 
 

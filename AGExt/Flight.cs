@@ -11,7 +11,10 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        
         //Selected Parts Window Variables
+        
+        //private Dictionary<int, KeyCode> Save10Keys =  new Dictionary<int, KeyCode>();
         public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
         public Rect SelPartsWin;
         public Rect FlightWin;
@@ -88,6 +91,7 @@ namespace ActionGroupsExtended
         private int RightClickDelay = 0;
         private bool RightLickPartAdded = false;
         private List<int> ActiveActions = new List<int>();
+       // public bool ActiveActionsCalculated = false;
 
 
 
@@ -98,6 +102,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
+            //Save10Keys = new Dictionary<int, KeyCode>();
             //foreach (Part p in 
             ActiveKeys = new List<KeyCode>();
             KSPActs[1] = KSPActionGroup.Custom01;
@@ -186,6 +191,8 @@ namespace ActionGroupsExtended
            
         }
 
+        
+
         public void LoadEverything()
         {
             foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
@@ -201,7 +208,7 @@ namespace ActionGroupsExtended
 
             LoadGroupNames();
             LoadCurrentKeyBindings();
-            //LoadActivatedGroups();
+            LoadActionGroups();
             loadFinished = true;
         }
 
@@ -211,29 +218,42 @@ namespace ActionGroupsExtended
         private void UnbindDefaultKeys()
         {
            //Unbind default keys from Custom 1 through 10. Note this does not save across sessions and so gets reapplied.
+           // Save10Keys[1] = GameSettings.CustomActionGroup1.primary;
             GameSettings.CustomActionGroup1.primary = KeyCode.None;
-            GameSettings.CustomActionGroup1.secondary = KeyCode.None;
+            //GameSettings.CustomActionGroup1.secondary = KeyCode.None;
+           // Save10Keys[2] = GameSettings.CustomActionGroup2.primary;
             GameSettings.CustomActionGroup2.primary = KeyCode.None;
-            GameSettings.CustomActionGroup2.secondary = KeyCode.None;
+           // GameSettings.CustomActionGroup2.secondary = KeyCode.None;
+           // Save10Keys[3] = GameSettings.CustomActionGroup3.primary;
             GameSettings.CustomActionGroup3.primary = KeyCode.None;
-            GameSettings.CustomActionGroup3.secondary = KeyCode.None;
+           // GameSettings.CustomActionGroup3.secondary = KeyCode.None;
+           // Save10Keys[4] = GameSettings.CustomActionGroup4.primary;
             GameSettings.CustomActionGroup4.primary = KeyCode.None;
-            GameSettings.CustomActionGroup4.secondary = KeyCode.None;
+            //GameSettings.CustomActionGroup4.secondary = KeyCode.None;
+            //Save10Keys[5] = GameSettings.CustomActionGroup5.primary;
             GameSettings.CustomActionGroup5.primary = KeyCode.None;
-            GameSettings.CustomActionGroup5.secondary = KeyCode.None;
+            //GameSettings.CustomActionGroup5.secondary = KeyCode.None;
+           // Save10Keys[6] = GameSettings.CustomActionGroup6.primary;
             GameSettings.CustomActionGroup6.primary = KeyCode.None;
-            GameSettings.CustomActionGroup6.secondary = KeyCode.None;
+            //GameSettings.CustomActionGroup6.secondary = KeyCode.None;
+           // Save10Keys[7] = GameSettings.CustomActionGroup7.primary;
             GameSettings.CustomActionGroup7.primary = KeyCode.None;
-            GameSettings.CustomActionGroup7.secondary = KeyCode.None;
+           // GameSettings.CustomActionGroup7.secondary = KeyCode.None;
+           // Save10Keys[8] = GameSettings.CustomActionGroup8.primary;
             GameSettings.CustomActionGroup8.primary = KeyCode.None;
-            GameSettings.CustomActionGroup8.secondary = KeyCode.None;
+           // GameSettings.CustomActionGroup8.secondary = KeyCode.None;
+           // Save10Keys[9] = GameSettings.CustomActionGroup9.primary;
             GameSettings.CustomActionGroup9.primary = KeyCode.None;
-            GameSettings.CustomActionGroup9.secondary = KeyCode.None;
+           // GameSettings.CustomActionGroup9.secondary = KeyCode.None;
+           // Save10Keys[10] = GameSettings.CustomActionGroup10.primary;
             GameSettings.CustomActionGroup10.primary = KeyCode.None;
-            GameSettings.CustomActionGroup10.secondary = KeyCode.None;
-            
+           // GameSettings.CustomActionGroup10.secondary = KeyCode.None;
         }
- 
+
+        //private void RebindDefaultKeys()
+        //{
+        //    GameSettings.CustomActionGroup1.primary = Save10Keys[1];
+        //}
 
         public void SaveWindowPositions()
         {
@@ -286,7 +306,15 @@ namespace ActionGroupsExtended
             
             //SaveGroupNames();
         SaveWindowPositions();
-       
+        SaveCurrentVesselActions();
+        foreach (Part p in FlightGlobals.ActiveVessel.parts)
+        {
+            foreach (PartModule pm in p.Modules.OfType<ModuleAGExtData>())
+            {
+                ModuleAGExtData AGData = (ModuleAGExtData)pm;
+                AGData.AGXNames = SaveGroupNames(p, AGData.AGXNames);
+            }
+        }
 
         }
 
@@ -476,8 +504,10 @@ namespace ActionGroupsExtended
                 {
                     agpm.partAGActions.Clear();
                     agpm.partAGActions.AddRange(CurrentVesselActions.Where(agp => agp.prt == p));
+                    agpm.AGXData = agpm.SaveActionGroups();
                 }
             }
+            CalculateActiveActions();
         }
         public void CurrentActionsWindow(int WindowID)
         {
@@ -500,93 +530,81 @@ namespace ActionGroupsExtended
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group]))
                     {
-                        AGXAction agtemp = new AGXAction();
-                        agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                        foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                        int ToDel = 0;
+                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
                         {
-                            int agcnt = new int();
-                            agcnt = 0;
-                            foreach (AGXAction agxact in agpm.partAGActions)
+
+                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                             {
-                                if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                {
-                                    agpm.partAGActions.RemoveAt(agcnt);
-                                    goto BreakOut;
-                                }
-                                agcnt = agcnt + 1;
+                                
+                                CurrentVesselActions.RemoveAt(ToDel);
+                                goto BreakOutA;
                             }
+                            ToDel = ToDel + 1;
                         }
-                    BreakOut:
-                        print("ActionDeleted");
+                    BreakOutA:
+                        SaveCurrentVesselActions();
+                        
                     }
 
                     if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title))
                     {
-                        AGXAction agtemp = new AGXAction();
-                        agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                        foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                        int ToDel = 0;
+                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
                         {
-                            int agcnt = new int();
-                            agcnt = 0;
-                            foreach (AGXAction agxact in agpm.partAGActions)
+
+                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                             {
-                                if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                {
-                                    agpm.partAGActions.RemoveAt(agcnt);
-                                    goto BreakOut;
-                                }
-                                agcnt = agcnt + 1;
+
+                                CurrentVesselActions.RemoveAt(ToDel);
+                                goto BreakOutB;
                             }
+                            ToDel = ToDel + 1;
                         }
-                    BreakOut:
-                        print("ActionDeleted");
+                    BreakOutB:
+                        SaveCurrentVesselActions();
+                        
                     }
                     try
                     {
                         if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName))
                         {
-                            AGXAction agtemp = new AGXAction();
-                            agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                            foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                            int ToDel = 0;
+                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
                             {
-                                int agcnt = new int();
-                                agcnt = 0;
-                                foreach (AGXAction agxact in agpm.partAGActions)
+
+                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                                 {
-                                    if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                    {
-                                        agpm.partAGActions.RemoveAt(agcnt);
-                                        goto BreakOut;
-                                    }
-                                    agcnt = agcnt + 1;
+
+                                    CurrentVesselActions.RemoveAt(ToDel);
+                                    goto BreakOutC;
                                 }
+                                ToDel = ToDel + 1;
                             }
-                        BreakOut:
-                            print("ActionDeleted");
+                        BreakOutC:
+                            SaveCurrentVesselActions();
+                        
                         }
                     }
                     catch
                     {
                         if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error"))
                         {
-                            AGXAction agtemp = new AGXAction();
-                            agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
-                            foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
+                            int ToDel = 0;
+                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
                             {
-                                int agcnt = new int();
-                                agcnt = 0;
-                                foreach (AGXAction agxact in agpm.partAGActions)
+
+                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                                 {
-                                    if (agxact.group == agtemp.group && agxact.ba.name == agtemp.ba.name)
-                                    {
-                                        agpm.partAGActions.RemoveAt(agcnt);
-                                        goto BreakOut;
-                                    }
-                                    agcnt = agcnt + 1;
+
+                                    CurrentVesselActions.RemoveAt(ToDel);
+                                    goto BreakOutD;
                                 }
+                                ToDel = ToDel + 1;
                             }
-                        BreakOut:
-                            print("ActionDeleted");
+                        BreakOutD:
+                            SaveCurrentVesselActions();
+                        
                         }
                     }
 
@@ -730,14 +748,21 @@ namespace ActionGroupsExtended
         public static string SaveCurrentKeySet(Part p, string curKeySet)
         {
 
-
-            if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
+            try
             {
-                return CurrentKeySet.ToString();
+                if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
+                {
+                    return CurrentKeySet.ToString();
 
+                }
+                else
+                {
+                    return curKeySet;
+                }
             }
-            else
+            catch
             {
+                print("AGX Save KeySet FAIL! (SaveCurrentKeySet)");
                 return curKeySet;
             }
             
@@ -848,8 +873,36 @@ namespace ActionGroupsExtended
 
             AGExtNode.SetValue("KeySet" + CurrentKeySet.ToString(), SaveString);
             AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-
+            if (CurrentKeySet == 1)
+            {
+                SaveDefaultCustomKeys();
+            }
             
+        }
+
+        public void SaveDefaultCustomKeys()
+        {
+            GameSettings.CustomActionGroup1.primary = AGXguiKeys[1]; //copy keys to KSP itself
+            GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
+            GameSettings.CustomActionGroup3.primary = AGXguiKeys[3];
+            GameSettings.CustomActionGroup4.primary = AGXguiKeys[4];
+            GameSettings.CustomActionGroup5.primary = AGXguiKeys[5];
+            GameSettings.CustomActionGroup6.primary = AGXguiKeys[6];
+            GameSettings.CustomActionGroup7.primary = AGXguiKeys[7];
+            GameSettings.CustomActionGroup8.primary = AGXguiKeys[8];
+            GameSettings.CustomActionGroup9.primary = AGXguiKeys[9];
+            GameSettings.CustomActionGroup10.primary = AGXguiKeys[10];
+            GameSettings.SaveSettings(); //save keys to disk
+            GameSettings.CustomActionGroup1.primary = KeyCode.None; //unbind keys so they don't conflict
+            GameSettings.CustomActionGroup2.primary = KeyCode.None;
+            GameSettings.CustomActionGroup3.primary = KeyCode.None;
+            GameSettings.CustomActionGroup4.primary = KeyCode.None;
+            GameSettings.CustomActionGroup5.primary = KeyCode.None;
+            GameSettings.CustomActionGroup6.primary = KeyCode.None;
+            GameSettings.CustomActionGroup7.primary = KeyCode.None;
+            GameSettings.CustomActionGroup8.primary = KeyCode.None;
+            GameSettings.CustomActionGroup9.primary = KeyCode.None;
+            GameSettings.CustomActionGroup10.primary = KeyCode.None;
         }
         public void KeyCodeWindow(int WindowID)
         {
@@ -1065,7 +1118,7 @@ namespace ActionGroupsExtended
                                 Checking.AddRange(CurrentVesselActions);
                                 Checking.RemoveAll(p => p.group != AGXCurActGroup);
                                 Checking.RemoveAll(p => p.prt != AGEditorSelectedParts.ElementAt(PrtCnt).AGPart);
-                                Checking.RemoveAll(p => p.ba.guiName != PartActionsList.ElementAt(ActionsCount - 1).guiName);
+                                Checking.RemoveAll(p => p.ba != PartActionsList.ElementAt(ActionsCount - 1));
                                 if (Checking.Count == 0)
                                 {
                                     CurrentVesselActions.Add(ToAdd);
@@ -1451,7 +1504,7 @@ namespace ActionGroupsExtended
         public void Update()
         {
 
-
+           // print("Flight count " + CurrentVesselActions.Count + " Active count "+ ActiveActions.Count);
             //UIPartActionWindow UIPartsListThing = new UIPartActionWindow();
             //UIPartsListThing = (UIPartActionWindow)FindObjectOfType(typeof(UIPartActionWindow));
             //try
@@ -1477,51 +1530,64 @@ namespace ActionGroupsExtended
             //    }
 
             //}
-            if (CurrentVesselActions == null)
+
+            bool RootPartExists = new bool();
+            try
             {
-
-                CurrentVesselActions = new List<AGXAction>();
-            }
-            else
-            {
-
-                CurrentVesselActions.Clear();
-            }
-
-            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-            {
-
-                foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>())
+                if (FlightGlobals.ActiveVessel.parts.Count > 0)
                 {
-
-                    CurrentVesselActions.AddRange(agpm.partAGActions);
                 }
+                RootPartExists = true;
+            }
+            catch
+            {
+                RootPartExists = false;
             }
 
-            ActiveActions.Clear();
-            for (int i = 1; i <= 250; i = i + 1)
+
+            if (RootPartExists)
             {
-                if (CurrentVesselActions.Any(a => a.group == i))
+
+                if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //load keyset also
                 {
-
-                    ActiveActions.Add(i);
-
-
-
-                }
-                ActiveKeys.Clear();
-                if (ActiveActions.Count > 0)
-                {
-
-                    foreach (int i2 in ActiveActions)
+                    print("Root part changed, AGX reloading");
+                    loadFinished = false;
+                    foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
                     {
-                        ActiveKeys.Add(AGXguiKeys[i2]);
+                        CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
+
                     }
+                    if (CurrentKeySet == 0)
+                    {
+                        LoadDefaultActionGroups();
+                    }
+
+                    LoadCurrentKeySet();
+
+                    
+                    
+                    LoadGroupNames();
+
+                    LoadCurrentKeyBindings();
+                    LoadActionGroups();
+                    //LoadActivatedGroups();
+
+
+
+
+                    AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+                    loadFinished = true;
+                    //print("LoadFin true");
+
                 }
-
-
             }
-
+            if (LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //parts count changed, remove any actions assigned to parts that have disconnected/been destroyed
+            {
+                print("Part count change, reload AGX");
+                LoadActionGroups();
+               // CalculateActiveActions();
+                
+            }
             foreach (KeyCode KC in ActiveKeys)
             {
                 if(Input.GetKeyDown(KC))
@@ -1535,6 +1601,11 @@ namespace ActionGroupsExtended
                 }
                 }
             }
+            //if (!ActiveActionsCalculated)
+            //{
+            //    CalculateActiveActions();
+                
+            //}
             if(Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
         {
             
@@ -1585,61 +1656,7 @@ namespace ActionGroupsExtended
 
             }
 
-
-            bool RootPartExists = new bool();
-            try
-            {
-                if (FlightGlobals.ActiveVessel.parts.Count > 0)
-                {
-                }
-                RootPartExists = true;
-            }
-            catch
-            {
-                RootPartExists = false;
-            }
-
-           
-            if (RootPartExists)
-            {
-
-                if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //load keyset also
-                {
-                    print("Root part changed, AGX reloading");
-                    loadFinished = false;
-                    foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
-                    {
-                        CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
-
-                    }
-                    if (CurrentKeySet == 0)
-                    {
-                        LoadDefaultActionGroups();
-                    }
-
-                    LoadCurrentKeySet();
-
-                    LoadActionGroups();
-
-                    LoadGroupNames();
-
-                    LoadCurrentKeyBindings();
-                    //LoadActivatedGroups();
-
-
-
-
-                    AGXRoot = FlightGlobals.ActiveVessel.rootPart;
-                    loadFinished = true;
-                    //print("LoadFin true");
-                     
-                }
-
-               
-
-              
-              
-            }
+            
             
         }
         //public static void ClearAction(BaseAction act)
@@ -1707,91 +1724,153 @@ namespace ActionGroupsExtended
      
             
         //}
-        
-        public void LoadActionGroups()
+
+        public void CalculateActiveActions()
         {
-            CurrentVesselActions.Clear();
-           
-            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+            
+            ActiveActions.Clear();
+            for (int i = 1; i <= 250; i = i + 1)
             {
-              
-                List<BaseAction> pActions = new List<BaseAction>();
-                string LoadList = "";
-
-             
-                foreach (PartModule pm in p.Modules.OfType<ModuleAGExtData>())
+                if (CurrentVesselActions.Any(a => a.group == i))
                 {
 
-                    LoadList = (string)pm.Fields.GetValue("AGXData");
-                    ModuleAGExtData AGpm = new ModuleAGExtData();
-                    AGpm = (ModuleAGExtData)pm;
-                    pActions.AddRange((List<BaseAction>)AGpm.partAllActions);
-                    //pActions.AddRange((List<BaseAction>)pm.Fields.GetValue("ThisPartActions"));
-                   
+                    ActiveActions.Add(i);
+
+
+
                 }
-               
-                if (LoadList.Length > 0)
+                ActiveKeys.Clear();
+                if (ActiveActions.Count > 0)
                 {
-                    while (LoadList[0] == '\u2023')
+
+                    foreach (int i2 in ActiveActions)
                     {
-                 
-
-                        LoadList = LoadList.Substring(1);
-
-                        int KeyLength = new int();
-
-                        int ActGroup = new int();
-
-                        KeyLength = LoadList.IndexOf('\u2023');
-                       
-                        if (KeyLength == -1)
-                        {
-                          
-                            ActGroup = Convert.ToInt32(LoadList.Substring(0, 3));
-                            LoadList = LoadList.Substring(3);
-                            CurrentVesselActions.Add(new AGXAction() { group = ActGroup, prt = p, ba = pActions.Find(b => b.guiName == LoadList) });
-                            
-                        }
-                        else
-                        {
-                           
-                            ActGroup = Convert.ToInt32(LoadList.Substring(0, 3));
-                            LoadList = LoadList.Substring(3);
-                            CurrentVesselActions.Add(new AGXAction() { group = ActGroup, prt = p, ba = pActions.Find(b => b.guiName == LoadList.Substring(0, KeyLength - 3)) });
-                            LoadList = LoadList.Substring(KeyLength - 3);
-                           
-                        }
+                        ActiveKeys.Add(AGXguiKeys[i2]);
                     }
                 }
+
+
+                
             }
-     
+           // ActiveActionsCalculated = true;
         }
+
+        public void LoadActionGroups()
+        {
+            
+            if (CurrentVesselActions == null)
+            {
+
+                CurrentVesselActions = new List<AGXAction>();
+            }
+            else
+            {
+
+                CurrentVesselActions.Clear();
+            }
+            
+            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+            {
+                
+                foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>())
+                {
+
+                    CurrentVesselActions.AddRange(agpm.LoadActionGroups());
+                }
+                
+            }
+            LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
+            
+            CalculateActiveActions();
+        }
+            //CurrentVesselActions.Clear();
+           
+            //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+            //{
+            //    List<ModuleAGExtData> tempAGXData = p.Modules.OfType<ModuleAGExtData>();
+                //List<BaseAction> pActions = new List<BaseAction>();
+                //string LoadList = "";
+
+             
+                //foreach (PartModule pm in p.Modules.OfType<ModuleAGExtData>())
+                //{
+
+                //    LoadList = (string)pm.Fields.GetValue("AGXData");
+                //    ModuleAGExtData AGpm = new ModuleAGExtData();
+                //    AGpm = (ModuleAGExtData)pm;
+                //    pActions.AddRange((List<BaseAction>)AGpm.partAllActions);
+                //    //pActions.AddRange((List<BaseAction>)pm.Fields.GetValue("ThisPartActions"));
+                   
+                //}
+               
+                //if (LoadList.Length > 0)
+                //{
+                //    while (LoadList[0] == '\u2023')
+                //    {
+                 
+
+                //        LoadList = LoadList.Substring(1);
+
+                //        int KeyLength = new int();
+
+                //        int ActGroup = new int();
+
+                //        KeyLength = LoadList.IndexOf('\u2023');
+                       
+                //        if (KeyLength == -1)
+                //        {
+                          
+                //            ActGroup = Convert.ToInt32(LoadList.Substring(0, 3));
+                //            LoadList = LoadList.Substring(3);
+                //            CurrentVesselActions.Add(new AGXAction() { group = ActGroup, prt = p, ba = pActions.Find(b => b.guiName == LoadList) });
+                            
+                //        }
+                //        else
+                //        {
+                           
+                //            ActGroup = Convert.ToInt32(LoadList.Substring(0, 3));
+                //            LoadList = LoadList.Substring(3);
+                //            CurrentVesselActions.Add(new AGXAction() { group = ActGroup, prt = p, ba = pActions.Find(b => b.guiName == LoadList.Substring(0, KeyLength - 3)) });
+                //            LoadList = LoadList.Substring(KeyLength - 3);
+                           
+                //        }
+                //    }
+                //}
+           // }
+     
+       // }
 
 
 
         public static string SaveGroupNames(Part p, String str)
         {
-            string SaveStringNames = "";
-            if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
+            try
             {
-
-                int GroupCnt = new int();
-                GroupCnt = 1;
-                while (GroupCnt <= 250)
+                
+                string SaveStringNames = str;
+                if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
                 {
-                    if (AGXguiNames[GroupCnt].Length >= 1)
+                    SaveStringNames = "";
+                    int GroupCnt = new int();
+                    GroupCnt = 1;
+                    while (GroupCnt <= 250)
                     {
-                        SaveStringNames = SaveStringNames + '\u2023' + GroupCnt.ToString("000") + AGXguiNames[GroupCnt];
+                        if (AGXguiNames[GroupCnt].Length >= 1)
+                        {
+                            SaveStringNames = SaveStringNames + '\u2023' + GroupCnt.ToString("000") + AGXguiNames[GroupCnt];
+                        }
+                        GroupCnt = GroupCnt + 1;
                     }
-                    GroupCnt = GroupCnt + 1;
                 }
+                
+                //print(p.partName + " " + SaveStringNames);
+                return SaveStringNames;
             }
-            else
+            catch
             {
-                SaveStringNames = str;
+                print("AGX Save Group Names FAIL! (SaveGroupNames)");
+                return str;
             }
-            //print(p.partName + " " + SaveStringNames);
-            return SaveStringNames;
         }
 
         public void UpdateActionsListCheck()
