@@ -15,7 +15,7 @@ namespace ActionGroupsExtended
         //Selected Parts Window Variables
         
         //private Dictionary<int, KeyCode> Save10Keys =  new Dictionary<int, KeyCode>();
-        public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+        
         public Rect SelPartsWin;
         public Rect FlightWin;
         private Vector2 ScrollPosSelParts;
@@ -105,16 +105,7 @@ namespace ActionGroupsExtended
             //Save10Keys = new Dictionary<int, KeyCode>();
             //foreach (Part p in 
             ActiveKeys = new List<KeyCode>();
-            KSPActs[1] = KSPActionGroup.Custom01;
-            KSPActs[2] = KSPActionGroup.Custom02;
-            KSPActs[3] = KSPActionGroup.Custom03;
-            KSPActs[4] = KSPActionGroup.Custom04;
-            KSPActs[5] = KSPActionGroup.Custom05;
-            KSPActs[6] = KSPActionGroup.Custom06;
-            KSPActs[7] = KSPActionGroup.Custom07;
-            KSPActs[8] = KSPActionGroup.Custom08;
-            KSPActs[9] = KSPActionGroup.Custom09;
-            KSPActs[10] = KSPActionGroup.Custom10;
+           
 
             TestWin = new Rect(600, 300, 100, 100);
             RenderingManager.AddToPostDrawQueue(0, AGXOnDraw);
@@ -509,6 +500,42 @@ namespace ActionGroupsExtended
             }
             CalculateActiveActions();
         }
+        public void SetDefaultAction(BaseAction ba, int group)
+        {
+            Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+            KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
+            KSPActs[2] = KSPActionGroup.Custom02;
+            KSPActs[3] = KSPActionGroup.Custom03;
+            KSPActs[4] = KSPActionGroup.Custom04;
+            KSPActs[5] = KSPActionGroup.Custom05;
+            KSPActs[6] = KSPActionGroup.Custom06;
+            KSPActs[7] = KSPActionGroup.Custom07;
+            KSPActs[8] = KSPActionGroup.Custom08;
+            KSPActs[9] = KSPActionGroup.Custom09;
+            KSPActs[10] = KSPActionGroup.Custom10;
+
+            ba.actionGroup = ba.actionGroup | KSPActs[group];
+        }
+
+        public void RemoveDefaultAction(BaseAction ba, int group)
+        {
+            Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+            KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
+            KSPActs[2] = KSPActionGroup.Custom02;
+            KSPActs[3] = KSPActionGroup.Custom03;
+            KSPActs[4] = KSPActionGroup.Custom04;
+            KSPActs[5] = KSPActionGroup.Custom05;
+            KSPActs[6] = KSPActionGroup.Custom06;
+            KSPActs[7] = KSPActionGroup.Custom07;
+            KSPActs[8] = KSPActionGroup.Custom08;
+            KSPActs[9] = KSPActionGroup.Custom09;
+            KSPActs[10] = KSPActionGroup.Custom10;
+
+            ba.actionGroup = ba.actionGroup & ~KSPActs[group];
+            
+        }
+
+
         public void CurrentActionsWindow(int WindowID)
         {
             List<AGXAction> ThisGroupActions = new List<AGXAction>();
@@ -544,7 +571,10 @@ namespace ActionGroupsExtended
                         }
                     BreakOutA:
                         SaveCurrentVesselActions();
-                        
+                    if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                    {
+                        RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                    }
                     }
 
                     if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title))
@@ -563,7 +593,10 @@ namespace ActionGroupsExtended
                         }
                     BreakOutB:
                         SaveCurrentVesselActions();
-                        
+                    if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                    {
+                        RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                    }
                     }
                     try
                     {
@@ -583,7 +616,10 @@ namespace ActionGroupsExtended
                             }
                         BreakOutC:
                             SaveCurrentVesselActions();
-                        
+                        if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                        {
+                            RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                        }
                         }
                     }
                     catch
@@ -604,7 +640,10 @@ namespace ActionGroupsExtended
                             }
                         BreakOutD:
                             SaveCurrentVesselActions();
-                        
+                        if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                        {
+                            RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                        }
                         }
                     }
 
@@ -1125,6 +1164,7 @@ namespace ActionGroupsExtended
                                     SaveCurrentVesselActions();
                                 }
                                 PrtCnt = PrtCnt + 1;
+                                SetDefaultAction(ToAdd.ba, ToAdd.group);
                             }
                         }
                         ActionsCount = ActionsCount + 1;

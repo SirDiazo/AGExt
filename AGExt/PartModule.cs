@@ -45,25 +45,25 @@ namespace ActionGroupsExtended
         
         try{//print("start save action groups " +this.part.ConstructID);
        
-       KSPActs[1] = KSPActionGroup.Custom01; //setup for saving to default action groups
-        KSPActs[2] = KSPActionGroup.Custom02;
-        KSPActs[3] = KSPActionGroup.Custom03;
-        KSPActs[4] = KSPActionGroup.Custom04;
-        KSPActs[5] = KSPActionGroup.Custom05;
-        KSPActs[6] = KSPActionGroup.Custom06;
-        KSPActs[7] = KSPActionGroup.Custom07;
-        KSPActs[8] = KSPActionGroup.Custom08;
-        KSPActs[9] = KSPActionGroup.Custom09;
-        KSPActs[10] = KSPActionGroup.Custom10;
+       //KSPActs[1] = KSPActionGroup.Custom01; //setup for saving to default action groups
+       // KSPActs[2] = KSPActionGroup.Custom02;
+       // KSPActs[3] = KSPActionGroup.Custom03;
+       // KSPActs[4] = KSPActionGroup.Custom04;
+       // KSPActs[5] = KSPActionGroup.Custom05;
+       // KSPActs[6] = KSPActionGroup.Custom06;
+       // KSPActs[7] = KSPActionGroup.Custom07;
+       // KSPActs[8] = KSPActionGroup.Custom08;
+       // KSPActs[9] = KSPActionGroup.Custom09;
+       // KSPActs[10] = KSPActionGroup.Custom10;
         
         
-        foreach (BaseAction clrAct in partAllActions)//actual code to save to default action groups
-            {
-                for (int i = 1; i <= 10; i = i + 1)
-                {
-                    //clrAct.actionGroup = clrAct.actionGroup &= KSPActs[i];  //actiongrouptest
-                }
-            }
+        //foreach (BaseAction clrAct in partAllActions)//actual code to save to default action groups
+        //    {
+        //        for (int i = 1; i <= 10; i = i + 1)
+        //        {
+        //            //clrAct.actionGroup = clrAct.actionGroup &= KSPActs[i];  //actiongrouptest
+        //        }
+        //    }
         if (partAGActions.Count >= 1 && HighLogic.LoadedSceneIsEditor) //there is an action assigned to this part
         {
             
@@ -264,16 +264,7 @@ public List<AGXAction> LoadActionGroups()
     List<AGXAction> partAGActions2 = new List<AGXAction>();
     try
     {
-        KSPActs[1] = KSPActionGroup.Custom01; //interface with default KSP
-        KSPActs[2] = KSPActionGroup.Custom02;
-        KSPActs[3] = KSPActionGroup.Custom03;
-        KSPActs[4] = KSPActionGroup.Custom04;
-        KSPActs[5] = KSPActionGroup.Custom05;
-        KSPActs[6] = KSPActionGroup.Custom06;
-        KSPActs[7] = KSPActionGroup.Custom07;
-        KSPActs[8] = KSPActionGroup.Custom08;
-        KSPActs[9] = KSPActionGroup.Custom09;
-        KSPActs[10] = KSPActionGroup.Custom10;
+       
 
         //partAGActions = new List<AGXAction>();
         partAllActions = new List<BaseAction>(); //populate all actions available on this part
@@ -285,53 +276,17 @@ public List<AGXAction> LoadActionGroups()
 
         }
         partCurrentKeySet = Convert.ToInt32(AGXKeySet);
+        if (partCurrentKeySet < 1 | partCurrentKeySet > 5)
+        {
+            partCurrentKeySet = 1;
+        }
 
         if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight)
         {
 
-            if (!AGXLoaded) //AGXLoaded is set true first time runs, this is to load default action groups, ispersistent
-            {
+            
 
-                List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
-                CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
-                CustomActions.Add(KSPActionGroup.Custom02);
-                CustomActions.Add(KSPActionGroup.Custom03);
-                CustomActions.Add(KSPActionGroup.Custom04);
-                CustomActions.Add(KSPActionGroup.Custom05);
-                CustomActions.Add(KSPActionGroup.Custom06);
-                CustomActions.Add(KSPActionGroup.Custom07);
-                CustomActions.Add(KSPActionGroup.Custom08);
-                CustomActions.Add(KSPActionGroup.Custom09);
-                CustomActions.Add(KSPActionGroup.Custom10);
-
-
-               // string AddGroup = "";
-
-                foreach (BaseAction baLoad in partAllActions)
-                {
-                    foreach (KSPActionGroup agrp in CustomActions)
-                    {
-
-                        if ((baLoad.actionGroup & agrp) == agrp)
-                        {
-
-                            //AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
-                            partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
-                        }
-                    }
-                }
-
-
-               // AGXData = AddGroup;
-
-                AGXKeySet = "1";
-                partCurrentKeySet = 1;
-                AGXLoaded = true;
-
-            }
-
-            else
-            {
+            
                 //partAGActions.Clear();
                 string LoadList = AGXData;
                
@@ -481,8 +436,64 @@ public List<AGXAction> LoadActionGroups()
                 //}
                 //AGXFlight.CurrentVesselActions.AddRange(partAGActions);
                // AGXFlight.ActiveActionsCalculated = false; fix this
-               
-            }
+
+                //start default groups load, load everything, most will be duplicate though
+                            
+
+                    List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
+                    CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
+                    CustomActions.Add(KSPActionGroup.Custom02);
+                    CustomActions.Add(KSPActionGroup.Custom03);
+                    CustomActions.Add(KSPActionGroup.Custom04);
+                    CustomActions.Add(KSPActionGroup.Custom05);
+                    CustomActions.Add(KSPActionGroup.Custom06);
+                    CustomActions.Add(KSPActionGroup.Custom07);
+                    CustomActions.Add(KSPActionGroup.Custom08);
+                    CustomActions.Add(KSPActionGroup.Custom09);
+                    CustomActions.Add(KSPActionGroup.Custom10);
+
+
+                    // string AddGroup = "";
+
+                    foreach (BaseAction baLoad in partAllActions)
+                    {
+                        foreach (KSPActionGroup agrp in CustomActions)
+                        {
+
+                            if ((baLoad.actionGroup & agrp) == agrp)
+                            {
+
+                                ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
+                                //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
+                                AGXAction ToAdd = new AGXAction() { prt = this.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
+                                List<AGXAction> Checking = new List<AGXAction>();
+                                Checking.AddRange(partAGActions2);
+                                Checking.RemoveAll(p => p.group != ToAdd.group);
+
+                                Checking.RemoveAll(p => p.prt != ToAdd.prt);
+
+                                Checking.RemoveAll(p => p.ba != ToAdd.ba);
+
+
+
+                                if (Checking.Count == 0)
+                                {
+
+                                    partAGActions2.Add(ToAdd);
+                                   
+                                }
+                            }
+                        }
+                    }
+
+
+                    // AGXData = AddGroup;
+
+                    
+                    AGXLoaded = true;
+
+                
+            
         }
         return partAGActions2;
     }

@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using KSP.IO;
 using System.Timers;
-
 using UnityEngine;
+
+
+
+
 
 
 namespace ActionGroupsExtended
@@ -13,6 +16,10 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
+
+        
+        private List<Part> SelectedWithSym; //selected parts from last frame for Default actions monitoring
+        private List<AGXDefaultCheck> SelectedWithSymActions; //monitor baseaction.actiongroups of selected parts
         public static bool NeedToLoadActions = true;
         public static bool LoadFinished = false;
         //Selected Parts Window Variables
@@ -81,7 +88,7 @@ namespace ActionGroupsExtended
         private static bool LoadGroupsOnceCheck = false;
         private static bool ShowCurActsWin = true;
         public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
-        private bool AGXShow = true;
+        private bool AGXShow = false;
         
 
        
@@ -91,7 +98,8 @@ namespace ActionGroupsExtended
         {
             //foreach (Part p in 
 
-            
+            //var EdPnl = EditorPanels.Instance.actions;
+            //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
             KSPActs[1] = KSPActionGroup.Custom01;
             KSPActs[2] = KSPActionGroup.Custom02;
             KSPActs[3] = KSPActionGroup.Custom03;
@@ -141,6 +149,14 @@ namespace ActionGroupsExtended
             JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
             KeyCodeNames.RemoveAll(JoySticks);
            AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+           if (AGExtNode.GetValue("EditShow") == "0")
+           {
+               AGXShow = false;
+           }
+           else
+           {
+               AGXShow = true;
+           }
            CurrentKeySet = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
            LoadCurrentKeySet();
            CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
@@ -154,7 +170,7 @@ namespace ActionGroupsExtended
 
 
            LoadCurrentKeyBindings();
-           
+
 
            if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
            {
@@ -165,8 +181,36 @@ namespace ActionGroupsExtended
                AGXBtn.ToolTip = "Action Groups Extended";
                AGXBtn.OnClick += (e) =>
                {
-                   AGXShow = !AGXShow;
+                   //List<UnityEngine.Transform> UIPanelList = new List<UnityEngine.Transform>(); //setup list to find Editor Actions UI transform into a list. Could not figure out how to find just a transform
+                   //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
+                   if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                   {
+                       if (AGXShow)
+                       {
+                           //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                           AGXShow = false;
+                           AGExtNode.SetValue("EditShow", "0");
+                           EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+
+                       }
+                       else
+                       {
+                           // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                           AGXShow = true;
+                           AGExtNode.SetValue("EditShow", "1");
+                           EditorPanels.Instance.panelManager.Dismiss();
+                       }
+                       AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                   }
+                   else
+                   {
+                       EditorLogic.fetch.SelectPanelActions();
+                   }
                };
+           }
+           else
+           {
+               AGXShow = true; //toolbar not installed, show AGX regardless
            }
            
            DetachedPartActions = new List<AGXAction>();
@@ -178,11 +222,65 @@ namespace ActionGroupsExtended
            DetachedPartReset.AutoReset = true;
            
            DetachedPartReset.Elapsed += new ElapsedEventHandler(ResetDetachedParts);
-            
-           
+
+           SelectedWithSym = new List<Part>();
+           SelectedWithSymActions = new List<AGXDefaultCheck>();
+
+           EditorPanels.Instance.actions.AddValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
+           EditorLogic.fetch.crewPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Part button clicked at top of screen
+           EditorLogic.fetch.partPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Crew button clicked at top of screen
            LoadFinished = true;
            
+           }
+
+        public void OnOtherButtonClick(IUIObject obj) //reset EditorPanel if needed
+        {
+            //only run this if the Action Panel was hidden by other code
+            if(AGXShow)
+            {
+                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+            }
         }
+
+        public void OnUIChanged(IUIObject obj)
+        {
+         
+            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions) //we in action groups mode?
+            {
+                if (AGXShow)
+                {
+                    EditorPanels.Instance.panelManager.Dismiss(); //show AGX? hide panel
+                }
+                else
+                {
+                    EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions); //hide AGX? show panel
+                    //print("Bring it in");
+                }
+            }
+        }
+        //public void OnGroupActionsListChange(UnityEngine.Object obj)
+        //{
+        //    print("Test");
+        //}
+
+
+        public void SetDefaultAction(BaseAction ba, int group)
+        {
+            Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+            KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
+            KSPActs[2] = KSPActionGroup.Custom02;
+            KSPActs[3] = KSPActionGroup.Custom03;
+            KSPActs[4] = KSPActionGroup.Custom04;
+            KSPActs[5] = KSPActionGroup.Custom05;
+            KSPActs[6] = KSPActionGroup.Custom06;
+            KSPActs[7] = KSPActionGroup.Custom07;
+            KSPActs[8] = KSPActionGroup.Custom08;
+            KSPActs[9] = KSPActionGroup.Custom09;
+            KSPActs[10] = KSPActionGroup.Custom10;
+
+            ba.actionGroup = ba.actionGroup | KSPActs[group];
+        }
+
         public static void ResetDetachedParts(object source, ElapsedEventArgs e)
         {
             
@@ -272,7 +370,11 @@ namespace ActionGroupsExtended
             Vector3 RealMousePos = new Vector3();
             RealMousePos = Input.mousePosition;
             RealMousePos.y = Screen.height - Input.mousePosition.y;
-            
+
+            if (!ToolbarManager.ToolbarAvailable)
+            {
+                AGXShow = true; //no toolbar so show AGX with KSP actions editor still up
+            }
             
 
           // TestWin = GUI.Window(673467791, TestWin, TestingWindow, "Test", AGXWinStyle); //not used in release version, just leave the code for testing
@@ -355,7 +457,10 @@ namespace ActionGroupsExtended
                         }
                     BreakOutA:
                         SaveCurrentVesselActions();
-                      
+                    if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                    {
+                        RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                    }
                         //AGXAction agtemp = new AGXAction();
                         //agtemp = ThisGroupActions.ElementAt(RowCnt - 1);
                         //foreach (ModuleAGExtData agpm in ThisGroupActions.ElementAt(RowCnt - 1).prt.Modules.OfType<ModuleAGExtData>())
@@ -373,7 +478,26 @@ namespace ActionGroupsExtended
                         //        agcnt = agcnt + 1;
                         //    }
                         //}
-                    
+
+
+                    //tempcode, do not release
+                    //List<UnityEngine.Object> OjbList = new List<UnityEngine.Object>();
+                    //OjbList.AddRange(FindObjectsOfType<UnityEngine.Object>());
+                    //print("ojb list count " + OjbList.Count);
+                    //foreach (UnityEngine.Object ojb2 in OjbList)
+                    //{
+                    //    print(ojb2.name + " " + ojb2.GetType().ToString());
+                    //}
+                    //EditorPanels EAG = new EditorPanels();
+                    //EAG = FindObjectOfType<EditorPanels>();
+                    //    print(EAG.actionsPanelWidth);
+                    //    EAG.actionsPanelWidth = EAG.actionsPanelWidth / 2;
+                    //List<UnityEngine.Transform> TestList = new List<UnityEngine.Transform>();
+                    //TestList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups"));
+                    //    print("TestList " + TestList.Count);
+                    //TestList.First().Translate(new Vector3(-500f,0,0),TestList.First().parent.transform);
+
+                        //end temp code
                     }
                 
                         if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title))
@@ -392,7 +516,15 @@ namespace ActionGroupsExtended
                             }
                         BreakOutB:
                             SaveCurrentVesselActions();
-                            
+                        if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                        {
+                            RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                        }
+                            //start tempcode
+                        //EditorLogic.fetch.SelectPanelCrew();
+                        //EditorLogic.fetch.SelectPanelActions();
+                       // TestList.First().Translate(new Vector3(500f, 0f, 0),TestList.First().parent.transform);
+                            //end tempcode
                         }
 
 
@@ -414,7 +546,10 @@ namespace ActionGroupsExtended
                                 }
                             BreakOutC:
                                 SaveCurrentVesselActions();
-                               
+                            if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                            {
+                                RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                            }
                             }
                         }
                         catch
@@ -435,7 +570,10 @@ namespace ActionGroupsExtended
                                 }
                             BreakOutD:
                                 SaveCurrentVesselActions();
-                                
+                            if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
+                            {
+                                RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
+                            }
                             }
                         }
 
@@ -807,6 +945,24 @@ namespace ActionGroupsExtended
             GUI.DragWindow();
         }
 
+        public void RemoveDefaultAction(BaseAction ba, int group)
+        {
+            Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+            KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
+            KSPActs[2] = KSPActionGroup.Custom02;
+            KSPActs[3] = KSPActionGroup.Custom03;
+            KSPActs[4] = KSPActionGroup.Custom04;
+            KSPActs[5] = KSPActionGroup.Custom05;
+            KSPActs[6] = KSPActionGroup.Custom06;
+            KSPActs[7] = KSPActionGroup.Custom07;
+            KSPActs[8] = KSPActionGroup.Custom08;
+            KSPActs[9] = KSPActionGroup.Custom09;
+            KSPActs[10] = KSPActionGroup.Custom10;
+
+            ba.actionGroup = ba.actionGroup & ~KSPActs[group];
+
+        }
+
         public void SelParts(int WindowID)
         {
 
@@ -922,6 +1078,7 @@ namespace ActionGroupsExtended
                                     SaveCurrentVesselActions();
                                 }
                                 PrtCnt = PrtCnt + 1;
+                                SetDefaultAction(ToAdd.ba, ToAdd.group);
                             }
                             
                             
@@ -1287,6 +1444,9 @@ namespace ActionGroupsExtended
             //print(HexStr);
            // print(DetachedPartReset.Enabled);
 
+           
+
+
             bool RootPartExists = new bool();
             try
             {
@@ -1486,13 +1646,176 @@ namespace ActionGroupsExtended
                     }
                 }
             }
-                   
-                    
-                
+
+            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+            {
+                MonitorDefaultActions();
+            }   
                 
             }
 
-    
+        public void MonitorDefaultActions()
+        {
+            
+            if (EditorActionGroups.Instance.GetSelectedParts() != null) //is a part selected?
+            {
+              
+                //List<Part> ThisUpdate = new List<Part>();
+                //ThisUpdate.AddRange(EditorActionGroups.Instance.GetSelectedParts());
+                //print("Count check " + ThisUpdate.Count + "||" + EditorActionGroups.Instance.GetSelectedParts().Count);
+                //ThisUpdate.AddRange(EditorLogic.fetch.PartSelected.symmetryCounterparts);
+                if (EditorActionGroups.Instance.GetSelectedParts().Count > 0) //list can exist with no parts in it if you selected then unselect one
+                {
+                   
+                    if(SelectedWithSym.Count == 0 || SelectedWithSym.First() != EditorActionGroups.Instance.GetSelectedParts().First()) //check if there is a previously selected part, if so check if its changed
+                    {
+                       
+                        //parts are different
+                        SelectedWithSym.Clear(); //reset lastpart list
+                        SelectedWithSym.AddRange(EditorActionGroups.Instance.GetSelectedParts());
+                        SelectedWithSym.AddRange(EditorActionGroups.Instance.GetSelectedParts().First().symmetryCounterparts);
+                        print("Reset monitored parts " + SelectedWithSym.Count);
+                        SelectedWithSymActions.Clear(); //reset actions list
+                      
+                        foreach (Part prt in SelectedWithSym)
+                        {
+                            
+                            foreach (BaseAction bap in prt.Actions) //get part actions
+                            {
+                                SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = bap, agrp = bap.actionGroup }); //add actiongroup separate otherwise it links and so have nothing to compare
+                            }
+                           
+                            foreach (PartModule pm in prt.Modules) //add actions from all partmodules
+                            {
+                                foreach (BaseAction bapm in pm.Actions)
+                                {
+                                    SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = bapm, agrp = bapm.actionGroup });
+                                }
+                            }
+                        }
+                        
+                        print("Reset monitored actions " + SelectedWithSymActions.Count);
+                        
+                    }
+                    else //selected part is the same a previously selected part
+                    {
+                        
+                        List<Part> PartsThisFrame = new List<Part>(); //get list of parts this update frame
+                        PartsThisFrame.AddRange(EditorActionGroups.Instance.GetSelectedParts());
+                        PartsThisFrame.AddRange(EditorActionGroups.Instance.GetSelectedParts().First().symmetryCounterparts);
+                        List<BaseAction> ThisFrameActions = new List<BaseAction>(); //get actions fresh again this update frame
+                        foreach (Part prt in PartsThisFrame)
+                        {
+                            
+                            foreach (BaseAction bap in prt.Actions)
+                            {
+                                ThisFrameActions.Add(bap);
+                            }
+                            foreach (PartModule pm in prt.Modules)
+                            {
+                                foreach (BaseAction bapm in pm.Actions)
+                                {
+                                    ThisFrameActions.Add(bapm);
+                                }
+                            }
+                        }
+                       
+
+                        foreach (BaseAction ba2 in ThisFrameActions) //check each action's actiongroup enum against last update frames actiongroup enum
+                        {
+                            
+                            AGXDefaultCheck ActionLastFrame = new AGXDefaultCheck();
+                            ActionLastFrame = SelectedWithSymActions.Find(a => a.ba == ba2);
+                            if (ActionLastFrame.agrp != ba2.actionGroup) //actiongroup enum is different
+                            {
+                                int NewGroup = 0; //which actiongroup changed?
+                                if (KSPActionGroup.Custom01 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 1;
+                                }
+                                else if (KSPActionGroup.Custom02 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 2;
+                                }
+                                else if (KSPActionGroup.Custom03 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 3;
+                                }
+                                else if (KSPActionGroup.Custom04 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 4;
+                                }
+                                else if (KSPActionGroup.Custom05 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 5;
+                                }
+                                else if (KSPActionGroup.Custom06 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 6;
+                                }
+                                else if (KSPActionGroup.Custom07 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 7;
+                                }
+                                else if (KSPActionGroup.Custom08 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 8;
+                                }
+                                else if (KSPActionGroup.Custom09 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 9;
+                                }
+                                else if (KSPActionGroup.Custom10 == (ActionLastFrame.agrp ^ ba2.actionGroup))
+                                {
+                                    NewGroup = 10;
+                                }
+                               
+
+                                if (NewGroup != 0) //if one of the other actiongroups (gear, lights) has changed, ignore it. newgroup will be the actiongroup if I want to process it.
+                                {
+                                        AGXAction ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = NewGroup, activated = false };
+                                        print(ba2.listParent.part.name);
+                                        List<AGXAction> Checking = new List<AGXAction>();
+                                        Checking.AddRange(CurrentVesselActions);
+                                        Checking.RemoveAll(p => p.group != ToAdd.group);
+                                        Checking.RemoveAll(p => p.prt != ToAdd.prt);
+                                        Checking.RemoveAll(p => p.ba != ToAdd.ba);
+
+                                        if (Checking.Count == 0)
+                                        {
+                                            CurrentVesselActions.Add(ToAdd);
+                                            SaveCurrentVesselActions();
+                                        }
+                                    
+                                }
+                                ActionLastFrame.agrp = KSPActionGroup.None;
+                                ActionLastFrame.agrp = ActionLastFrame.agrp | ba2.actionGroup;
+                                
+                            }
+                           
+                        }
+                        SelectedWithSymActions.Clear(); //reset actions list as one of the enums changed.
+                       
+                        foreach (Part prt in SelectedWithSym)
+                        {
+                            
+                            foreach (BaseAction bap in prt.Actions) //get part actions
+                            {
+                                SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = bap, agrp = bap.actionGroup }); //add actiongroup separate otherwise it links and so have nothing to compare
+                            }
+                            foreach (PartModule pm in prt.Modules) //add actions from all partmodules
+                            {
+                                foreach (BaseAction bapm in pm.Actions)
+                                {
+                                    SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = bapm, agrp = bapm.actionGroup });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public void LoadActionGroups()
         {
            
