@@ -170,10 +170,11 @@ namespace ActionGroupsExtended
                        //    SaveGroupsString = SaveGroupsString + '\u2022'; //all other modules on code u2022
                        //}
                    //}
-                   if (agAct.group <= 10) //will be where actions are saved to default action groups, currently not working
-                   {
+                   //if (agAct.group <= 10) //will be where actions are saved to default action groups, currently not working
+                  // {
                        //agAct.ba.actionGroup = (agAct.ba.actionGroup |= KSPActs[agAct.group]); //actiongrouptest
-                   }
+                   //}
+                //default action groups set code is in SelParts window in Flight and Editor classes
                    
                 }
         //BreakOut2:

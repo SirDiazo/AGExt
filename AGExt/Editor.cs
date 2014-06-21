@@ -1059,15 +1059,28 @@ namespace ActionGroupsExtended
                             PrtCnt = 0;
                             foreach (AGXPart agPrt in AGEditorSelectedParts)
                             {
-                                
-                                AGXAction ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = PartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated=false };
+                                List<BaseAction> ThisPartActionsList = new List<BaseAction>();
+                                ThisPartActionsList.AddRange(agPrt.AGPart.Actions);
+                                foreach (PartModule pm3 in agPrt.AGPart.Modules)
+                                {
+                                    ThisPartActionsList.AddRange(pm3.Actions);
+                                }
+                                AGXAction ToAdd = new AGXAction();
+                                if (ThisPartActionsList.ElementAt(ActionsCount - 1).guiName == PartActionsList.ElementAt(ActionsCount - 1).guiName)
+                                {
+                                   ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = ThisPartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
+                                }
+                                else
+                                {
+                                    ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = PartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
+                                }
                                 List<AGXAction> Checking = new List<AGXAction>();
                                 Checking.AddRange(CurrentVesselActions);
-                                Checking.RemoveAll(p => p.group != AGXCurActGroup);
+                                Checking.RemoveAll(p => p.group != ToAdd.group);
 
-                                Checking.RemoveAll(p => p.prt != AGEditorSelectedParts.ElementAt(PrtCnt).AGPart);
+                                Checking.RemoveAll(p => p.prt != ToAdd.prt);
                                 
-                                Checking.RemoveAll(p => p.ba != PartActionsList.ElementAt(ActionsCount - 1));
+                                Checking.RemoveAll(p => p.ba != ToAdd.ba);
                               
 
 
@@ -1078,7 +1091,10 @@ namespace ActionGroupsExtended
                                     SaveCurrentVesselActions();
                                 }
                                 PrtCnt = PrtCnt + 1;
-                                SetDefaultAction(ToAdd.ba, ToAdd.group);
+                                if (ToAdd.group < 11)
+                                {
+                                    SetDefaultAction(ToAdd.ba, ToAdd.group);
+                                }
                             }
                             
                             
@@ -1674,7 +1690,7 @@ namespace ActionGroupsExtended
                         SelectedWithSym.Clear(); //reset lastpart list
                         SelectedWithSym.AddRange(EditorActionGroups.Instance.GetSelectedParts());
                         SelectedWithSym.AddRange(EditorActionGroups.Instance.GetSelectedParts().First().symmetryCounterparts);
-                        print("Reset monitored parts " + SelectedWithSym.Count);
+                       // print("Reset monitored parts " + SelectedWithSym.Count);
                         SelectedWithSymActions.Clear(); //reset actions list
                       
                         foreach (Part prt in SelectedWithSym)
@@ -1694,7 +1710,7 @@ namespace ActionGroupsExtended
                             }
                         }
                         
-                        print("Reset monitored actions " + SelectedWithSymActions.Count);
+                        //print("Reset monitored actions " + SelectedWithSymActions.Count);
                         
                     }
                     else //selected part is the same a previously selected part
@@ -1774,7 +1790,7 @@ namespace ActionGroupsExtended
                                 if (NewGroup != 0) //if one of the other actiongroups (gear, lights) has changed, ignore it. newgroup will be the actiongroup if I want to process it.
                                 {
                                         AGXAction ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = NewGroup, activated = false };
-                                        print(ba2.listParent.part.name);
+                                        //print(ba2.listParent.part.name);
                                         List<AGXAction> Checking = new List<AGXAction>();
                                         Checking.AddRange(CurrentVesselActions);
                                         Checking.RemoveAll(p => p.group != ToAdd.group);

@@ -394,12 +394,42 @@ namespace ActionGroupsExtended
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                     agAct.activated = false;
                     agAct.ba.Invoke(actParam);
+                    if (agAct.group <= 10) //set Vessel's actionGroups
+                    {
+                        Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+                        KSPActs[1] = KSPActionGroup.Custom01; 
+                        KSPActs[2] = KSPActionGroup.Custom02;
+                        KSPActs[3] = KSPActionGroup.Custom03;
+                        KSPActs[4] = KSPActionGroup.Custom04;
+                        KSPActs[5] = KSPActionGroup.Custom05;
+                        KSPActs[6] = KSPActionGroup.Custom06;
+                        KSPActs[7] = KSPActionGroup.Custom07;
+                        KSPActs[8] = KSPActionGroup.Custom08;
+                        KSPActs[9] = KSPActionGroup.Custom09;
+                        KSPActs[10] = KSPActionGroup.Custom10;
+                        FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActs[agAct.group], false);// = FlightGlobals.ActiveVessel.ActionGroups & ~KSPActs[agAct.group];
+                    }
                 }
                 else
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Activate);
                     agAct.activated = true;
                     agAct.ba.Invoke(actParam);
+                    if (agAct.group <= 10) //set Vessel's actionGroups
+                    {
+                        Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+                        KSPActs[1] = KSPActionGroup.Custom01;
+                        KSPActs[2] = KSPActionGroup.Custom02;
+                        KSPActs[3] = KSPActionGroup.Custom03;
+                        KSPActs[4] = KSPActionGroup.Custom04;
+                        KSPActs[5] = KSPActionGroup.Custom05;
+                        KSPActs[6] = KSPActionGroup.Custom06;
+                        KSPActs[7] = KSPActionGroup.Custom07;
+                        KSPActs[8] = KSPActionGroup.Custom08;
+                        KSPActs[9] = KSPActionGroup.Custom09;
+                        KSPActs[10] = KSPActionGroup.Custom10;
+                        FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActs[agAct.group], true);// = FlightGlobals.ActiveVessel.ActionGroups & ~KSPActs[agAct.group];
+                    }
                     
                 }
                
@@ -502,6 +532,7 @@ namespace ActionGroupsExtended
         }
         public void SetDefaultAction(BaseAction ba, int group)
         {
+            //print("AGX Start Default Action " + ba.name + group + "||" + ba.actionGroup);
             Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
             KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
             KSPActs[2] = KSPActionGroup.Custom02;
@@ -513,8 +544,9 @@ namespace ActionGroupsExtended
             KSPActs[8] = KSPActionGroup.Custom08;
             KSPActs[9] = KSPActionGroup.Custom09;
             KSPActs[10] = KSPActionGroup.Custom10;
-
+            //print("AGX Mid Default Action");
             ba.actionGroup = ba.actionGroup | KSPActs[group];
+            //print("AGX End Default Action " + ba.name + group + "||" + ba.actionGroup);
         }
 
         public void RemoveDefaultAction(BaseAction ba, int group)
@@ -1142,29 +1174,51 @@ namespace ActionGroupsExtended
 
                             foreach (AGXPart agPrt in AGEditorSelectedParts)
                             {
+                                //print("AGX A " + agPrt.AGPart.name + " " + agPrt.AGPart.ConstructID);
+                                //List<BaseAction> baList = new List<BaseAction>();
                                 
-                                List<BaseAction> baList = new List<BaseAction>();
-                                
-                                foreach (ModuleAGExtData agpm in agPrt.AGPart.Modules.OfType<ModuleAGExtData>())
-                                {
+                                //foreach (ModuleAGExtData agpm in agPrt.AGPart.Modules.OfType<ModuleAGExtData>())
+                                //{
                                     
-                                    baList.AddRange(agpm.partAllActions);
+                                //    baList.AddRange(agpm.partAllActions);
                                    
                                     
+                                //}
+                                //AGXAction ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = baList.First(ba3 => ba3.name == baname) , group = AGXCurActGroup };
+                                List<BaseAction> ThisPartActionsList = new List<BaseAction>();
+                                ThisPartActionsList.AddRange(agPrt.AGPart.Actions);
+                                foreach (PartModule pm3 in agPrt.AGPart.Modules)
+                                {
+                                    ThisPartActionsList.AddRange(pm3.Actions);
                                 }
-                                AGXAction ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = baList.First(ba3 => ba3.name == baname) , group = AGXCurActGroup };
+                                AGXAction ToAdd = new AGXAction();
+                                //print("AGX B " + PartActionsList.Count + "||" + ThisPartActionsList.Count);
+                                if (ThisPartActionsList.ElementAt(ActionsCount - 1).guiName == PartActionsList.ElementAt(ActionsCount - 1).guiName)
+                                {
+                                    ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = ThisPartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
+                                    //print("AGX C " + ThisPartActionsList.ElementAt(ActionsCount - 1).guiName + "||" + PartActionsList.ElementAt(ActionsCount - 1).guiName);
+                                }
+                                else
+                                {
+                                    ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = PartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
+                                    //print("AGX D " + ThisPartActionsList.ElementAt(ActionsCount - 1).guiName + "||" + PartActionsList.ElementAt(ActionsCount - 1).guiName);
+                                }
                                 List<AGXAction> Checking = new List<AGXAction>();
                                 Checking.AddRange(CurrentVesselActions);
-                                Checking.RemoveAll(p => p.group != AGXCurActGroup);
-                                Checking.RemoveAll(p => p.prt != AGEditorSelectedParts.ElementAt(PrtCnt).AGPart);
-                                Checking.RemoveAll(p => p.ba != PartActionsList.ElementAt(ActionsCount - 1));
+                                Checking.RemoveAll(p => p.group != ToAdd.group);
+                                Checking.RemoveAll(p => p.prt != ToAdd.prt);
+                                Checking.RemoveAll(p => p.ba != ToAdd.ba);
+                                //print("AGX E " + Checking.Count);
                                 if (Checking.Count == 0)
                                 {
                                     CurrentVesselActions.Add(ToAdd);
                                     SaveCurrentVesselActions();
                                 }
                                 PrtCnt = PrtCnt + 1;
-                                SetDefaultAction(ToAdd.ba, ToAdd.group);
+                                if (ToAdd.group < 11)
+                                {
+                                    SetDefaultAction(ToAdd.ba, ToAdd.group);
+                                }
                             }
                         }
                         ActionsCount = ActionsCount + 1;
@@ -1544,7 +1598,8 @@ namespace ActionGroupsExtended
         public void Update()
         {
 
-           // print("Flight count " + CurrentVesselActions.Count + " Active count "+ ActiveActions.Count);
+            //print("Acts " + FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Custom01]);
+            // print("Flight count " + CurrentVesselActions.Count + " Active count "+ ActiveActions.Count);
             //UIPartActionWindow UIPartsListThing = new UIPartActionWindow();
             //UIPartsListThing = (UIPartActionWindow)FindObjectOfType(typeof(UIPartActionWindow));
             //try
@@ -1820,7 +1875,27 @@ namespace ActionGroupsExtended
                 
             }
             LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
-            
+
+            for (int i = 1; i <= 10; i++)
+            {
+                if (CurrentVesselActions.Count(grp => grp.group == i) > 0)
+                {
+                    AGXAction TempAgxAct = CurrentVesselActions.Find(agx => agx.group == i);
+                    Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+                    KSPActs[1] = KSPActionGroup.Custom01;
+                    KSPActs[2] = KSPActionGroup.Custom02;
+                    KSPActs[3] = KSPActionGroup.Custom03;
+                    KSPActs[4] = KSPActionGroup.Custom04;
+                    KSPActs[5] = KSPActionGroup.Custom05;
+                    KSPActs[6] = KSPActionGroup.Custom06;
+                    KSPActs[7] = KSPActionGroup.Custom07;
+                    KSPActs[8] = KSPActionGroup.Custom08;
+                    KSPActs[9] = KSPActionGroup.Custom09;
+                    KSPActs[10] = KSPActionGroup.Custom10;
+                    FlightGlobals.ActiveVessel.ActionGroups[KSPActs[TempAgxAct.group]] = TempAgxAct.activated;
+                }
+            }
+
             CalculateActiveActions();
         }
             //CurrentVesselActions.Clear();
