@@ -25,6 +25,12 @@ namespace ActionGroupsExtended
         [KSPField(isPersistant = true, guiActive = false)]
         public bool AGXLoaded = false; //OnSave can run before OnLoad has finished at times, error trap this
 
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string AGXGroupStates; //string to save toggle state and group show state, first bit toggle, next 5 are show in those groups group names tie to key set, add to keyset window
+
+        [KSPField(isPersistant = true, guiActive = false)]
+        public string AGXGroupStateNames; //string to save names of group names
+
         public List<BaseAction> partAllActions; //List of all actions on part, generate at load
 
         public List<AGXAction> partAGActions; //list of Actions assigned to action groups
@@ -216,6 +222,41 @@ namespace ActionGroupsExtended
         }
     }
 
+        public string[] LoadShowGroupNames()
+        {
+            string[] ReturnNames = new string[6];
+            ReturnNames[1] = "Group 1";
+            ReturnNames[2] = "Group 2";
+            ReturnNames[3] = "Group 3";
+            ReturnNames[4] = "Group 4";
+            ReturnNames[5] = "Group 5";
+
+            try
+            {
+                string LoadNames = AGXGroupStateNames;
+                int KeyLength = LoadNames.IndexOf('\u2023');
+                if (KeyLength > 0)
+                {
+                    ReturnNames[1] = LoadNames.Substring(0, KeyLength );
+                        for(int i = 2;i <= 4;i++)
+                        {
+                            LoadNames = LoadNames.Substring(KeyLength+1);
+                            KeyLength = LoadNames.IndexOf('\u2023');
+                            ReturnNames[i] = LoadNames.Substring(0, KeyLength);
+                        }
+                        LoadNames = LoadNames.Substring(KeyLength + 1);
+                        ReturnNames[5] = LoadNames;
+                }
+                return ReturnNames;
+
+            }
+            catch
+            {
+                return ReturnNames;
+            }
+
+        }
+
         public void Update()
 {
 
@@ -231,8 +272,6 @@ namespace ActionGroupsExtended
         this.part.OnEditorAttach -= PartOnAttach;
         CallBacksSet = false;
     }
-
-    //print(this.part.name + " " + this.part.isConnected);
 
     if (partAGActions != null) //actiongroup list is initialized?
     {
@@ -532,11 +571,15 @@ public List<AGXAction> LoadActionGroups()
             {
                 node.SetValue("AGXNames", AGXFlight.SaveGroupNames(this.part, AGXNames));
                 node.SetValue("AGXKeySet", AGXFlight.SaveCurrentKeySet(this.part, AGXKeySet));
+                node.SetValue("AGXGroupStates", AGXFlight.SaveGroupVisibility(this.part, AGXGroupStates));
+                node.SetValue("AGXGroupStateNames", AGXFlight.SaveGroupVisibilityNames(this.part, AGXGroupStateNames));
             }
             else if (HighLogic.LoadedSceneIsEditor && AGXEditor.LoadFinished)
             {
                 node.SetValue("AGXNames", AGXEditor.SaveGroupNames(this.part, AGXNames));
                 node.SetValue("AGXKeySet", AGXEditor.SaveCurrentKeySet(this.part, AGXKeySet));
+                node.SetValue("AGXGroupStates", AGXEditor.SaveGroupVisibility(this.part, AGXGroupStates));
+                node.SetValue("AGXGroupStateNames", AGXEditor.SaveGroupVisibilityNames(this.part, AGXGroupStateNames));
             }
   
         }
@@ -564,6 +607,13 @@ public List<AGXAction> LoadActionGroups()
 
         }
         
+    }
+
+    public class AGXActionsState
+    {
+        public int group;
+        public bool actionOff;
+        public bool actionOn;
     }
   
     

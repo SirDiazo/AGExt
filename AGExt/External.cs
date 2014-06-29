@@ -27,6 +27,25 @@ namespace ActionGroupsExtended
                 AGXFlight.ActivateActionGroup(i);
             }
         }
+        public static bool AGXGroupState(int i)
+        {
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (AGXFlight.ActiveActionsState.Find(g => g.group == i).actionOn)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     public class AGXAction : MonoBehaviour //basic data class for AGX mod, used everywhere
