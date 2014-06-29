@@ -32,11 +32,19 @@ namespace ActionGroupsExtended
 
             if (HighLogic.LoadedSceneIsFlight)
             {
-                if (AGXFlight.ActiveActionsState.Find(g => g.group == i).actionOn)
+                try
                 {
-                    return true;
+
+                    if (AGXFlight.ActiveActionsState.Find(g => g.group == i).actionOn)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else
+                catch
                 {
                     return false;
                 }
