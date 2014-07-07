@@ -49,86 +49,33 @@ namespace ActionGroupsExtended
     public string SaveActionGroups() 
     {
         
-        try{//print("start save action groups " +this.part.ConstructID);
-       
-       //KSPActs[1] = KSPActionGroup.Custom01; //setup for saving to default action groups
-       // KSPActs[2] = KSPActionGroup.Custom02;
-       // KSPActs[3] = KSPActionGroup.Custom03;
-       // KSPActs[4] = KSPActionGroup.Custom04;
-       // KSPActs[5] = KSPActionGroup.Custom05;
-       // KSPActs[6] = KSPActionGroup.Custom06;
-       // KSPActs[7] = KSPActionGroup.Custom07;
-       // KSPActs[8] = KSPActionGroup.Custom08;
-       // KSPActs[9] = KSPActionGroup.Custom09;
-       // KSPActs[10] = KSPActionGroup.Custom10;
-        
-        
-        //foreach (BaseAction clrAct in partAllActions)//actual code to save to default action groups
-        //    {
-        //        for (int i = 1; i <= 10; i = i + 1)
-        //        {
-        //            //clrAct.actionGroup = clrAct.actionGroup &= KSPActs[i];  //actiongrouptest
-        //        }
-        //    }
+        try{
         if (partAGActions.Count >= 1 && HighLogic.LoadedSceneIsEditor) //there is an action assigned to this part
         {
-            
-            //print("AGCnt " + partAGActions.ElementAt(0).prt.partInfo.name + " " +partAGActions.ElementAt(0).ba.name + " " +partAGActions.ElementAt(0).group.ToString() + " " +partAGActions.ElementAt(0).activated);
-            //print("A");
             try
             {
                 if (partAGActions.ElementAt(0).prt == null) //make sure we don't have an empty list, can happen if actions ar assigned and then all are deleted
                 {
 
                 }
-                //print("not null");
             }
                 catch //empty list with a null, refresh list
             {
-                    //print("null?");
                 partAGActions.Clear();
                 partAGActions.AddRange(AGXEditor.AttachAGXPart(this.part, partAllActions, partAGActions));
                 AGXEditor.NeedToLoadActions = true;
                 
             }
-            //print("b");
         }
-        //print("part cnt " + partAGActions.Count);
             string SaveGroupsString = ""; //reset save string to blank
             
-            //print(partAGActions.Count);
-
-           // print("c");
             foreach (AGXAction agAct in partAGActions)
             {
-                //print("d");
-                //if (agAct == null)
-                //{
-                //    print("nell");
-                //    goto BreakOut2;
-                //}
-                
-                //print(this.part.symmetryCounterparts.Count);
-                //foreach (Part p in this.part.symmetryCounterparts)
-                //{
-                //    print(p.name);
-                //}
-                //if(HighLogic.LoadedSceneIsFlight)
-                //{
-                //    if (AGXFlight.CurrentVesselActions.First(p => p.group == agAct.group).activated)
-                //    {
-                //        agAct.activated = true;
-                        
-                //    }
-                //    else
-                //    {
-                //        agAct.activated = false;
-                       
-                //    }
-                //    }
                 SaveGroupsString = SaveGroupsString + '\u2023' + agAct.group.ToString("000"); //\u2023 is divider character (right arrow), make sure actiongroup number is 3 characters
-             
-                    if(agAct.activated==true) //is actiongroup activaed? then add 1, else add 0 to string
+
+                
+                  
+                if(agAct.activated==true) //is actiongroup activaed? then add 1, else add 0 to string
                     {
                      
                         SaveGroupsString = SaveGroupsString + "1";
@@ -138,11 +85,8 @@ namespace ActionGroupsExtended
                     {
                        
                         SaveGroupsString = SaveGroupsString + "0";
-                        
                     }
-
                     SaveGroupsString = SaveGroupsString + agAct.ba.name; //action name added to save string
-                   //foreach (BaseAction ba2 in partAllActions)
                    //{
                        
                        if (agAct.ba.listParent.module.moduleName == "ModuleEnviroSensor") //add this to the agxactions list somehow and add to save.load serialze
@@ -155,37 +99,21 @@ namespace ActionGroupsExtended
                            ModuleScienceExperiment MSE = (ModuleScienceExperiment)agAct.ba.listParent.module; //all other modules use guiname
                            SaveGroupsString = SaveGroupsString + '\u2022' +  MSE.experimentID; //u2021 is sciencemodule
                        }
+                       else if (agAct.ba.listParent.module.moduleName == "ModuleAnimateGeneric") //add this to the agxactions list somehow and add to save.load serialze
+                       {
+                           ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                           SaveGroupsString = SaveGroupsString + '\u2024' + MAnim.animationName; //u2021 is sciencemodule
+                       }
                         else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
                        {
                            //ModuleScienceExperiment MSE = (ModuleScienceExperiment)agAct.ba.listParent.module; //all other modules use guiname
                            SaveGroupsString = SaveGroupsString + '\u2021' +  agAct.ba.guiName; //u2021 is sciencemodule
                        }
-                       //else if (agAct.ba.listParent.module.moduleName == "KethaneConverter") //add this to the agxactions list somehow and add to save.load serialze
-                       //{
-                       //   // print("Kethane converter found");
-                       //    //foreach (BaseAction ba3 in agAct.ba.listParent.module.Actions)
-                       //    //{
-                       //    //    print("K1 " + ba3.guiName);
-                       //    //}
-                       //    //ModuleEnviroSensor MSE = (ModuleEnviroSensor)agAct.ba.listParent.module;
-                       //    SaveGroupsString = SaveGroupsString + '\u2032' + agAct.ba.guiName; //u2021 is kethaneconverter
-                       //}
-                       //else
-                       //{
-
-                       //    SaveGroupsString = SaveGroupsString + '\u2022'; //all other modules on code u2022
-                       //}
-                   //}
-                   //if (agAct.group <= 10) //will be where actions are saved to default action groups, currently not working
-                  // {
-                       //agAct.ba.actionGroup = (agAct.ba.actionGroup |= KSPActs[agAct.group]); //actiongrouptest
-                   //}
-                //default action groups set code is in SelParts window in Flight and Editor classes
-                   
+                      // print("AGXDataSaveOK: " + agAct.ba.listParent.part.ConstructID + " " + SaveGroupsString);
                 }
-        //BreakOut2:
             
-                return SaveGroupsString; //return string to save to SetValue command that called this method.
+              
+            return SaveGroupsString; //return string to save to SetValue command that called this method.
     }
         catch
     {
@@ -395,6 +323,7 @@ public List<AGXAction> LoadActionGroups()
                                     }
                                 }
                                 partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = SciModuleActs.Find(b => b.name == ActionName), activated = Activated });
+                                //print("AGXDataLoadAct1: " + this.part.ConstructID + " " + ActGroup + " " + SciModuleActs.Find(b => b.name == ActionName).name + " " + SciModuleActs.Find(b => b.name == ActionName).guiName + " " + Activated);
                                 LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                             }
                              else if (LoadList.Substring(0, KeyLength - 4).Contains('\u2022')) //science part
@@ -416,6 +345,7 @@ public List<AGXAction> LoadActionGroups()
                                  
                                      SciActs.AddRange(SciPMList.Find(b => b.experimentID== ExperimentID).Actions);
                                      partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = SciActs.Find(b => b.name == ActionName), activated = Activated });
+                                    // print("AGXDataLoadAct2: " + this.part.ConstructID + " " + ActGroup + " " + SciActs.Find(b => b.name == ActionName).name + " " + SciActs.Find(b => b.name == ActionName).guiName + " " + Activated);
                                      LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                                  //foreach (BaseAction baList in SciActs) //find this actions science module and get actions list
                                  //{
@@ -438,6 +368,7 @@ public List<AGXAction> LoadActionGroups()
                                      {
                                          
                                          partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = baList, activated = Activated });
+                                        // print("AGXDataLoadAct3: " + this.part.ConstructID + " " + ActGroup + " " + baList.name + " " + baList.guiName + " " + Activated);
                                          goto BreakOut; //break out of foreach, only want to find one action
                                      }
                                  }
@@ -446,6 +377,32 @@ public List<AGXAction> LoadActionGroups()
                              
                              LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                                  }
+
+                             else if (LoadList.Substring(0, KeyLength - 4).Contains('\u2024')) //regular part
+                             {
+
+                                 string ActionName = LoadList.Substring(0, LoadList.IndexOf('\u2024')); //name of action
+                                 string ActionGUIName = LoadList.Substring(LoadList.IndexOf('\u2024') + 1, KeyLength - 5 - LoadList.IndexOf('\u2024')); //name of action shown on gui
+
+                                 List<BaseAction> animActs = new List<BaseAction>();
+                                 animActs.AddRange(partAllActions.Where(ba => ba.listParent.module.name == "ModuleAnimateGeneric"));
+                                 
+                                 foreach (BaseAction baList in animActs) //find this actions science module and get actions list
+                                 {
+                                     ModuleAnimateGeneric animMdl = (ModuleAnimateGeneric)baList.listParent.module;
+                                     if (baList.name == ActionName && animMdl.animationName == ActionGUIName)
+                                     {
+
+                                         partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = baList, activated = Activated });
+                                         //print("AGXDataLoadAct3a: " + this.part.ConstructID + " " + ActGroup + " " + baList.name + " " + baList.guiName + " " + Activated);
+                                         goto BreakOut; //break out of foreach, only want to find one action
+                                     }
+                                 }
+                             BreakOut:
+
+
+                                 LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
+                             }
 
                                 // partAGActions.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = SciModuleActs.Find(b => b.name == ActionName), activated = Activated });
                                  //LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
@@ -456,7 +413,8 @@ public List<AGXAction> LoadActionGroups()
                             {
                                 
                                 partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = partAllActions.Find(b => b.name == LoadList.Substring(0, KeyLength - 4)), activated = Activated });    //add action, old string format                  
-                                LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
+                                //print("AGXDataLoadAct4: " + this.part.ConstructID + " " + ActGroup + " " + partAllActions.Find(b => b.name == LoadList.Substring(0, KeyLength - 4)).name + " " + partAllActions.Find(b => b.name == LoadList.Substring(0, KeyLength - 4)).guiName + " " + Activated);
+                                     LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                             }
                             
                              
@@ -465,9 +423,10 @@ public List<AGXAction> LoadActionGroups()
                                 AllDone = true;
                             }
 
-
+                            
                         }
                     }
+                    
                 }
                 //if (AGXFlight.CurrentVesselActions == null)
                 //{
@@ -535,6 +494,7 @@ public List<AGXAction> LoadActionGroups()
                 
             
         }
+        //print("AGXLoadDataOK" + partAGActions2.Count);
         return partAGActions2;
     }
 
@@ -543,6 +503,7 @@ public List<AGXAction> LoadActionGroups()
         print("AGX Critical Fail: PartModule LoadActionGroups");
         return partAGActions2;
     }
+    
 }
     public override void OnLoad(ConfigNode node)
     {
