@@ -2061,7 +2061,7 @@ namespace ActionGroupsExtended
                     }
                 }
                 
-                    RightClickDelay = RightClickDelay + 1;
+                    RightClickDelay = RightClickDelay + 1; 
                 
 
             }
