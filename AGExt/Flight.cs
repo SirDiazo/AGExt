@@ -100,6 +100,7 @@ namespace ActionGroupsExtended
         public static List<AGXActionsState> ActiveActionsState = new List<AGXActionsState>();
         public static List<AGXActionsState> ActiveActionsStateToShow = new List<AGXActionsState>();
        // public bool ActiveActionsCalculated = false;
+        private int actionsCheckFrameCount = 0;
 
 
 
@@ -2085,7 +2086,15 @@ namespace ActionGroupsExtended
             //        }
             //    }
             //}
-            CheckActionsActive();
+            if (actionsCheckFrameCount >= 20)
+            {
+                CheckActionsActive();
+                actionsCheckFrameCount = 0;
+            }
+            else
+            {
+                actionsCheckFrameCount = actionsCheckFrameCount + 1;
+            }
         }
 
         
@@ -3028,6 +3037,201 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
+                        if (agAct.ba.listParent.module.moduleName == "DTMagnetometer")
+                        {
+                            if (agAct.ba.name == "ActivateMagnetometerAction" || agAct.ba.name == "DeactivateMagnetometerAction" || agAct.ba.name == "ToggleMagnetometerAction")
+                            {
+                                if (agAct.ba.listParent.module.isEnabled)
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "FNThermalHeatExchanger")
+                        {
+                            if (agAct.ba.name == "ActivateHeatExchangerAction" || agAct.ba.name == "DeactivateHeatExchangerAction" || agAct.ba.name == "ToggleHeatExchangerAction")
+                            {
+                                if (agAct.ba.listParent.module.isEnabled)
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ISRUScoop")
+                        {
+                            if (agAct.ba.name == "ActivateScoopAction" || agAct.ba.name == "DisableScoopAction" || agAct.ba.name == "ToggleScoopAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("scoopIsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitter")
+                        {
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                            if (agAct.ba.name == "ActivateRelayAction" || agAct.ba.name == "DeactivateRelayAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("relay"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitterBackup")
+                        {
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ModuleModableScienceGenerator")
+                        {
+                            if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("Deployed"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "AlcubierreDrive")
+                        {
+                            if (agAct.ba.name == "StartChargingAction" || agAct.ba.name == "StopChargingAction" || agAct.ba.name == "ToggleChargingAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsCharging"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiverBackup")
+                        {
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "FNGenerator")
+                        {
+                            if (agAct.ba.name == "ActivateGeneratorAction" || agAct.ba.name == "DeactivateGeneratorAction" || agAct.ba.name == "ToggleGeneratorAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "FNRadiator")
+                        {
+                            if (agAct.ba.name == "DeployRadiatorAction" || agAct.ba.name == "RetractRadiatorAction" || agAct.ba.name == "ToggleRadiatorAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("radiatorIsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "FNReactor")
+                        {
+                            if (agAct.ba.name == "ActivateReactorAction" || agAct.ba.name == "DeactivateReactorAction" || agAct.ba.name == "ToggleReactorAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiver")
+                        {
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("receiverIsEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "TacGenericConverter")
+                        {
+                            if (agAct.ba.name == "ToggleConverter")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                       
+
 
                 //else //all other modules, check the isEnabled bool
                 //{
