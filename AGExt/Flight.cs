@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 using UnityEngine;
 
@@ -31,7 +32,7 @@ namespace ActionGroupsExtended
         public Vector2 FlightWinScroll;
         private List<AGXPart> AGEditorSelectedParts;
         private bool AGEEditorSelectedPartsSame = false;
-        private static GUIStyle AGXWinStyle = null;
+        
         private int SelectedPartsCount = 0;
         private bool ShowSelectedWin = false;
         //private Part PreviousSelectedPart = null;
@@ -81,6 +82,9 @@ namespace ActionGroupsExtended
         //private bool ShipListOk = false;
         Texture2D BtnTexRed = new Texture2D(1, 1);
         Texture2D BtnTexGrn = new Texture2D(1, 1);
+        Texture2D ButtonTexture = new Texture2D(64, 64);
+        Texture2D ButtonTextureRed = new Texture2D(64, 64);
+        Texture2D ButtonTextureGreen = new Texture2D(64, 64);
         public static Dictionary<int, string> AGXguiNames;
         public static Dictionary<int, KeyCode> AGXguiKeys;
         public int AGXCurActGroup = 1;
@@ -102,8 +106,14 @@ namespace ActionGroupsExtended
        // public bool ActiveActionsCalculated = false;
         private int actionsCheckFrameCount = 0;
 
-
-
+        private static GUISkin AGXSkin;
+        private static GUIStyle AGXWinStyle = null;
+        //private static GUIStyle TWR1WinStyle = null; //window style
+        private static GUIStyle AGXLblStyle = null; //window style
+        private static GUIStyle AGXBtnStyle = null; //window style
+        private static GUIStyle AGXFldStyle = null; //window style
+        //private static GUIStyle AGXScrollStyle = null; //window style
+        
 
 
 
@@ -126,7 +136,7 @@ namespace ActionGroupsExtended
 
             //AGXVsl = new AGXVessel();
 
-            AGXWinStyle = new GUIStyle(HighLogic.Skin.window);
+            //AGXWinStyle = new GUIStyle(HighLogic.Skin.window);
 
             BtnTexRed.SetPixel(0, 0, new Color(1, 0, 0, .5f));
             BtnTexRed.Apply();
@@ -208,8 +218,35 @@ namespace ActionGroupsExtended
             }
             ShowGroupInFlightCurrent = 1;
            // print("AGXStart " + Planetarium.GetUniversalTime());
-            
-            
+
+            AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
+            AGXWinStyle = new GUIStyle(AGXSkin.window); 
+            AGXLblStyle = new GUIStyle(AGXSkin.label);
+            AGXFldStyle = new GUIStyle(AGXSkin.textField);
+            AGXFldStyle.fontStyle = FontStyle.Normal;
+            //AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1);
+            AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            AGXLblStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            AGXLblStyle.wordWrap = false;
+
+            AGXBtnStyle = new GUIStyle(AGXSkin.button);
+            AGXBtnStyle.fontStyle = FontStyle.Normal;
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+            AGXBtnStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            //AGXScrollStyle.normal.background = null;
+            //print("AGX " + AGXBtnStyle.normal.background);
+            byte[] importTxt = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTexture.png");
+            byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
+            byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
+            //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
+            //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
+            ButtonTexture.LoadImage(importTxt);
+            ButtonTexture.Apply();
+            ButtonTextureRed.LoadImage(importTxtRed);
+            ButtonTextureRed.Apply();
+            ButtonTextureGreen.LoadImage(importTxtGreen);
+            ButtonTextureGreen.Apply();
+            AGXBtnStyle.normal.background = ButtonTexture;
            
         }
 
@@ -497,31 +534,31 @@ namespace ActionGroupsExtended
 
         public void GroupsInFlightWindow(int WindowID)
         {
-            if (GUI.Button(new Rect(5, 5, 70, 20), ShowGroupInFlightNames[1]))
+            if (GUI.Button(new Rect(5, 5, 70, 20), ShowGroupInFlightNames[1],AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 1;
                 CalculateActionsToShow();
                 ShowGroupsInFlightWindow = false;
             }
-            if (GUI.Button(new Rect(5, 25, 70, 20), ShowGroupInFlightNames[2]))
+            if (GUI.Button(new Rect(5, 25, 70, 20), ShowGroupInFlightNames[2], AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 2;
                 CalculateActionsToShow();
                 ShowGroupsInFlightWindow = false;
             }
-            if (GUI.Button(new Rect(5, 45, 70, 20), ShowGroupInFlightNames[3]))
+            if (GUI.Button(new Rect(5, 45, 70, 20), ShowGroupInFlightNames[3], AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 3;
                 CalculateActionsToShow();
                 ShowGroupsInFlightWindow = false;
             }
-            if (GUI.Button(new Rect(5, 65, 70, 20), ShowGroupInFlightNames[4]))
+            if (GUI.Button(new Rect(5, 65, 70, 20), ShowGroupInFlightNames[4], AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 4;
                 CalculateActionsToShow();
                 ShowGroupsInFlightWindow = false;
             }
-            if (GUI.Button(new Rect(5, 85, 70, 20), ShowGroupInFlightNames[5]))
+            if (GUI.Button(new Rect(5, 85, 70, 20), ShowGroupInFlightNames[5], AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 5;
                 CalculateActionsToShow();
@@ -531,13 +568,14 @@ namespace ActionGroupsExtended
 
         public void FlightWindow(int WindowID)
         {
-
-            if (GUI.Button(new Rect(140, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent]))
+            HighLogic.Skin.scrollView.normal.background = null;
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+            if (GUI.Button(new Rect(140, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent], AGXBtnStyle))
             {
                 
                 ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
             }
-            if (GUI.Button(new Rect(5, 5, 75, 20), "Edit"))
+            if (GUI.Button(new Rect(5, 5, 75, 20), "Edit", AGXBtnStyle))
             {
 
                 if (ShowSelectedWin || ShowKeySetWin)
@@ -600,7 +638,7 @@ namespace ActionGroupsExtended
             //}
 
             //GUI.Box(new Rect(5, 25, 190, Math.Min(410,10+(20*Math.Max(1,ActiveActions.Count)))), "");
-            GUI.Box(new Rect(5, 25, 190, Math.Min(410, 10 + (20 * Math.Max(1, ActiveActionsStateToShow.Count)))), "");
+            GUI.Box(new Rect(5, 25, 190, Math.Min(410, 10 + (20 * Math.Max(1, ActiveActionsStateToShow.Count)))), "", AGXBtnStyle);
             //FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 200, Math.Min(400,20+(20*(ActiveActions.Count-1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActions.Count))));
             FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 200, Math.Min(400, 20 + (20 * (ActiveActionsStateToShow.Count - 1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActionsStateToShow.Count))));
             //FlightWin.height = Math.Min( Math.Max(60,40+(20*ActiveActions.Count)),440);
@@ -653,17 +691,17 @@ namespace ActionGroupsExtended
                         }
                     }
 
-                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                    AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
                     //if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 110, 20), ActiveActions.ElementAt((i2 - 1)) + ": " + AGXguiNames[ActiveActions.ElementAt((i2 - 1))]))
-                        if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 110, 20), ActiveActionsStateToShow.ElementAt((i2 - 1)).group + ": " + AGXguiNames[ActiveActionsStateToShow.ElementAt((i2 - 1)).group]))
+                    if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 110, 20), ActiveActionsStateToShow.ElementAt((i2 - 1)).group + ": " + AGXguiNames[ActiveActionsStateToShow.ElementAt((i2 - 1)).group], AGXBtnStyle))
                     {
                         
                         //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
                         ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
                     }
-                    GUI.skin.button.alignment = TxtAnch4;
+                    AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
                     //if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActions.ElementAt((i2 - 1))].ToString()))
-                        if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActionsStateToShow.ElementAt((i2 - 1)).group].ToString()))
+                    if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActionsStateToShow.ElementAt((i2 - 1)).group].ToString(), AGXBtnStyle))
                     {
 
                         //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
@@ -677,8 +715,8 @@ namespace ActionGroupsExtended
             //if(ActiveActions.Count ==0)
                 if (ActiveActionsState.Count == 0)
             {
-              
-                GUI.Label(new Rect(40, 30, 150,20), "No actions available");
+
+                GUI.Label(new Rect(40, 30, 150, 20), "No actions available", AGXLblStyle);
             }
           
                 
@@ -687,16 +725,31 @@ namespace ActionGroupsExtended
         }
         public void SaveCurrentVesselActions()
         {
-            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+            string errLine = "1";
+            try
             {
-                foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>())
+                errLine = "2";
+                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 {
-                    agpm.partAGActions.Clear();
-                    agpm.partAGActions.AddRange(CurrentVesselActions.Where(agp => agp.prt == p));
-                    agpm.AGXData = agpm.SaveActionGroups();
+                    errLine = "3";
+                    foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>())
+                    {
+                        errLine = "4";
+                        agpm.partAGActions.Clear();
+                        errLine = "5";
+                        agpm.partAGActions.AddRange(CurrentVesselActions.Where(agp => agp.prt == p));
+                        errLine = "6";
+                        agpm.AGXData = agpm.SaveActionGroups();
+                        errLine = "7";
+                    }
                 }
+                errLine = "8";
+                CalculateActiveActions();
             }
-            CalculateActiveActions();
+            catch (Exception e)
+            {
+                print("AGX Fail (SaveCurrentVesselActions) " + errLine + " " + e);
+            }
         }
         public void SetDefaultAction(BaseAction ba, int group)
         {
@@ -735,6 +788,7 @@ namespace ActionGroupsExtended
 
         public void CurrentActionsWindow(int WindowID)
         {
+            HighLogic.Skin.scrollView.normal.background = null;
             List<AGXAction> ThisGroupActions = new List<AGXAction>();
             ThisGroupActions.AddRange(CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
             GUI.Box(new Rect(5, 25, 310, 110), "");
@@ -751,8 +805,8 @@ namespace ActionGroupsExtended
 
                     TxtAnch4 = GUI.skin.button.alignment;
 
-                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group]))
+                    AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
+                    if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group], AGXBtnStyle))
                     {
                         int ToDel = 0;
                         foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -774,7 +828,7 @@ namespace ActionGroupsExtended
                     }
                     }
 
-                    if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title))
+                    if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title, AGXBtnStyle))
                     {
                         int ToDel = 0;
                         foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -797,7 +851,7 @@ namespace ActionGroupsExtended
                     }
                     try
                     {
-                        if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName))
+                        if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName, AGXBtnStyle))
                         {
                             int ToDel = 0;
                             foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -821,7 +875,7 @@ namespace ActionGroupsExtended
                     }
                     catch
                     {
-                        if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error"))
+                        if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error", AGXBtnStyle))
                         {
                             int ToDel = 0;
                             foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -844,7 +898,7 @@ namespace ActionGroupsExtended
                         }
                     }
 
-                    GUI.skin.button.alignment = TxtAnch4;
+                    AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
                     RowCnt = RowCnt + 1;
                 }
             }
@@ -854,9 +908,9 @@ namespace ActionGroupsExtended
 
                 TxtAnch5 = GUI.skin.label.alignment;
 
-                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(10, 30, 274, 30), "No actions");
-                GUI.skin.label.alignment = TxtAnch5;
+                AGXLblStyle.alignment = TextAnchor.MiddleCenter;
+                GUI.Label(new Rect(10, 30, 274, 30), "No actions",AGXLblStyle);
+                AGXLblStyle.alignment = TextAnchor.MiddleLeft;
             }
             GUI.EndScrollView();
 
@@ -871,7 +925,7 @@ namespace ActionGroupsExtended
 
             GUI.DrawTexture(new Rect(6, (CurrentKeySet * 25) + 1, 68, 18), BtnTexGrn);
 
-            if (GUI.Button(new Rect(5, 25, 70, 20), "Select 1:"))
+            if (GUI.Button(new Rect(5, 25, 70, 20), "Select 1:", AGXBtnStyle))
             {
                 
                 SaveCurrentKeyBindings();
@@ -894,7 +948,7 @@ namespace ActionGroupsExtended
             }
             KeySetNames[0] = GUI.TextField(new Rect(80, 25, 100, 20), KeySetNames[0]);
 
-            if (GUI.Button(new Rect(5, 50, 70, 20), "Select 2:"))
+            if (GUI.Button(new Rect(5, 50, 70, 20), "Select 2:", AGXBtnStyle))
             {
 
                 SaveCurrentKeyBindings();
@@ -912,7 +966,7 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNames[1] = GUI.TextField(new Rect(80, 50, 100, 20), KeySetNames[1]);
-            if (GUI.Button(new Rect(5, 75, 70, 20), "Select 3:"))
+            if (GUI.Button(new Rect(5, 75, 70, 20), "Select 3:", AGXBtnStyle))
             {
 
                 SaveCurrentKeyBindings();
@@ -930,7 +984,7 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNames[2] = GUI.TextField(new Rect(80, 75, 100, 20), KeySetNames[2]);
-            if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:"))
+            if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:", AGXBtnStyle))
             {
                 SaveCurrentKeyBindings();
                 CurrentKeySet = 4;
@@ -947,7 +1001,7 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNames[3] = GUI.TextField(new Rect(80, 100, 100, 20), KeySetNames[3]);
-            if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:"))
+            if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:", AGXBtnStyle))
             {
                 SaveCurrentKeyBindings();
                 CurrentKeySet = 5;
@@ -967,47 +1021,47 @@ namespace ActionGroupsExtended
 
             Color TxtClr3 = GUI.contentColor;
             GUI.contentColor = new Color(0.5f, 1f, 0f,1f);
-                GUI.skin.label.fontStyle = FontStyle.Bold;
+                AGXLblStyle.fontStyle = FontStyle.Bold;
                 TextAnchor TxtAnc = GUI.skin.label.alignment;
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(5, 145, 175, 25), "Actiongroup Groups");
-                GUI.skin.label.fontStyle = FontStyle.Normal;
-                GUI.skin.label.alignment = TxtAnc;
+                GUI.Label(new Rect(5, 145, 175, 25), "Actiongroup Groups",AGXLblStyle);
+                AGXLblStyle.fontStyle = FontStyle.Normal;
+                AGXLblStyle.alignment = TextAnchor.MiddleLeft;
                 GUI.contentColor = TxtClr3;
 
             GUI.DrawTexture(new Rect(6, (ShowGroupInFlightCurrent * 25) + 141, 68, 18), BtnTexGrn);
-            if (GUI.Button(new Rect(5, 165, 70, 20), "Group 1:"))
+            if (GUI.Button(new Rect(5, 165, 70, 20), "Group 1:", AGXBtnStyle))
                 {
                      ShowGroupInFlightCurrent = 1;
                 }
                 ShowGroupInFlightNames[1] = GUI.TextField(new Rect(80, 165, 100, 20), ShowGroupInFlightNames[1]);
 
-                if (GUI.Button(new Rect(5, 190, 70, 20), "Group 2:"))
+                if (GUI.Button(new Rect(5, 190, 70, 20), "Group 2:", AGXBtnStyle))
                 {
                     ShowGroupInFlightCurrent = 2;
                 }
                 ShowGroupInFlightNames[2] = GUI.TextField(new Rect(80, 190, 100, 20), ShowGroupInFlightNames[2]);
 
-                if (GUI.Button(new Rect(5, 215, 70, 20), "Group 3:"))
+                if (GUI.Button(new Rect(5, 215, 70, 20), "Group 3:", AGXBtnStyle))
                 {
                     ShowGroupInFlightCurrent = 3;
                 }
                 ShowGroupInFlightNames[3] = GUI.TextField(new Rect(80, 215, 100, 20), ShowGroupInFlightNames[3]);
 
-                if (GUI.Button(new Rect(5, 240, 70, 20), "Group 4:"))
+                if (GUI.Button(new Rect(5, 240, 70, 20), "Group 4:", AGXBtnStyle))
                 {
                     ShowGroupInFlightCurrent = 4;
                 }
                 ShowGroupInFlightNames[4] = GUI.TextField(new Rect(80, 240, 100, 20), ShowGroupInFlightNames[4]);
 
-                if (GUI.Button(new Rect(5, 265, 70, 20), "Group 5:"))
+                if (GUI.Button(new Rect(5, 265, 70, 20), "Group 5:", AGXBtnStyle))
                 {
                     ShowGroupInFlightCurrent = 5;
                 }
                 ShowGroupInFlightNames[5] = GUI.TextField(new Rect(80, 265, 100, 20), ShowGroupInFlightNames[5]);
 
 
-            if (GUI.Button(new Rect(5, 300, 175, 30), "Close Window"))
+                if (GUI.Button(new Rect(5, 300, 175, 30), "Close Window", AGXBtnStyle))
             {
 
                 AGExtNode.SetValue("KeySetName1", KeySetNames[0]);
@@ -1031,22 +1085,26 @@ namespace ActionGroupsExtended
 
         public static string SaveCurrentKeySet(Part p, string curKeySet)
         {
-
+            string errLine = "1";
             try
             {
+                errLine = "2";
                 if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
                 {
+                    errLine = "3";
                     return CurrentKeySet.ToString();
 
                 }
                 else
                 {
+                    errLine = "4";
                     return curKeySet;
                 }
+                errLine = "5";
             }
-            catch
+            catch (Exception e)
             {
-                print("AGX Save KeySet FAIL! (SaveCurrentKeySet)");
+                print("AGX Save KeySet FAIL! (SaveCurrentKeySet) " + errLine + " " + e);
                 return curKeySet;
             }
             
@@ -1190,7 +1248,7 @@ namespace ActionGroupsExtended
         }
         public void KeyCodeWindow(int WindowID)
         {
-            if (GUI.Button(new Rect(5, 3, 100, 25), "None"))
+            if (GUI.Button(new Rect(5, 3, 100, 25), "None", AGXBtnStyle))
             {
                 AGXguiKeys[AGXCurActGroup] = KeyCode.None;
                 ShowKeyCodeWin = false;
@@ -1202,7 +1260,7 @@ namespace ActionGroupsExtended
                 GUI.DrawTexture(new Rect(281, 3, 123, 18), BtnTexGrn);
             }
 
-            if (GUI.Button(new Rect(280, 2, 125, 20), "Show JoySticks"))
+            if (GUI.Button(new Rect(280, 2, 125, 20), "Show JoySticks", AGXBtnStyle))
             {
                 ShowJoySticks = !ShowJoySticks;
             }
@@ -1212,7 +1270,7 @@ namespace ActionGroupsExtended
                 KeyListCount = 0;
                 while (KeyListCount <= 34)
                 {
-                    if (GUI.Button(new Rect(5, 25 + (KeyListCount * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount)))
+                    if (GUI.Button(new Rect(5, 25 + (KeyListCount * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
                         ShowKeyCodeWin = false;
@@ -1222,7 +1280,7 @@ namespace ActionGroupsExtended
                 }
                 while (KeyListCount <= 69)
                 {
-                    if (GUI.Button(new Rect(105, 25 + ((KeyListCount - 35) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount)))
+                    if (GUI.Button(new Rect(105, 25 + ((KeyListCount - 35) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
                         ShowKeyCodeWin = false;
@@ -1232,7 +1290,7 @@ namespace ActionGroupsExtended
                 }
                 while (KeyListCount <= 104)
                 {
-                    if (GUI.Button(new Rect(205, 25 + ((KeyListCount - 70) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount)))
+                    if (GUI.Button(new Rect(205, 25 + ((KeyListCount - 70) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
                         ShowKeyCodeWin = false;
@@ -1242,7 +1300,7 @@ namespace ActionGroupsExtended
                 }
                 while (KeyListCount <= 139)
                 {
-                    if (GUI.Button(new Rect(305, 25 + ((KeyListCount - 105) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount)))
+                    if (GUI.Button(new Rect(305, 25 + ((KeyListCount - 105) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
                         ShowKeyCodeWin = false;
@@ -1257,7 +1315,7 @@ namespace ActionGroupsExtended
                 JoyStickCount = 0;
                 while (JoyStickCount <= 34)
                 {
-                    if (GUI.Button(new Rect(5, 25 + (JoyStickCount * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount)))
+                    if (GUI.Button(new Rect(5, 25 + (JoyStickCount * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
@@ -1267,7 +1325,7 @@ namespace ActionGroupsExtended
                 }
                 while (JoyStickCount <= 69)
                 {
-                    if (GUI.Button(new Rect(130, 25 + ((JoyStickCount - 35) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount)))
+                    if (GUI.Button(new Rect(130, 25 + ((JoyStickCount - 35) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
@@ -1277,7 +1335,7 @@ namespace ActionGroupsExtended
                 }
                 while (JoyStickCount <= 99)
                 {
-                    if (GUI.Button(new Rect(255, 25 + ((JoyStickCount - 70) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount)))
+                    if (GUI.Button(new Rect(255, 25 + ((JoyStickCount - 70) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
@@ -1292,8 +1350,8 @@ namespace ActionGroupsExtended
         public void SelParts(int WindowID)
         {
 
-
-
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+            HighLogic.Skin.scrollView.normal.background = null;
             SelectedPartsCount = AGEditorSelectedParts.Count;
             int SelPartsLeft = new int(); //move everything left or right by tweaking this variable
             SelPartsLeft = -10;
@@ -1315,7 +1373,7 @@ namespace ActionGroupsExtended
                 while (ButtonCount <= SelectedPartsCount)
                 {
 
-                    if (GUI.Button(new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20), AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.partInfo.title))
+                    if (GUI.Button(new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20), AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.partInfo.title,AGXBtnStyle))
                     {
 
                         AGEditorSelectedParts.RemoveAt(ButtonCount - 1);
@@ -1337,24 +1395,26 @@ namespace ActionGroupsExtended
 
             if (SelPartsIncSym)
             {
-                GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexGrn, ScaleMode.StretchToFill, false);
+                //GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexGrn, ScaleMode.StretchToFill, false);
+                AGXBtnStyle.normal.background = ButtonTextureGreen;
                 BtnTxt = "Symmetry? Yes";
             }
             else
             {
-                GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexRed, ScaleMode.StretchToFill, false);
+                //GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexRed, ScaleMode.StretchToFill, false);
+                AGXBtnStyle.normal.background = ButtonTextureRed;
                 BtnTxt = "Symmetry? No";
             }
 
 
 
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 25, 110, 25), BtnTxt))
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 25, 110, 25), BtnTxt,AGXBtnStyle))
             {
                 SelPartsIncSym = !SelPartsIncSym;
 
             }
-
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 55, 110, 25), "Clear List"))
+            AGXBtnStyle.normal.background = ButtonTexture;
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 55, 110, 25), "Clear List",AGXBtnStyle))
             {
                 AGEditorSelectedParts.Clear();
                 PartActionsList.Clear();
@@ -1373,12 +1433,13 @@ namespace ActionGroupsExtended
                     int ActionsCountTotal = new int();
                     ActionsCount = 1;
                     ActionsCountTotal = PartActionsList.Count;
+                    
                     ScrollPosSelPartsActs = GUI.BeginScrollView(new Rect(SelPartsLeft + 20, 155, 220, 110), ScrollPosSelPartsActs, new Rect(0, 0, 200, (20 * Math.Max(5, ActionsCountTotal)) + 10));
 
                     while (ActionsCount <= ActionsCountTotal)
                     {
 
-                        if (GUI.Button(new Rect(5, 0 + ((ActionsCount - 1) * 20), 190, 20), PartActionsList.ElementAt(ActionsCount - 1).guiName))
+                        if (GUI.Button(new Rect(5, 0 + ((ActionsCount - 1) * 20), 190, 20), PartActionsList.ElementAt(ActionsCount - 1).guiName,AGXBtnStyle))
                         {
                             
                             int PrtCnt = new int();
@@ -1430,29 +1491,30 @@ namespace ActionGroupsExtended
 
                 TxtAnch = GUI.skin.label.alignment;
 
-                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type");
+                AGXLblStyle.alignment = TextAnchor.MiddleCenter;
+                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type",AGXLblStyle);
+                
 
 
-
-                GUI.skin.label.alignment = TxtAnch;
+                AGXLblStyle.alignment = TextAnchor.MiddleLeft;
 
             }
 
             TextAnchor TxtAnch2 = new TextAnchor();
-            TxtAnch2 = GUI.skin.button.alignment;
-            GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 85, 120, 30), AGXCurActGroup + ": " + AGXguiNames[AGXCurActGroup])) //current action group button
+            AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
+            //GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 85, 120, 30), AGXCurActGroup + ": " + AGXguiNames[AGXCurActGroup], AGXBtnStyle)) //current action group button
             {
                 TempShowGroupsWin = true;
             }
-            GUI.skin.button.alignment = TxtAnch2;
+            //GUI.skin.button.alignment = TxtAnch2;
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
             if (IsGroupToggle[AGXCurActGroup])
             {
                 
                 Color TxtClr = GUI.contentColor;
                 GUI.contentColor = Color.green;
-                if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: Yes"))
+                if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: Yes", AGXBtnStyle))
                 {
                   
                     IsGroupToggle[AGXCurActGroup] = false;
@@ -1461,13 +1523,13 @@ namespace ActionGroupsExtended
             }
             else
             {
-                if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: No"))
+                if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: No", AGXBtnStyle))
                 {
                    
                     IsGroupToggle[AGXCurActGroup] = true;
                 }
             }
-            GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:");
+            GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:",AGXLblStyle);
             Color TxtClr2 = GUI.contentColor;
             
             if (ShowGroupInFlight[1,AGXCurActGroup])
@@ -1478,7 +1540,7 @@ namespace ActionGroupsExtended
             {
                 GUI.contentColor = Color.red;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 271, 183, 20, 22), "1"))
+            if (GUI.Button(new Rect(SelPartsLeft + 271, 183, 20, 22), "1", AGXBtnStyle))
             {
                 ShowGroupInFlight[1, AGXCurActGroup] = !ShowGroupInFlight[1, AGXCurActGroup];
                 CalculateActionsToShow();
@@ -1492,7 +1554,7 @@ namespace ActionGroupsExtended
             {
                 GUI.contentColor = Color.red;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 291, 183, 20, 22), "2"))
+            if (GUI.Button(new Rect(SelPartsLeft + 291, 183, 20, 22), "2", AGXBtnStyle))
             {
                 ShowGroupInFlight[2, AGXCurActGroup] = !ShowGroupInFlight[2, AGXCurActGroup];
                 CalculateActionsToShow();
@@ -1506,7 +1568,7 @@ namespace ActionGroupsExtended
             {
                 GUI.contentColor = Color.red;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 311, 183, 20, 22), "3"))
+            if (GUI.Button(new Rect(SelPartsLeft + 311, 183, 20, 22), "3", AGXBtnStyle))
             {
                 ShowGroupInFlight[3, AGXCurActGroup] = !ShowGroupInFlight[3, AGXCurActGroup];
                 CalculateActionsToShow();
@@ -1520,7 +1582,7 @@ namespace ActionGroupsExtended
             {
                 GUI.contentColor = Color.red;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 331, 183, 20, 22), "4"))
+            if (GUI.Button(new Rect(SelPartsLeft + 331, 183, 20, 22), "4", AGXBtnStyle))
             {
                 ShowGroupInFlight[4, AGXCurActGroup] = !ShowGroupInFlight[4, AGXCurActGroup];
                 CalculateActionsToShow();
@@ -1534,22 +1596,22 @@ namespace ActionGroupsExtended
             {
                 GUI.contentColor = Color.red;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 351, 183, 20, 22), "5"))
+            if (GUI.Button(new Rect(SelPartsLeft + 351, 183, 20, 22), "5", AGXBtnStyle))
             {
                 ShowGroupInFlight[5, AGXCurActGroup] = !ShowGroupInFlight[5, AGXCurActGroup];
                 CalculateActionsToShow();
             }
             GUI.contentColor = TxtClr2;
-            GUI.Label(new Rect(SelPartsLeft + 245, 115, 110, 20), "Description:");
+            GUI.Label(new Rect(SelPartsLeft + 245, 115, 110, 20), "Description:",AGXLblStyle);
             CurGroupDesc = AGXguiNames[AGXCurActGroup];
-            CurGroupDesc = GUI.TextField(new Rect(SelPartsLeft + 245, 135, 120, 22), CurGroupDesc);
+            CurGroupDesc = GUI.TextField(new Rect(SelPartsLeft + 245, 135, 120, 22), CurGroupDesc,AGXFldStyle);
             AGXguiNames[AGXCurActGroup] = CurGroupDesc;
-            GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), "Keybinding:");
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 222, 120, 20), AGXguiKeys[AGXCurActGroup].ToString()))
+            GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), "Keybinding:",AGXLblStyle);
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 222, 120, 20), AGXguiKeys[AGXCurActGroup].ToString(),AGXBtnStyle))
             {
                 ShowKeyCodeWin = true;
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 244, 120, 20), CurrentKeySetName))
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 244, 120, 20), CurrentKeySetName, AGXBtnStyle))
             {
                 SaveCurrentKeyBindings();
                 KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
@@ -1568,16 +1630,19 @@ namespace ActionGroupsExtended
         public void GroupsWindow(int WindowID)
         {
 
-
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+            HighLogic.Skin.scrollView.normal.background = null;
             if (AutoHideGroupsWin)
             {
-                GUI.DrawTexture(new Rect(6, 4, 78, 18), BtnTexRed);
+                //GUI.DrawTexture(new Rect(6, 4, 78, 18), BtnTexRed);
+                AGXBtnStyle.normal.background = ButtonTextureRed;
             }
-            if (GUI.Button(new Rect(5, 3, 80, 20), "Auto-Hide"))
+            if (GUI.Button(new Rect(5, 3, 80, 20), "Auto-Hide", AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
 
             }
+            AGXBtnStyle.normal.background = ButtonTexture;
             bool[] PageGrn = new bool[5];
             foreach (AGXAction AGact in CurrentVesselActions)
             {
@@ -1603,37 +1668,50 @@ namespace ActionGroupsExtended
                 }
             }
 
-            for (int i = 1; i <= 5; i = i + 1)
-            {
-                if (PageGrn[i - 1] == true && GroupsPage != i)
-                {
-                    GUI.DrawTexture(new Rect(96 + (i * 25), 4, 23, 18), BtnTexGrn);
-                }
-            }
-            GUI.DrawTexture(new Rect(96 + (GroupsPage * 25), 4, 23, 18), BtnTexRed);
+           // for (int i = 1; i <= 5; i = i + 1)
+         //   {
+               // if (PageGrn[i - 1] == true && GroupsPage != i)
+               // {
+                //    GUI.DrawTexture(new Rect(96 + (i * 25), 4, 23, 18), BtnTexGrn);
+               // }
+           // }
+            //GUI.DrawTexture(new Rect(96 + (GroupsPage * 25), 4, 23, 18), BtnTexRed);
            // bool[5] PageBtnGrn = new bool[]();
-
-            
-            if (GUI.Button(new Rect(120, 3, 25, 20), "1"))
+            if (PageGrn[0]) AGXBtnStyle.normal.background = ButtonTextureGreen;
+            if (GroupsPage == 1) AGXBtnStyle.normal.background = ButtonTextureRed;
+            if (GUI.Button(new Rect(120, 3, 25, 20), "1", AGXBtnStyle))
             {
                 GroupsPage = 1;
             }
-            if (GUI.Button(new Rect(145, 3, 25, 20), "2"))
+            AGXBtnStyle.normal.background = ButtonTexture;
+            if (PageGrn[1]) AGXBtnStyle.normal.background = ButtonTextureGreen;
+            if (GroupsPage == 2) AGXBtnStyle.normal.background = ButtonTextureRed;
+            if (GUI.Button(new Rect(145, 3, 25, 20), "2", AGXBtnStyle))
             {
                 GroupsPage = 2;
             }
-            if (GUI.Button(new Rect(170, 3, 25, 20), "3"))
+            AGXBtnStyle.normal.background = ButtonTexture;
+            if (PageGrn[2]) AGXBtnStyle.normal.background = ButtonTextureGreen;
+            if (GroupsPage == 3) AGXBtnStyle.normal.background = ButtonTextureRed;
+            if (GUI.Button(new Rect(170, 3, 25, 20), "3", AGXBtnStyle))
             {
                 GroupsPage = 3;
             }
-            if (GUI.Button(new Rect(195, 3, 25, 20), "4"))
+            AGXBtnStyle.normal.background = ButtonTexture;
+            if (PageGrn[3]) AGXBtnStyle.normal.background = ButtonTextureGreen;
+            if (GroupsPage == 4) AGXBtnStyle.normal.background = ButtonTextureRed;
+            if (GUI.Button(new Rect(195, 3, 25, 20), "4", AGXBtnStyle))
             {
                 GroupsPage = 4;
             }
-            if (GUI.Button(new Rect(220, 3, 25, 20), "5"))
+            AGXBtnStyle.normal.background = ButtonTexture;
+            if (PageGrn[4]) AGXBtnStyle.normal.background = ButtonTextureGreen;
+            if (GroupsPage == 5) AGXBtnStyle.normal.background = ButtonTextureRed;
+            if (GUI.Button(new Rect(220, 3, 25, 20), "5", AGXBtnStyle))
             {
                 GroupsPage = 5;
             }
+            AGXBtnStyle.normal.background = ButtonTexture;
             ScrollGroups = GUI.BeginScrollView(new Rect(5, 25, 240, 500), ScrollPosSelParts, new Rect(0, 0, 240, 500));
 
             int ButtonID = new int();
@@ -1642,12 +1720,12 @@ namespace ActionGroupsExtended
             ButtonPos = 1;
             TextAnchor TxtAnch3 = new TextAnchor();
             TxtAnch3 = GUI.skin.button.alignment;
-            GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+            AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
             while (ButtonPos <= 25)
             {
                 if (ShowKeySetWin)
                 {
-                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString()))
+                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
                     {
                         
                         AGXCurActGroup = ButtonID;
@@ -1657,17 +1735,18 @@ namespace ActionGroupsExtended
 
                 else
                 {
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID))
-                    {
-                        GUI.DrawTexture(new Rect(1, ((ButtonPos - 1) * 20) + 1, 118, 18), BtnTexGrn);
-                    }
+                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                    //{
+                    //    GUI.DrawTexture(new Rect(1, ((ButtonPos - 1) * 20) + 1, 118, 18), BtnTexGrn);
+                    //}
 
 
-                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID]))
+                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
                     {
                         AGXCurActGroup = ButtonID;
                         TempShowGroupsWin = false;
                     }
+                    AGXBtnStyle.normal.background = ButtonTexture;
                 }
                 ButtonPos = ButtonPos + 1;
                 ButtonID = ButtonID + 1;
@@ -1676,7 +1755,7 @@ namespace ActionGroupsExtended
             {
                 if (ShowKeySetWin)
                 {
-                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString()))
+                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
                     {
                         AGXCurActGroup = ButtonID;
                         ShowKeyCodeWin = true;
@@ -1684,11 +1763,11 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID))
-                    {
-                        GUI.DrawTexture(new Rect(121, ((ButtonPos - 26) * 20) + 1, 118, 18), BtnTexGrn);
-                    }
-                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID]))
+                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                    //{
+                    //    GUI.DrawTexture(new Rect(121, ((ButtonPos - 26) * 20) + 1, 118, 18), BtnTexGrn);
+                    //}
+                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
                     {
 
 
@@ -1696,6 +1775,7 @@ namespace ActionGroupsExtended
                         TempShowGroupsWin = false;
 
                     }
+                    AGXBtnStyle.normal.background = ButtonTexture;
                 }
                 ButtonPos = ButtonPos + 1;
                 ButtonID = ButtonID + 1;
@@ -2166,21 +2246,25 @@ namespace ActionGroupsExtended
 
         public static string SaveGroupVisibility(Part p, string str)
         {
-
+            string errLine = "1";
             try
             {
+                errLine = "1";
                 if (p.missionID != FlightGlobals.ActiveVessel.rootPart.missionID)
                 {
+                    errLine = "1";
                    // print("AGXTogSave other vessel");
 
                     return str;
                 }
                 else
                 {
+                    errLine = "1";
                     string ReturnStr = ShowGroupInFlightCurrent.ToString(); //add currently show flightgroup
-                    
+                    errLine = "1";
                     for (int i = 1; i <= 250; i++)
                     {
+                        errLine = "1";
                         ReturnStr = ReturnStr + Convert.ToInt16(IsGroupToggle[i]).ToString(); //add toggle state for group
                         for (int i2 = 1; i2 <= 5; i2++)
                         {
@@ -2191,9 +2275,9 @@ namespace ActionGroupsExtended
                     return ReturnStr;
                 }
             }
-            catch
+            catch (Exception e)
             {
-                print("AGX Fail: SaveGroupVisibility");
+                print("AGX Fail: SaveGroupVisibility " + errLine + " " + e);
                 return str;
             }
         }
@@ -2320,31 +2404,43 @@ namespace ActionGroupsExtended
 
         public static string SaveGroupNames(Part p, String str)
         {
+            string errStep = "1";
             try
             {
-                
-                string SaveStringNames = str;
+                errStep = "2";
+                string SaveStringNames = "";
+                errStep = "3";
                 if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
                 {
+                    errStep = "4";
                     SaveStringNames = "";
+                    errStep = "5";
                     int GroupCnt = new int();
+                    errStep = "6";
                     GroupCnt = 1;
+                    errStep = "7";
                     while (GroupCnt <= 250)
                     {
+                        errStep = "8";
                         if (AGXguiNames[GroupCnt].Length >= 1)
                         {
+                            errStep = "9";
                             SaveStringNames = SaveStringNames + '\u2023' + GroupCnt.ToString("000") + AGXguiNames[GroupCnt];
+                            errStep = "10";
                         }
+                        errStep = "11";
                         GroupCnt = GroupCnt + 1;
+                        errStep = "12";
                     }
+                    errStep = "13";
                 }
                 
                 //print(p.partName + " " + SaveStringNames);
                 return SaveStringNames;
             }
-            catch
+            catch (Exception e)
             {
-                print("AGX Save Group Names FAIL! (SaveGroupNames)");
+                print("AGX Save Group Names FAIL! (SaveGroupNames) " + errStep + " " + e);
                 return str;
             }
         }
@@ -2560,7 +2656,7 @@ namespace ActionGroupsExtended
                         }
                         if (agAct.ba.listParent.module.moduleName == "ModuleReactionWheel") //all acts
                         {
-                            print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
+                            //print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
                             if (agAct.ba.name == "Toggle" || agAct.ba.name == "Activate" || agAct.ba.name == "Deactivate")
                             {
                                 if ((string)agAct.ba.listParent.module.Fields.GetValue("stateString") == "Disabled")

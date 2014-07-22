@@ -48,76 +48,100 @@ namespace ActionGroupsExtended
 
     public string SaveActionGroups() 
     {
-        
+        string errLine = "1"; 
         try{
+            errLine = "2";
         if (partAGActions.Count >= 1 && HighLogic.LoadedSceneIsEditor) //there is an action assigned to this part
         {
+            errLine = "3";
             try
             {
+                errLine = "4";
                 if (partAGActions.ElementAt(0).prt == null) //make sure we don't have an empty list, can happen if actions ar assigned and then all are deleted
                 {
-
+                    errLine = "5";
                 }
             }
                 catch //empty list with a null, refresh list
             {
-                partAGActions.Clear();
+
+                errLine = "6"; 
+                    partAGActions.Clear();
+                    errLine = "7";
                 partAGActions.AddRange(AGXEditor.AttachAGXPart(this.part, partAllActions, partAGActions));
+                errLine = "8";
                 AGXEditor.NeedToLoadActions = true;
+                errLine = "9";
                 
             }
         }
+        errLine = "10";
             string SaveGroupsString = ""; //reset save string to blank
-            
+            errLine = "11";
             foreach (AGXAction agAct in partAGActions)
             {
+                errLine = "12";
                 SaveGroupsString = SaveGroupsString + '\u2023' + agAct.group.ToString("000"); //\u2023 is divider character (right arrow), make sure actiongroup number is 3 characters
 
-                
+                errLine = "13";
                   
                 if(agAct.activated==true) //is actiongroup activaed? then add 1, else add 0 to string
                     {
+                        errLine = "14";
                      
                         SaveGroupsString = SaveGroupsString + "1";
                        
                     }
                     else
                     {
-                       
+                        errLine = "15";
                         SaveGroupsString = SaveGroupsString + "0";
                     }
+                errLine = "16";
                     SaveGroupsString = SaveGroupsString + agAct.ba.name; //action name added to save string
                    //{
-                       
+                    errLine = "17";
                        if (agAct.ba.listParent.module.moduleName == "ModuleEnviroSensor") //add this to the agxactions list somehow and add to save.load serialze
                        {
+                           errLine = "18";
                            ModuleEnviroSensor MSE = (ModuleEnviroSensor)agAct.ba.listParent.module;
+                           errLine = "19";
                            SaveGroupsString = SaveGroupsString + '\u2020' + MSE.sensorType; //u2020 is envirosensor
+                           errLine = "20";
                        }
                        else if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
                        {
+                           errLine = "21";
                            ModuleScienceExperiment MSE = (ModuleScienceExperiment)agAct.ba.listParent.module; //all other modules use guiname
+                           errLine = "22";
                            SaveGroupsString = SaveGroupsString + '\u2022' +  MSE.experimentID; //u2021 is sciencemodule
+                           errLine = "23";
                        }
                        else if (agAct.ba.listParent.module.moduleName == "ModuleAnimateGeneric") //add this to the agxactions list somehow and add to save.load serialze
                        {
+                           errLine = "24";
                            ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                           errLine = "25";
                            SaveGroupsString = SaveGroupsString + '\u2024' + MAnim.animationName; //u2021 is sciencemodule
+                           errLine = "26";
                        }
                         else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
                        {
+                           errLine = "27";
                            //ModuleScienceExperiment MSE = (ModuleScienceExperiment)agAct.ba.listParent.module; //all other modules use guiname
                            SaveGroupsString = SaveGroupsString + '\u2021' +  agAct.ba.guiName; //u2021 is sciencemodule
+                           errLine = "28";
                        }
                       // print("AGXDataSaveOK: " + agAct.ba.listParent.part.ConstructID + " " + SaveGroupsString);
+                       errLine = "29";
                 }
-            
-              
+
+            errLine = "30";
             return SaveGroupsString; //return string to save to SetValue command that called this method.
     }
-        catch
+        catch (Exception e)
     {
-        print("AGX Critical Fail: PartModule SaveActionGroups");
+        print("AGX Critical Fail: PartModule SaveActionGroups "+ errLine+" " + e);
             return "";
     }
         }
@@ -229,10 +253,11 @@ public void DeleteAction(int delgroup, string baname)
 
 public List<AGXAction> LoadActionGroups()
 {
+    string errLine = "1";
     List<AGXAction> partAGActions2 = new List<AGXAction>();
     try
     {
-       
+        errLine = "2";
 
         //partAGActions = new List<AGXAction>();
         partAllActions = new List<BaseAction>(); //populate all actions available on this part
@@ -243,12 +268,13 @@ public List<AGXAction> LoadActionGroups()
             partAllActions.AddRange(pm.Actions);
 
         }
+        errLine = "3";
         partCurrentKeySet = Convert.ToInt32(AGXKeySet);
         if (partCurrentKeySet < 1 | partCurrentKeySet > 5)
         {
             partCurrentKeySet = 1;
         }
-
+        errLine = "4";
         if (HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight)
         {
 
@@ -264,6 +290,7 @@ public List<AGXAction> LoadActionGroups()
                     {
                         bool AllDone = new bool();
                         AllDone = false;
+                        errLine = "5";
                         while (!AllDone)
                         {
                             LoadList = LoadList.Substring(1);//remove leading u2023
@@ -399,7 +426,7 @@ public List<AGXAction> LoadActionGroups()
                                      }
                                  }
                              BreakOut:
-
+                                 errLine = "6";
 
                                  LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                              }
@@ -416,7 +443,7 @@ public List<AGXAction> LoadActionGroups()
                                 //print("AGXDataLoadAct4: " + this.part.ConstructID + " " + ActGroup + " " + partAllActions.Find(b => b.name == LoadList.Substring(0, KeyLength - 4)).name + " " + partAllActions.Find(b => b.name == LoadList.Substring(0, KeyLength - 4)).guiName + " " + Activated);
                                      LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                             }
-                            
+                             errLine = "7";
                              
                             if (LoadList.Length == 0)
                             {
@@ -426,7 +453,7 @@ public List<AGXAction> LoadActionGroups()
                             
                         }
                     }
-                    
+                    errLine = "8";
                 }
                 //if (AGXFlight.CurrentVesselActions == null)
                 //{
@@ -451,7 +478,7 @@ public List<AGXAction> LoadActionGroups()
                     CustomActions.Add(KSPActionGroup.Custom09);
                     CustomActions.Add(KSPActionGroup.Custom10);
 
-
+                    errLine = "9";
                     // string AddGroup = "";
 
                     foreach (BaseAction baLoad in partAllActions)
@@ -461,7 +488,7 @@ public List<AGXAction> LoadActionGroups()
 
                             if ((baLoad.actionGroup & agrp) == agrp)
                             {
-
+                                errLine = "10";
                                 ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
                                 //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
                                 AGXAction ToAdd = new AGXAction() { prt = this.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
@@ -483,6 +510,7 @@ public List<AGXAction> LoadActionGroups()
                                 }
                             }
                         }
+                        errLine = "11";
                     }
 
 
@@ -494,13 +522,14 @@ public List<AGXAction> LoadActionGroups()
                 
             
         }
+        errLine = "12";
         //print("AGXLoadDataOK" + partAGActions2.Count);
         return partAGActions2;
     }
 
-    catch
+    catch (Exception e)
     {
-        print("AGX Critical Fail: PartModule LoadActionGroups");
+        print("AGX Critical Fail: PartModule LoadActionGroups "+ errLine + " " +e);
         return partAGActions2;
     }
     
@@ -508,6 +537,7 @@ public List<AGXAction> LoadActionGroups()
     public override void OnLoad(ConfigNode node)
     {
 
+        //print("AGX Load Start: " + node.GetValue("name"));
         partAGActions = new List<AGXAction>();
         partAGActions.AddRange(LoadActionGroups());
 
@@ -515,8 +545,8 @@ public List<AGXAction> LoadActionGroups()
 
         public override void OnSave(ConfigNode node)
         {
-       
-           
+
+            //print("AGX Save Start: " + node.GetValue("name"));
             if (!AGXLoaded)
             {
                 partAGActions.Clear();
