@@ -16,7 +16,7 @@ namespace ActionGroupsExtended
         //Selected Parts Window Variables
         
         //private Dictionary<int, KeyCode> Save10Keys =  new Dictionary<int, KeyCode>();
-
+        private string LastKeyCode = "";
         public static Dictionary<int, bool> IsGroupToggle; //is group a toggle group?
         public static bool[,] ShowGroupInFlight; //Show group in flight?
         public static int ShowGroupInFlightCurrent;
@@ -247,6 +247,13 @@ namespace ActionGroupsExtended
             ButtonTextureGreen.LoadImage(importTxtGreen);
             ButtonTextureGreen.Apply();
             AGXBtnStyle.normal.background = ButtonTexture;
+            AGXBtnStyle.onNormal.background = ButtonTexture;
+            AGXBtnStyle.onActive.background = ButtonTexture;
+            AGXBtnStyle.onFocused.background = ButtonTexture;
+            AGXBtnStyle.onHover.background = ButtonTexture;
+            AGXBtnStyle.active.background = ButtonTexture;
+            AGXBtnStyle.focused.background = ButtonTexture;
+            AGXBtnStyle.hover.background = ButtonTexture;
            
         }
 
@@ -1086,15 +1093,30 @@ namespace ActionGroupsExtended
         public static string SaveCurrentKeySet(Part p, string curKeySet)
         {
             string errLine = "1";
+            bool OkayToSave = true;
             try
             {
                 errLine = "2";
-                if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
+                try
+                {
+                    if (p.missionID != FlightGlobals.ActiveVessel.rootPart.missionID)
+                    {
+                        OkayToSave = false;
+                    }
+                }
+                catch(Exception e)
+                {
+                    print("AGX Save KeySet FAIL! (SaveCurrentKeySet) " + errLine + " " + e);
+                }
+
+                if (OkayToSave)
                 {
                     errLine = "3";
                     return CurrentKeySet.ToString();
 
                 }
+                
+
                 else
                 {
                     errLine = "4";
@@ -1317,7 +1339,7 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(5, 25 + (JoyStickCount * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
@@ -1327,7 +1349,7 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(130, 25 + ((JoyStickCount - 35) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
@@ -1337,12 +1359,18 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(255, 25 + ((JoyStickCount - 70) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
                     JoyStickCount = JoyStickCount + 1;
                 }
+                GUI.Label(new Rect(260, 665, 120, 20), "Button test:", AGXLblStyle);
+                if (Event.current.keyCode != KeyCode.None)
+                {
+                    LastKeyCode = Event.current.keyCode.ToString();
+                }
+                GUI.TextField(new Rect(260, 685, 130, 20), LastKeyCode, AGXFldStyle);
             }
             GUI.DragWindow();
         }
@@ -1433,15 +1461,15 @@ namespace ActionGroupsExtended
                     int ActionsCountTotal = new int();
                     ActionsCount = 1;
                     ActionsCountTotal = PartActionsList.Count;
-                    
+
                     ScrollPosSelPartsActs = GUI.BeginScrollView(new Rect(SelPartsLeft + 20, 155, 220, 110), ScrollPosSelPartsActs, new Rect(0, 0, 200, (20 * Math.Max(5, ActionsCountTotal)) + 10));
 
                     while (ActionsCount <= ActionsCountTotal)
                     {
 
-                        if (GUI.Button(new Rect(5, 0 + ((ActionsCount - 1) * 20), 190, 20), PartActionsList.ElementAt(ActionsCount - 1).guiName,AGXBtnStyle))
+                        if (GUI.Button(new Rect(5, 0 + ((ActionsCount - 1) * 20), 190, 20), PartActionsList.ElementAt(ActionsCount - 1).guiName, AGXBtnStyle))
                         {
-                            
+
                             int PrtCnt = new int();
                             PrtCnt = 0;
                             string baname = PartActionsList.ElementAt(ActionsCount - 1).name;
@@ -1483,6 +1511,22 @@ namespace ActionGroupsExtended
                         ActionsCount = ActionsCount + 1;
                     }
                     GUI.EndScrollView();
+                }
+                else
+                {
+                    if (AGEditorSelectedParts.Count >= 1)
+                    {
+                        if (GUI.Button(new Rect(SelPartsLeft + 30, 190,185, 40), "No actions found.\r\nRefresh?", AGXBtnStyle))
+                        {
+                            PartActionsList.Clear();
+                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                            foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
+                            {
+                                PartActionsList.AddRange(pm.Actions);
+                            }
+                            print("AGX Actions refresh found actions: " + PartActionsList.Count);
+                        }
+                    }
                 }
             }
             else
@@ -2247,31 +2291,48 @@ namespace ActionGroupsExtended
         public static string SaveGroupVisibility(Part p, string str)
         {
             string errLine = "1";
+            bool OkayToProceed = true;
             try
             {
-                errLine = "1";
+                errLine = "2";
+                try
+                {
                 if (p.missionID != FlightGlobals.ActiveVessel.rootPart.missionID)
                 {
-                    errLine = "1";
+                    errLine = "3";
                    // print("AGXTogSave other vessel");
+                    OkayToProceed = false;
+                    
+                }
+                }
+                catch (Exception e)
+                {
+                    print("AGX Error: SaveGroupVisibility no root part  " + errLine + " " + e);
+                    OkayToProceed = true;
+                }
 
+                if (!OkayToProceed)
+                {
                     return str;
                 }
                 else
                 {
-                    errLine = "1";
+                    errLine = "4";
                     string ReturnStr = ShowGroupInFlightCurrent.ToString(); //add currently show flightgroup
-                    errLine = "1";
+                    errLine = "5";
                     for (int i = 1; i <= 250; i++)
                     {
-                        errLine = "1";
+                        errLine = "6";
                         ReturnStr = ReturnStr + Convert.ToInt16(IsGroupToggle[i]).ToString(); //add toggle state for group
+                        errLine = "7";
                         for (int i2 = 1; i2 <= 5; i2++)
                         {
-                            ReturnStr = ReturnStr + Convert.ToInt16(ShowGroupInFlight[i2,i]).ToString(); //add flight state visibility for each group
+                            errLine = "8";
+                            ReturnStr = ReturnStr + Convert.ToInt16(ShowGroupInFlight[i2, i]).ToString(); //add flight state visibility for each group
                         }
                     }
                     //print("AGXTogSave: " + ReturnStr);    
+                    errLine = "9";
                     return ReturnStr;
                 }
             }
@@ -2405,12 +2466,24 @@ namespace ActionGroupsExtended
         public static string SaveGroupNames(Part p, String str)
         {
             string errStep = "1";
+            bool OkayToProceed = true;
             try
             {
                 errStep = "2";
                 string SaveStringNames = "";
                 errStep = "3";
-                if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
+                try
+                {
+                    if (p.missionID != FlightGlobals.ActiveVessel.rootPart.missionID)
+                    {
+                        OkayToProceed = false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    print("AGX Error (SaveGroupNames) No root part " + errStep + " " + e);
+                }
+                if (OkayToProceed)
                 {
                     errStep = "4";
                     SaveStringNames = "";

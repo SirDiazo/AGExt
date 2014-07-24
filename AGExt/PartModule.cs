@@ -124,6 +124,15 @@ namespace ActionGroupsExtended
                            errLine = "25";
                            SaveGroupsString = SaveGroupsString + '\u2024' + MAnim.animationName; //u2021 is sciencemodule
                            errLine = "26";
+                           //print(MAnim.animationName);
+                       }
+                       else if (agAct.ba.listParent.module.moduleName == "DMModuleScienceAnimate") //DMagic orbital science mod
+                       {
+                           errLine = "24a";
+                           //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                           errLine = "25a";
+                           SaveGroupsString = SaveGroupsString + '\u2025' + agAct.ba.listParent.module.Fields.GetValue("startEventGUIName"); //u2021 is sciencemodule
+                           errLine = "26a";
                        }
                         else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
                        {
@@ -253,6 +262,8 @@ public void DeleteAction(int delgroup, string baname)
 
 public List<AGXAction> LoadActionGroups()
 {
+    
+    
     string errLine = "1";
     List<AGXAction> partAGActions2 = new List<AGXAction>();
     try
@@ -410,13 +421,14 @@ public List<AGXAction> LoadActionGroups()
 
                                  string ActionName = LoadList.Substring(0, LoadList.IndexOf('\u2024')); //name of action
                                  string ActionGUIName = LoadList.Substring(LoadList.IndexOf('\u2024') + 1, KeyLength - 5 - LoadList.IndexOf('\u2024')); //name of action shown on gui
-
+                                 //print("Load " + ActionName + " " + ActionGUIName);
                                  List<BaseAction> animActs = new List<BaseAction>();
-                                 animActs.AddRange(partAllActions.Where(ba => ba.listParent.module.name == "ModuleAnimateGeneric"));
+                                 animActs.AddRange(partAllActions.Where(ba => ba.listParent.module.moduleName == "ModuleAnimateGeneric"));
                                  
                                  foreach (BaseAction baList in animActs) //find this actions science module and get actions list
                                  {
                                      ModuleAnimateGeneric animMdl = (ModuleAnimateGeneric)baList.listParent.module;
+                                     //print(animMdl.animationName);
                                      if (baList.name == ActionName && animMdl.animationName == ActionGUIName)
                                      {
 
@@ -430,7 +442,37 @@ public List<AGXAction> LoadActionGroups()
 
                                  LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                              }
+                             else if (LoadList.Substring(0, KeyLength - 4).Contains('\u2025')) //regular part
+                             {
 
+                                 string ActionName = LoadList.Substring(0, LoadList.IndexOf('\u2025')); //name of action
+                                 string ActionGUIName = LoadList.Substring(LoadList.IndexOf('\u2025') + 1, KeyLength - 5 - LoadList.IndexOf('\u2025')); //name of action shown on gui
+
+                                 List<BaseAction> animActs = new List<BaseAction>();
+                                 //foreach (BaseAction ba in partAllActions)
+                                 //{
+                                 //    print("Action! " +ba.listParent.part.partName+ " " + ba.listParent.module.moduleName);
+                                 //}
+                                 animActs.AddRange(partAllActions.Where(ba => ba.listParent.module.moduleName == "DMModuleScienceAnimate"));
+                                 //print("Test " + baList.name + " " + baList.listParent.module.Fields.GetValue("startEventGUIName"));
+                                 //print("Test " + animActs.Count);
+                                 foreach (BaseAction baList in animActs) //find this actions science module and get actions list
+                                 {
+                                     //ModuleAnimateGeneric animMdl = (ModuleAnimateGeneric)baList.listParent.module;
+                                     //print("Test " + baList.name + " " + baList.listParent.module.Fields.GetValue("startEventGUIName"));
+                                     if (baList.name == ActionName && (string)baList.listParent.module.Fields.GetValue("startEventGUIName") == ActionGUIName)
+                                     {
+
+                                         partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = baList, activated = Activated });
+                                         //print("AGXDataLoadAct3a: " + this.part.ConstructID + " " + ActGroup + " " + baList.name + " " + baList.guiName + " " + Activated);
+                                         goto BreakOut; //break out of foreach, only want to find one action
+                                     }
+                                 }
+                             BreakOut:
+                                 errLine = "6a";
+
+                                 LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
+                             }
                                 // partAGActions.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = SciModuleActs.Find(b => b.name == ActionName), activated = Activated });
                                  //LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                              
@@ -536,7 +578,16 @@ public List<AGXAction> LoadActionGroups()
 }
     public override void OnLoad(ConfigNode node)
     {
-
+        List<BaseAction> partActs = new List<BaseAction>();
+        partActs.AddRange(this.part.Actions);
+        foreach (PartModule pm in this.part.Modules)
+        {
+            partActs.AddRange(pm.Actions);
+        }
+        //foreach(BaseAction ba in partActs)
+        //{
+        //    print("load " +ba.name + " " + ba.guiName);
+        //}
         //print("AGX Load Start: " + node.GetValue("name"));
         partAGActions = new List<AGXAction>();
         partAGActions.AddRange(LoadActionGroups());
@@ -545,7 +596,16 @@ public List<AGXAction> LoadActionGroups()
 
         public override void OnSave(ConfigNode node)
         {
-
+            List<BaseAction> partActs = new List<BaseAction>();
+            partActs.AddRange(this.part.Actions);
+            foreach (PartModule pm in this.part.Modules)
+            {
+                partActs.AddRange(pm.Actions);
+            }
+            foreach (BaseAction ba in partActs)
+            //{
+            //    print("load " + ba.name + " " + ba.guiName);
+            //}
             //print("AGX Save Start: " + node.GetValue("name"));
             if (!AGXLoaded)
             {

@@ -17,7 +17,7 @@ namespace ActionGroupsExtended
     public class AGXEditor : PartModule
     {
 
-
+        private string LastKeyCode = "";
         public static Dictionary<int, bool> IsGroupToggle; //is group a toggle group?
         public static bool[,] ShowGroupInFlight; //Show group in flight?
         
@@ -292,6 +292,14 @@ namespace ActionGroupsExtended
             ButtonTextureGreen.LoadImage(importTxtGreen);
             ButtonTextureGreen.Apply();
             AGXBtnStyle.normal.background = ButtonTexture;
+            AGXBtnStyle.onNormal.background = ButtonTexture;
+            AGXBtnStyle.onActive.background = ButtonTexture;
+            AGXBtnStyle.onFocused.background = ButtonTexture;
+            AGXBtnStyle.onHover.background = ButtonTexture;
+            AGXBtnStyle.active.background = ButtonTexture;
+            AGXBtnStyle.focused.background = ButtonTexture;
+            AGXBtnStyle.hover.background = ButtonTexture;
+            
            LoadFinished = true;
            
            }
@@ -1025,7 +1033,7 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(5, 25 + (JoyStickCount * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
@@ -1035,7 +1043,7 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(130, 25 + ((JoyStickCount - 35) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
@@ -1045,12 +1053,18 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(255, 25 + ((JoyStickCount - 70) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(JoyStickCount));
+                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
                         ShowKeyCodeWin = false;
 
                     }
                     JoyStickCount = JoyStickCount + 1;
                 }
+                GUI.Label(new Rect(260, 665, 120, 20), "Button test:", AGXLblStyle);
+                if (Event.current.keyCode != KeyCode.None)
+                {
+                    LastKeyCode = Event.current.keyCode.ToString();
+                }
+                GUI.TextField(new Rect(260, 685, 130, 20), LastKeyCode, AGXFldStyle);
             }
             GUI.DragWindow();
         }
@@ -1216,6 +1230,22 @@ namespace ActionGroupsExtended
                     }
                     GUI.EndScrollView();
                 }
+                else
+                {
+                    if (AGEditorSelectedParts.Count >= 1)
+                    {
+                        if (GUI.Button(new Rect(SelPartsLeft + 30, 190, 185, 40), "No actions found.\r\nRefresh?", AGXBtnStyle))
+                        {
+                            PartActionsList.Clear();
+                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                            foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
+                            {
+                                PartActionsList.AddRange(pm.Actions);
+                            }
+                            print("AGX Actions refresh found actions: " + PartActionsList.Count);
+                        }
+                    }
+                }
 
                 // 
             }
@@ -1227,7 +1257,7 @@ namespace ActionGroupsExtended
 
                 //GUI.skin.label.alignment = TextAnchor.MiddleCenter;
                 AGXLblStyle.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type",AGXBtnStyle);
+                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type",AGXLblStyle);
 
 
                 AGXLblStyle.alignment = TextAnchor.MiddleLeft;
@@ -2174,10 +2204,24 @@ namespace ActionGroupsExtended
         public static string SaveGroupNames(Part p, string str)
         {
             string errLine = "1";
+            bool OkayToSave = true;
             try
             {
                 errLine = "2";
-                if (p.missionID == EditorLogic.startPod.missionID)
+
+                try
+                {
+                    if (p.missionID != EditorLogic.startPod.missionID)
+                    {
+                        OkayToSave = false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    print("AGX Editor Error (SaveGroupNames) " + errLine + " " + e);
+                }
+                
+                if (OkayToSave)
                 {
                     errLine = "3";
                     string SaveStringNames = "";
