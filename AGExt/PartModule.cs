@@ -134,6 +134,14 @@ namespace ActionGroupsExtended
                            SaveGroupsString = SaveGroupsString + '\u2025' + agAct.ba.listParent.module.Fields.GetValue("startEventGUIName"); //u2021 is sciencemodule
                            errLine = "26a";
                        }
+                       else if (agAct.ba.listParent.module.moduleName == "DMSolarCollector") //DMagic orbital science mod
+                       {
+                           errLine = "24b";
+                           //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                           errLine = "25b";
+                           SaveGroupsString = SaveGroupsString + '\u2026' + agAct.ba.listParent.module.Fields.GetValue("startEventGUIName"); //u2021 is sciencemodule
+                           errLine = "26b";
+                       }
                         else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
                        {
                            errLine = "27";
@@ -146,6 +154,7 @@ namespace ActionGroupsExtended
                 }
 
             errLine = "30";
+            print("AGX Save check: " + SaveGroupsString);
             return SaveGroupsString; //return string to save to SetValue command that called this method.
     }
         catch (Exception e)
@@ -294,7 +303,7 @@ public List<AGXAction> LoadActionGroups()
             
                 //partAGActions.Clear();
                 string LoadList = AGXData;
-               
+               print("AGX Load check: " + LoadList);
                 if (LoadList.Length > 0)
                 {
                     if (LoadList[0] == '\u2023')
@@ -470,6 +479,37 @@ public List<AGXAction> LoadActionGroups()
                                  }
                              BreakOut:
                                  errLine = "6a";
+
+                                 LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
+                             }
+                             else if (LoadList.Substring(0, KeyLength - 4).Contains('\u2026')) //regular part
+                             {
+
+                                 string ActionName = LoadList.Substring(0, LoadList.IndexOf('\u2026')); //name of action
+                                 string ActionGUIName = LoadList.Substring(LoadList.IndexOf('\u2026') + 1, KeyLength - 5 - LoadList.IndexOf('\u2026')); //name of action shown on gui
+
+                                 List<BaseAction> animActs = new List<BaseAction>();
+                                 //foreach (BaseAction ba in partAllActions)
+                                 //{
+                                 //    print("Action! " +ba.listParent.part.partName+ " " + ba.listParent.module.moduleName);
+                                 //}
+                                 animActs.AddRange(partAllActions.Where(ba => ba.listParent.module.moduleName == "DMSolarCollector"));
+                                 //print("Test " + baList.name + " " + baList.listParent.module.Fields.GetValue("startEventGUIName"));
+                                 //print("Test " + animActs.Count);
+                                 foreach (BaseAction baList in animActs) //find this actions science module and get actions list
+                                 {
+                                     //ModuleAnimateGeneric animMdl = (ModuleAnimateGeneric)baList.listParent.module;
+                                     //print("Test " + baList.name + " " + baList.listParent.module.Fields.GetValue("startEventGUIName"));
+                                     if (baList.name == ActionName && (string)baList.listParent.module.Fields.GetValue("startEventGUIName") == ActionGUIName)
+                                     {
+
+                                         partAGActions2.Add(new AGXAction() { group = ActGroup, prt = this.part, ba = baList, activated = Activated });
+                                         //print("AGXDataLoadAct3a: " + this.part.ConstructID + " " + ActGroup + " " + baList.name + " " + baList.guiName + " " + Activated);
+                                         goto BreakOut; //break out of foreach, only want to find one action
+                                     }
+                                 }
+                             BreakOut:
+                                 errLine = "6b";
 
                                  LoadList = LoadList.Substring(KeyLength - 4); //remove this action from load string
                              }
