@@ -55,7 +55,7 @@ namespace ActionGroupsExtended
         private static int CurrentKeySet = 1;
         private string CurrentKeySetName;
         private Rect KeySetWin;
-        private ConfigNode AGExtNode;
+        public static ConfigNode AGExtNode;
         string[] KeySetNames = new string[5];
         //private bool TrapMouse = false;
         private int LastPartCount = 0;
@@ -107,12 +107,15 @@ namespace ActionGroupsExtended
         private int actionsCheckFrameCount = 0;
 
         private static GUISkin AGXSkin;
-        private static GUIStyle AGXWinStyle = null;
+        public static GUIStyle AGXWinStyle = null;
         //private static GUIStyle TWR1WinStyle = null; //window style
         private static GUIStyle AGXLblStyle = null; //window style
-        private static GUIStyle AGXBtnStyle = null; //window style
+        public static GUIStyle AGXBtnStyle = null; //window style
         private static GUIStyle AGXFldStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
+        private bool ShowSettingsWin = false;
+        private Rect SettingsWinRect;
+        public static bool FlightWinShowKeycodes = true;
         
 
 
@@ -172,9 +175,17 @@ namespace ActionGroupsExtended
             KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeY")), 410, 730);
             KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeySetX")), Convert.ToInt32(AGExtNode.GetValue("FltKeySetY")), 185, 335);
             CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltCurActsX")), Convert.ToInt32(AGExtNode.GetValue("FltCurActsY")), 345, 140);
-            FlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 215, 100);
+            FlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 235, 100);
             GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
             ActiveGroups = new Dictionary<int, bool>();
+            if(AGExtNode.GetValue("FlightWinShowKeys") == "1")
+            {
+                FlightWinShowKeycodes = true;
+            }
+            else
+            {
+                FlightWinShowKeycodes = false;
+            }
             
             UnbindDefaultKeys();
 
@@ -186,9 +197,31 @@ namespace ActionGroupsExtended
                 AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
                 AGXBtn.ToolTip = "Action Groups Extended";
                 AGXBtn.OnClick += (e) =>
-                {
-                    ShowAGXMod = !ShowAGXMod;
-                };
+                    {
+                        if (e.MouseButton == 0)
+                        {
+                            ShowAGXMod = !ShowAGXMod;
+                        }
+                        if (e.MouseButton == 1)
+                        {
+                            //ShowSettingsWin = !ShowSettingsWin;
+                            if (ShowSettingsWin)
+                            {
+                                AGXBtn.Drawable = null;
+                                ShowSettingsWin = false;
+                            }
+                            else
+                            {
+                                SettingsWindow Settings = new SettingsWindow();
+                                AGXBtn.Drawable = Settings;
+                                ShowSettingsWin = true;
+                            }
+                            
+                        }
+                    };
+                //{
+                //    ShowAGXMod = !ShowAGXMod;
+                //};
             }
 
             if (AGExtNode.GetValue("FltShow") == "0")
@@ -254,6 +287,7 @@ namespace ActionGroupsExtended
             AGXBtnStyle.active.background = ButtonTexture;
             AGXBtnStyle.focused.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
+            SettingsWinRect = new Rect(500, 500, 150, 75);
            
         }
 
@@ -435,11 +469,16 @@ namespace ActionGroupsExtended
 
     
             //TestWin = GUI.Window(673467791, TestWin, TestingWindow, "Test", AGXWinStyle);
+            //if (ShowSettingsWin)
+            //{
+            //    SettingsWinRect = GUI.Window(673467780, SettingsWinRect, AGXMethods.SettingsWindow, "AGX Settings", AGXWinStyle);
+            //}
+
             if (ShowAGXMod)
             {
                 if (ShowAGXFlightWin)
                 {
-                    GroupsInFlightWin.x = FlightWin.x + 215;
+                    GroupsInFlightWin.x = FlightWin.x + 235;
                     GroupsInFlightWin.y = FlightWin.y;
                     FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
                     //TrapMouse |= FlightWin.Contains(RealMousePos);
@@ -577,7 +616,7 @@ namespace ActionGroupsExtended
         {
             HighLogic.Skin.scrollView.normal.background = null;
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
-            if (GUI.Button(new Rect(140, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent], AGXBtnStyle))
+            if (GUI.Button(new Rect(160, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent], AGXBtnStyle))
             {
                 
                 ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
@@ -645,9 +684,9 @@ namespace ActionGroupsExtended
             //}
 
             //GUI.Box(new Rect(5, 25, 190, Math.Min(410,10+(20*Math.Max(1,ActiveActions.Count)))), "");
-            GUI.Box(new Rect(5, 25, 190, Math.Min(410, 10 + (20 * Math.Max(1, ActiveActionsStateToShow.Count)))), "", AGXBtnStyle);
+            GUI.Box(new Rect(5, 25, 210, Math.Min(410, 10 + (20 * Math.Max(1, ActiveActionsStateToShow.Count)))), "", AGXBtnStyle);
             //FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 200, Math.Min(400,20+(20*(ActiveActions.Count-1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActions.Count))));
-            FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 200, Math.Min(400, 20 + (20 * (ActiveActionsStateToShow.Count - 1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActionsStateToShow.Count))));
+            FlightWinScroll = GUI.BeginScrollView(new Rect(10, 30, 220, Math.Min(400, 20 + (20 * (ActiveActionsStateToShow.Count - 1)))), FlightWinScroll, new Rect(0, 0, 180, (20 * (ActiveActionsStateToShow.Count))));
             //FlightWin.height = Math.Min( Math.Max(60,40+(20*ActiveActions.Count)),440);
             Rect FlightWinOld = new Rect(FlightWin.x, FlightWin.y, FlightWin.width, FlightWin.height);
             FlightWin.height = Math.Min(Math.Max(60, 40 + (20 * ActiveActionsStateToShow.Count)), 440);
@@ -700,7 +739,7 @@ namespace ActionGroupsExtended
 
                     AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
                     //if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 110, 20), ActiveActions.ElementAt((i2 - 1)) + ": " + AGXguiNames[ActiveActions.ElementAt((i2 - 1))]))
-                    if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 110, 20), ActiveActionsStateToShow.ElementAt((i2 - 1)).group + ": " + AGXguiNames[ActiveActionsStateToShow.ElementAt((i2 - 1)).group], AGXBtnStyle))
+                    if (GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), FlightWinShowKeycodes? 110:200, 20), ActiveActionsStateToShow.ElementAt((i2 - 1)).group + ": " + AGXguiNames[ActiveActionsStateToShow.ElementAt((i2 - 1)).group], AGXBtnStyle))
                     {
                         
                         //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
@@ -708,11 +747,14 @@ namespace ActionGroupsExtended
                     }
                     AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
                     //if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActions.ElementAt((i2 - 1))].ToString()))
-                    if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActionsStateToShow.ElementAt((i2 - 1)).group].ToString(), AGXBtnStyle))
+                    if (FlightWinShowKeycodes)
                     {
+                        if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 90, 20), AGXguiKeys[ActiveActionsStateToShow.ElementAt((i2 - 1)).group].ToString(), AGXBtnStyle))
+                        {
 
-                        //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
-                        ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                            //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
+                            ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                        }
                     }
                         GUI.contentColor = TxtClr;
                 }
@@ -1935,6 +1977,8 @@ namespace ActionGroupsExtended
         public void LoadGroupNames()
         {
             
+           
+
             for (int i = 1; i <= 250; i = i + 1)
             {
                 AGXguiNames[i] = "";
@@ -1951,7 +1995,7 @@ namespace ActionGroupsExtended
                   
 
                     LoadNames = (string)pm.Fields.GetValue("AGXNames");
-                   
+                    print("AGX Load Name: "+ p.partName+ " " + LoadNames);
 
                     if (LoadNames.Length > 0)
                     {
@@ -2219,6 +2263,7 @@ namespace ActionGroupsExtended
             {
                 actionsCheckFrameCount = actionsCheckFrameCount + 1;
             }
+            //print("test " + ShowSettingsWin + FlightWinShowKeycodes);
         }
 
         

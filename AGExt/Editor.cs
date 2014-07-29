@@ -1693,7 +1693,7 @@ namespace ActionGroupsExtended
 
 
                     LoadNames = pm.AGXNames;
-                 
+                    print("AGX Load Name: " + EditorLogic.startPod.partName+" "+ LoadNames);
                    
                     if(LoadNames.Length > 0)
                     {
