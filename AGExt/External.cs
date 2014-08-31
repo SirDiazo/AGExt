@@ -62,6 +62,7 @@ namespace ActionGroupsExtended
         public BaseAction ba;
         public int group;
         public bool activated = false;
+        
     }
 
     public class AGXDefaultCheck : MonoBehaviour //used in Editor to monitor default action groups
