@@ -317,6 +317,7 @@ namespace ActionGroupsExtended
             //AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"); 
             AllVesselsActions = new List<AGXAction>();
             loadedVessels = new List<Vessel>();
+            LoadCurrentKeyBindings();
             
            
         }
@@ -587,6 +588,7 @@ namespace ActionGroupsExtended
             if (vsl == FlightGlobals.ActiveVessel)
             {
                 CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
+                LoadCurrentKeyBindings();
                 LoadGroupNames(vslNode.GetValue("groupNames"));
                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
                 LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
@@ -657,29 +659,29 @@ namespace ActionGroupsExtended
 
         }
 
-        public void LoadEverything()
-        {
-            //foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
-            //{
-            //    CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
-            //    //ActivatedGroups = (string)pm.Fields.GetValue("AGXActivated");
+        //public void LoadEverything()
+        //{
+        //    //foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
+        //    //{
+        //    //    CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
+        //    //    //ActivatedGroups = (string)pm.Fields.GetValue("AGXActivated");
 
-            //}
-            //if (CurrentKeySet == 0)
-            //{
-            //    CurrentKeySet = 1;
-            //}
+        //    //}
+        //    //if (CurrentKeySet == 0)
+        //    //{
+        //    //    CurrentKeySet = 1;
+        //    //}
 
-            //LoadGroupNames();
-            LoadCurrentKeyBindings();
-            //LoadActionGroups();
-            //LoadGroupVisibility();
-            //foreach (ModuleAGExtData agData in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
-            //{
-            //    ShowGroupInFlightNames = agData.LoadShowGroupNames();
-            //}
-            //loadFinished = true;
-        }
+        //    //LoadGroupNames();
+        //    LoadCurrentKeyBindings();
+        //    //LoadActionGroups();
+        //    //LoadGroupVisibility();
+        //    //foreach (ModuleAGExtData agData in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
+        //    //{
+        //    //    ShowGroupInFlightNames = agData.LoadShowGroupNames();
+        //    //}
+        //    //loadFinished = true;
+        //}
 
       
 
@@ -1611,8 +1613,9 @@ namespace ActionGroupsExtended
         {
 
 
-
+            
             String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySet.ToString());
+            print("Keyset load " + CurrentKeySet + " " + LoadString);
 
             for (int i = 1; i <= 250; i++)
             {
@@ -1663,7 +1666,7 @@ namespace ActionGroupsExtended
 
         public void SaveCurrentKeyBindings()
         {
-
+            print("Saving current keybinds");
        
             AGExtNode.SetValue("KeySetName" + CurrentKeySet, CurrentKeySetName);
             string SaveString = "";
