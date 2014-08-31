@@ -1222,22 +1222,40 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
                     if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group], AGXBtnStyle))
                     {
-                        int ToDel = 0;
-                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
-                        {
+                        //print("Action check " + ThisGroupActions.ElementAt(RowCnt - 1).ba.name + " " +ThisGroupActions.ElementAt(RowCnt - 1).group);
+                        AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                        RefreshCurrentActions();
+                        ////BaseAction actToDel = ThisGroupActions.ElementAt(RowCnt - 1).ba;
+                        ////int groupToDel = ThisGroupActions.ElementAt(RowCnt - 1).group;
+                        ////List<AGXAction> actionsToDel = new List<AGXAction>();
+                        ////actionsToDel.AddRange(AllVesselsActions);
+                        ////actionsToDel.RemoveAll(gp => gp.group != groupToDel);
+                        ////actionsToDel.RemoveAll(gp => gp.ba != actToDel);
+                        ////if (actionsToDel.Count > 0)
+                        ////{
+                        ////    foreach (AGXAction agAct in actionsToDel)
+                        ////    {
+                        ////        print("del check " + agAct.ba.name + " " + agAct.group);
+                        ////        AllVesselsActions.Remove(agAct);
+                        ////        RefreshCurrentActions();
+                        ////    }
+                        ////}
+                        //int ToDel = 0;
+                        //foreach (AGXAction AGXToRemove in CurrentVesselActions)
+                        //{
 
-                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
-                            {
+                        //    if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
+                        //    {
                                 
-                                //CurrentVesselActions.RemoveAt(ToDel);
-                                AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
-                                AllVesselsActions.Remove(delThis);
-                                RefreshCurrentActions();
-                                goto BreakOutA;
-                            }
-                            ToDel = ToDel + 1;
-                        }
-                    BreakOutA:
+                        //        //CurrentVesselActions.RemoveAt(ToDel);
+                        //        AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
+                        //        AllVesselsActions.Remove(delThis);
+                        //        RefreshCurrentActions();
+                        //        goto BreakOutA;
+                        //    }
+                        //    ToDel = ToDel + 1;
+                        //}
+                    //BreakOutA:
                         //SaveCurrentVesselActions();
                     if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
                     {
@@ -1247,22 +1265,24 @@ namespace ActionGroupsExtended
 
                     if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title, AGXBtnStyle))
                     {
-                        int ToDel = 0;
-                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
-                        {
+                        AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                        RefreshCurrentActions();
+                    //    int ToDel = 0;
+                    //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
+                    //    {
 
-                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
-                            {
+                    //        if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
+                    //        {
 
-                                //CurrentVesselActions.RemoveAt(ToDel);
-                                AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
-                                AllVesselsActions.Remove(delThis);
-                                RefreshCurrentActions();
-                                goto BreakOutB;
-                            }
-                            ToDel = ToDel + 1;
-                        }
-                    BreakOutB:
+                    //            //CurrentVesselActions.RemoveAt(ToDel);
+                    //            AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
+                    //            AllVesselsActions.Remove(delThis);
+                    //            RefreshCurrentActions();
+                    //            goto BreakOutB;
+                    //        }
+                    //        ToDel = ToDel + 1;
+                    //    }
+                    //BreakOutB:
                        // SaveCurrentVesselActions();
                     if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
                     {
@@ -1273,22 +1293,24 @@ namespace ActionGroupsExtended
                     {
                         if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName, AGXBtnStyle))
                         {
-                            int ToDel = 0;
-                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
-                            {
+                            AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            RefreshCurrentActions();
+                        //    int ToDel = 0;
+                        //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
+                        //    {
 
-                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
-                                {
+                        //        if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
+                        //        {
 
-                                    //CurrentVesselActions.RemoveAt(ToDel);
-                                    AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
-                                    AllVesselsActions.Remove(delThis);
-                                    RefreshCurrentActions();
-                                    goto BreakOutC;
-                                }
-                                ToDel = ToDel + 1;
-                            }
-                        BreakOutC:
+                        //            //CurrentVesselActions.RemoveAt(ToDel);
+                        //            AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
+                        //            AllVesselsActions.Remove(delThis);
+                        //            RefreshCurrentActions();
+                        //            goto BreakOutC;
+                        //        }
+                        //        ToDel = ToDel + 1;
+                        //    }
+                        //BreakOutC:
                             //SaveCurrentVesselActions();
                         if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
                         {
@@ -1300,22 +1322,24 @@ namespace ActionGroupsExtended
                     {
                         if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error", AGXBtnStyle))
                         {
-                            int ToDel = 0;
-                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
-                            {
+                            AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            RefreshCurrentActions();
+                        //    int ToDel = 0;
+                        //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
+                        //    {
 
-                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
-                                {
+                        //        if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
+                        //        {
 
-                                    //CurrentVesselActions.RemoveAt(ToDel);
-                                    AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
-                                    AllVesselsActions.Remove(delThis);
-                                    RefreshCurrentActions();
-                                    goto BreakOutD;
-                                }
-                                ToDel = ToDel + 1;
-                            }
-                        BreakOutD:
+                        //            //CurrentVesselActions.RemoveAt(ToDel);
+                        //            AGXAction delThis = CurrentVesselActions.ElementAt(ToDel);
+                        //            AllVesselsActions.Remove(delThis);
+                        //            RefreshCurrentActions();
+                        //            goto BreakOutD;
+                        //        }
+                        //        ToDel = ToDel + 1;
+                        //    }
+                        //BreakOutD:
                             //SaveCurrentVesselActions();
                         if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
                         {
@@ -2712,7 +2736,7 @@ namespace ActionGroupsExtended
             //{
             //    print("action " + agact.ba.listParent.part.vessel.id.ToString() + " " + agact.ba.listParent.part.ConstructID);
             //}
-            //print("part count " + FlightGlobals.ActiveVessel.parts.Count);
+            //print("actions count " + AllVesselsActions.Count);
         }
 
         public void partDead(Part p)
