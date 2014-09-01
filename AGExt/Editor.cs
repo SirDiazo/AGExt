@@ -2548,6 +2548,63 @@ namespace ActionGroupsExtended
                         }
                     }
                 }
+
+                List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
+                CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
+                CustomActions.Add(KSPActionGroup.Custom02);
+                CustomActions.Add(KSPActionGroup.Custom03);
+                CustomActions.Add(KSPActionGroup.Custom04);
+                CustomActions.Add(KSPActionGroup.Custom05);
+                CustomActions.Add(KSPActionGroup.Custom06);
+                CustomActions.Add(KSPActionGroup.Custom07);
+                CustomActions.Add(KSPActionGroup.Custom08);
+                CustomActions.Add(KSPActionGroup.Custom09);
+                CustomActions.Add(KSPActionGroup.Custom10);
+
+                errLine = "16";
+                // string AddGroup = "";
+                List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    partAllActions.AddRange(p.Actions);
+                    foreach(PartModule pm in p.Modules)
+                    {
+                        partAllActions.AddRange(pm.Actions);
+                    }
+                }
+
+                foreach (BaseAction baLoad in partAllActions)
+                {
+                    foreach (KSPActionGroup agrp in CustomActions)
+                    {
+
+                        if ((baLoad.actionGroup & agrp) == agrp)
+                        {
+                            errLine = "17";
+                            ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
+                            //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
+                            AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
+                            List<AGXAction> Checking = new List<AGXAction>();
+                            Checking.AddRange(CurrentVesselActions);
+                            Checking.RemoveAll(p => p.group != ToAdd.group);
+
+                            Checking.RemoveAll(p => p.prt != ToAdd.prt);
+
+                            Checking.RemoveAll(p => p.ba != ToAdd.ba);
+
+
+
+                            if (Checking.Count == 0)
+                            {
+
+                                CurrentVesselActions.Add(ToAdd);
+
+                            }
+                        }
+                    }
+                    errLine = "18";
+                }
+
             }
             catch (Exception e)
             {
@@ -2809,8 +2866,16 @@ namespace ActionGroupsExtended
                             partTemp.AddValue("name", p.name);
                             partTemp.AddValue("vesselID", "0");
                             partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.startPod.transform.position).x);
-                            partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).y);
-                            partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                            if (!inVAB)
+                            {
+                                partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.startPod.transform.position).y) * -1f);
+                                partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                            }
+                            else
+                            {
+                                partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).y);
+                                partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                            }
                             errLine = "20";
                             foreach (AGXAction agxAct in thisPartsActions)
                             {
@@ -2822,6 +2887,7 @@ namespace ActionGroupsExtended
                             thisVsl.AddNode(partTemp);
                             errLine = "23";
                         }
+                       // print("part OrgPart "+ p.ConstructID+" " + p.orgPos + " " + p.orgRot);
                     }
                 }
                 catch
