@@ -2635,32 +2635,57 @@ namespace ActionGroupsExtended
                     //loadFinished = false;
                     if (AGXRoot != null)
                     {
+                        print("Root part changed, AGX reloadinga");
                         ConfigNode oldVsl = new ConfigNode(AGXRoot.vessel.id.ToString());
                         if(AGXFlightNode.HasNode(AGXRoot.vessel.id.ToString()))
                         {
+                            print("Root part changed, AGX reloadingb");
                             oldVsl = AGXFlightNode.GetNode(AGXRoot.vessel.id.ToString());
                             AGXFlightNode.RemoveNode(AGXRoot.vessel.id.ToString());
                         }
+                        print("Root part changed, AGX reloadingc");
+                        if(oldVsl.HasValue("name"));
+                        {
+                            oldVsl.RemoveValue("name");
+                        }
                         oldVsl.AddValue("name", AGXRoot.vessel.vesselName);
                        // errLine = "13";
+                        if (oldVsl.HasValue("currentKeyset")) ;
+                        {
+                            oldVsl.RemoveValue("currentKeyset");
+                        }
                         oldVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
                         //errLine = "14";
+                        if (oldVsl.HasValue("groupNames")) ;
+                        {
+                            oldVsl.RemoveValue("groupNames");
+                        }
                         oldVsl.AddValue("groupNames", SaveGroupNames(""));
                         //errLine = "15";
+                        if (oldVsl.HasValue("groupVisibility")) ;
+                        {
+                            oldVsl.RemoveValue("groupVisibility");
+                        }
                         oldVsl.AddValue("groupVisibility", SaveGroupVisibility(""));
                         //errLine = "16";
+                        if (oldVsl.HasValue("groupVisibilityNames")) ;
+                        {
+                            oldVsl.RemoveValue("groupVisibilityNames");
+                        }
                         oldVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                         AGXFlightNode.AddNode(oldVsl);
+                        print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
                     }
-
+                    print("Root part changed, AGX reloadinge");
                     if (flightNodeIsLoaded && AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
                     {
+                        print("Root part changed, AGX reloadingf");
                         ConfigNode currentVessel = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
                         CurrentKeySet = Convert.ToInt32(currentVessel.GetValue("currentKeyset"));
                         LoadGroupNames(currentVessel.GetValue("groupNames"));
                         LoadGroupVisibility(currentVessel.GetValue("groupVisibility"));
                         LoadGroupVisibilityNames(currentVessel.GetValue("groupVisibilityNames"));
-
+                        print("Root part changed, AGX reloadingg");
                     }
                     else
                     {
@@ -2689,6 +2714,8 @@ namespace ActionGroupsExtended
 
 
                     AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+                    AGEditorSelectedParts.Clear();
+                    PartActionsList.Clear();
                     RefreshCurrentActions();
                     //loadFinished = true;
                     //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
@@ -2698,6 +2725,8 @@ namespace ActionGroupsExtended
             if (LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //parts count changed, remove any actions assigned to parts that have disconnected/been destroyed
             {
                 print("Part count change, reload AGX");
+                AGEditorSelectedParts.Clear();
+                PartActionsList.Clear();
                 //LoadActionGroups();
                 RefreshCurrentActions();
                 LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
@@ -2823,6 +2852,80 @@ namespace ActionGroupsExtended
                 }
                 else if (prtCheck.prt.vessel != prtCheck.pVsl)
                 {
+                    if (prtCheck.prt.vessel == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.prt.vessel.id.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
+                    {
+                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.prt.vessel.id.ToString());
+
+                        if (vslUpdate.HasValue("name"))
+                        {
+                            vslUpdate.RemoveValue("name");
+                        }
+                        vslUpdate.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
+
+                        if (vslUpdate.HasValue("currentKeyset"))
+                        {
+                            vslUpdate.RemoveValue("currentKeyset");
+                        }
+                        vslUpdate.AddValue("currentKeyset", CurrentKeySet.ToString());
+
+                        if (vslUpdate.HasValue("groupNames"))
+                        {
+                            vslUpdate.RemoveValue("groupNames");
+                        }
+                        vslUpdate.AddValue("groupNames", SaveGroupNames(""));
+
+                        if (vslUpdate.HasValue("groupVisibility"))
+                        {
+                            vslUpdate.RemoveValue("groupVisibility");
+                        }
+                        vslUpdate.AddValue("groupVisibility", SaveGroupVisibility(""));
+
+                        if (vslUpdate.HasValue("groupVisibilityNames"))
+                        {
+                            vslUpdate.RemoveValue("groupVisibilityNames");
+                        }
+                        vslUpdate.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                        AGXFlightNode.RemoveNode(prtCheck.prt.vessel.id.ToString());
+                        AGXFlightNode.AddNode(vslUpdate);
+                    }
+
+                    if (prtCheck.pVsl == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
+                    {
+                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.pVsl.id.ToString());
+
+                        if (vslUpdate.HasValue("name"))
+                        {
+                            vslUpdate.RemoveValue("name");
+                        }
+                        vslUpdate.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
+
+                        if (vslUpdate.HasValue("currentKeyset"))
+                        {
+                            vslUpdate.RemoveValue("currentKeyset");
+                        }
+                        vslUpdate.AddValue("currentKeyset", CurrentKeySet.ToString());
+
+                        if (vslUpdate.HasValue("groupNames"))
+                        {
+                            vslUpdate.RemoveValue("groupNames");
+                        }
+                        vslUpdate.AddValue("groupNames", SaveGroupNames(""));
+
+                        if (vslUpdate.HasValue("groupVisibility"))
+                        {
+                            vslUpdate.RemoveValue("groupVisibility");
+                        }
+                        vslUpdate.AddValue("groupVisibility", SaveGroupVisibility(""));
+
+                        if (vslUpdate.HasValue("groupVisibilityNames"))
+                        {
+                            vslUpdate.RemoveValue("groupVisibilityNames");
+                        }
+                        vslUpdate.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                        AGXFlightNode.RemoveNode(prtCheck.pVsl.id.ToString());
+                        AGXFlightNode.AddNode(vslUpdate);
+                    }
+                    
                     if(AGXFlightNode.HasNode(prtCheck.prt.vessel.id.ToString()) && AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString()))
                     {
                         //both ships exist in node, combine groupnames
@@ -3211,7 +3314,7 @@ namespace ActionGroupsExtended
         public static string SaveGroupNames(String str)
         {
             string errStep = "1";
-            bool OkayToProceed = true;
+            //bool OkayToProceed = true;
             try
             {
                 errStep = "2";
@@ -3254,6 +3357,7 @@ namespace ActionGroupsExtended
                 //}
                 
                 //print(p.partName + " " + SaveStringNames);
+                    print("Savegroup return " + SaveStringNames);
                 return SaveStringNames;
             }
             catch (Exception e)
