@@ -107,6 +107,14 @@ namespace ActionGroupsExtended
         bool checkShipsExist = false; //flag to check existing ships on load window open
         int checkShipsExistDelay = 0;//delay timer to wait after opening load ship window
         static bool inVAB = true; //true if in VAB, flase in SPH
+         bool highlightPartThisFrameSelWin = false;
+         bool highlightPartThisFrameActsWin = false;
+        Part partToHighlight = null;
+         Texture2D PartCenter = new Texture2D(41, 41);
+        //static Part partLastHighlight = null;
+        ////static Color partHighlighLastColor;
+        //static Part.HighlightType partHighlightLastType;
+        //static Material[] partHighlightLastMaterial;
 
        
         
@@ -292,6 +300,7 @@ namespace ActionGroupsExtended
             byte[] importTxt = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTexture.png");
             byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
             byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
+            byte[] importPartCenter = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocationCross.png");
             //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
             ButtonTexture.LoadImage(importTxt);
@@ -308,6 +317,8 @@ namespace ActionGroupsExtended
             AGXBtnStyle.active.background = ButtonTexture;
             AGXBtnStyle.focused.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
+            PartCenter.LoadImage(importPartCenter);
+            PartCenter.Apply();
             //EditorLoadFromFile();
             if (HighLogic.LoadedScene == GameScenes.EDITOR)
             {
@@ -638,10 +649,12 @@ namespace ActionGroupsExtended
 
         public void AGXOnDraw()
         {
-
+            //print("start ondraw draw");
             Vector3 RealMousePos = new Vector3();
             RealMousePos = Input.mousePosition;
             RealMousePos.y = Screen.height - Input.mousePosition.y;
+           
+            
 
             if (!ToolbarManager.ToolbarAvailable)
             {
@@ -666,8 +679,9 @@ namespace ActionGroupsExtended
 
                 if (ShowSelectedWin)
                 {
-
+                    //print("start selparts draw");
                     SelPartsWin = GUI.Window(673467794, SelPartsWin, SelParts, "AGExt Selected parts: " + AGEditorSelectedParts.Count(), AGXWinStyle);
+                   // print("end selparts draw");
                     ShowCurActsWin = true;
                     TrapMouse = SelPartsWin.Contains(RealMousePos);
                     if (AutoHideGroupsWin && !TempShowGroupsWin)
@@ -692,6 +706,25 @@ namespace ActionGroupsExtended
                     TrapMouse |= CurActsWin.Contains(RealMousePos);
                 }
             }
+           // print("Truth check " + highlightPartThisFrameActsWin + " " + highlightPartThisFrameSelWin);
+            if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin)
+            {
+                //Camera edCam = EditorCamera.fe
+               // print("mouse over");
+                //print("screen pos " + EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position));
+                //print("orgpos" + partToHighlight.);
+                Vector3 partScreenPos = EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
+                Rect partCenterWin = new Rect(partScreenPos.x - 20, (Screen.height- partScreenPos.y) - 20, 41, 41);
+                partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
+                
+
+            }
+            //print("end ondraw draw");
+        }
+
+        public void PartTarget(int WindowID)
+        {
+            GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
         }
 
         public void CurrentActionsWindow(int WindowID)
@@ -703,11 +736,21 @@ namespace ActionGroupsExtended
             CurGroupsWin = GUI.BeginScrollView(new Rect(10, 30, 330, 100), CurGroupsWin, new Rect(0, 0, 310, Math.Max(100,0+(20*(ThisGroupActions.Count)))));
             int RowCnt = new int();
             RowCnt = 1;
-
+            highlightPartThisFrameActsWin = false;
             if (ThisGroupActions.Count > 0)
             {
+
                 while (RowCnt <= ThisGroupActions.Count)
                 {
+
+                    if (Mouse.screenPos.y >= CurActsWin.y + 30 && Mouse.screenPos.y <= CurActsWin.y + 130 && new Rect(CurActsWin.x + 10, (CurActsWin.y + 30 + ((RowCnt - 1) * 20)) - CurGroupsWin.y, 300, 20).Contains(Mouse.screenPos))
+                    {
+                        highlightPartThisFrameActsWin = true;
+                        //print("part found to highlight acts " + highlightPartThisFrameActsWin + " " + ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.transform.position);
+                        partToHighlight = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part;
+                    }
+                   
+
                     TextAnchor TxtAnch4 = new TextAnchor();
                     TxtAnch4 = GUI.skin.button.alignment;
                    // GUI.skin.button.alignment = TextAnchor.MiddleLeft;
@@ -1324,6 +1367,7 @@ namespace ActionGroupsExtended
             //AGXPart FirstPart = new AGXPart();
             // FirstPart = AGEditorSelectedParts.First().AGPart.name;
             GUI.Box(new Rect(SelPartsLeft + 20, 25, 200, 110), "");
+            highlightPartThisFrameSelWin = false;
             if (AGEditorSelectedParts != null && AGEditorSelectedParts.Count > 0)
             {
 
@@ -1335,6 +1379,15 @@ namespace ActionGroupsExtended
                 //GUI.Box(new Rect(SelPartsLeft, 25, 200, (20 * Math.Max(5, SelectedPartsCount)) + 10), "");
                 while (ButtonCount <= SelectedPartsCount)
                 {
+                    //Rect buttonRect = new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20); //need this rectangle twice
+                    if (Mouse.screenPos.y >= SelPartsWin.y + 30 && Mouse.screenPos.y <= SelPartsWin.y + 140 && new Rect(SelPartsWin.x + SelPartsLeft + 25, (SelPartsWin.y + 30 + ((ButtonCount - 1) * 20)) - ScrollPosSelParts.y, 190, 20).Contains(Mouse.screenPos))
+                    {
+                        highlightPartThisFrameSelWin = true;
+                        //print("part found to highlight " + AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.ConstructID);
+                        partToHighlight = AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart;
+                    }
+                    
+                       
 
                     if (GUI.Button(new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20), AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.partInfo.title, AGXBtnStyle))
                     {
@@ -2264,7 +2317,58 @@ namespace ActionGroupsExtended
                 MonitorDefaultActions();
             }
             //print("count check " + CurrentVesselActions.Count);
+            //HighlightPartLogic();
             }
+
+        //public static void HighlightPartLogic()
+        //{
+            
+        //    //Camera[] allCams = 
+        //    //print("Highligh part logic called");
+        //    if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin)
+        //    {
+        //        //Camera edCam = EditorCamera.fe
+        //        print("screen pos " + EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position));
+        //        Vector3 partScreenPos = EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
+
+        //    }
+            //    if (partLastHighlight != null)
+            //    {
+            //        //partLastHighlight.highlightColor = partHighlighLastColor;
+            //        partLastHighlight.renderer.materials = partHighlightLastMaterial;
+            //        partLastHighlight.highlightType = partHighlightLastType;
+            //        //partLastHighlight.SetHighlight(false);
+            //        //partLastHighlight = null;
+            //    }
+            //    partToHighlight = null;
+               
+
+            //}
+            
+            //if (partToHighlight != partLastHighlight)
+            //{
+            //    if (partLastHighlight != null)
+            //    {
+            //        //partLastHighlight.highlightColor = partHighlighLastColor;
+            //        partLastHighlight.highlightType = partHighlightLastType;
+            //        partLastHighlight.renderer.materials = partHighlightLastMaterial;
+            //        //partLastHighlight.SetHighlight(false);
+            //    }
+            //    //partHighlighLastColor = partToHighlight.highlightColor;
+            //    //partToHighlight.highlightColor = Color.yellow;
+            //    partHighlightLastMaterial = partToHighlight.renderer.materials;
+            //    foreach (Material mat in partToHighlight.renderer.materials)
+            //    {
+            //        mat.color = Color.yellow;
+            //    }
+            //    partHighlightLastType = partToHighlight.highlightType;
+            //    partToHighlight.highlightType = Part.HighlightType.AlwaysOn;
+            //    //partToHighlight.SetHighlight(true);
+            //    partLastHighlight = partToHighlight;
+            //    partToHighlight.renderer.
+
+            //}
+        //}
 
         public void MonitorDefaultActions()
         {

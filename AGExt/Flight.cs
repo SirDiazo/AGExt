@@ -124,6 +124,10 @@ namespace ActionGroupsExtended
         List<AGXPartVesselCheck> partOldVessel = new List<AGXPartVesselCheck>();
         public static bool flightNodeIsLoaded = false;
         static List<Vessel> loadedVessels; //loaded vessels list, add vessels to this on OffRails, remove when OnRails
+        bool highlightPartThisFrameSelWin = false;
+        bool highlightPartThisFrameActsWin = false;
+        Part partToHighlight = null;
+        Texture2D PartCenter = new Texture2D(41, 41);
         
 
 
@@ -279,6 +283,7 @@ namespace ActionGroupsExtended
             byte[] importTxt = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTexture.png");
             byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
             byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
+            byte[] importPartCenter = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocationCross.png");
             //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
             ButtonTexture.LoadImage(importTxt);
@@ -295,6 +300,8 @@ namespace ActionGroupsExtended
             AGXBtnStyle.active.background = ButtonTexture;
             AGXBtnStyle.focused.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
+            PartCenter.LoadImage(importPartCenter);
+            PartCenter.Apply();
             SettingsWinRect = new Rect(500, 500, 150, 75);
             partOldVessel = new List<AGXPartVesselCheck>();
             GameEvents.onVesselGoOffRails.Add(VesselOffRails); //triggers when vessel loads at flight scene start also
@@ -952,6 +959,24 @@ namespace ActionGroupsExtended
                     }
                 
             }
+            if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin)
+            {
+                //Camera edCam = EditorCamera.fe
+                // print("mouse over");
+                //print("screen pos " + EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position));
+                //print("orgpos" + partToHighlight.);
+                Vector3 partScreenPos = FlightCamera.fetch.mainCamera.WorldToScreenPoint(partToHighlight.transform.position);
+                    //EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
+                Rect partCenterWin = new Rect(partScreenPos.x - 20, (Screen.height - partScreenPos.y) - 20, 41, 41);
+                partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
+
+
+            }
+        }
+
+        public void PartTarget(int WindowID)
+        {
+            GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
         }
 
         public static void ActivateActionGroup(int group)
@@ -1270,11 +1295,18 @@ namespace ActionGroupsExtended
             CurGroupsWin = GUI.BeginScrollView(new Rect(10, 30, 330, 100), CurGroupsWin, new Rect(0, 0, 310, Math.Max(100, 0 + (20 * (ThisGroupActions.Count)))));
             int RowCnt = new int();
             RowCnt = 1;
-
+            highlightPartThisFrameActsWin = false;
             if (ThisGroupActions.Count > 0)
             {
                 while (RowCnt <= ThisGroupActions.Count)
                 {
+
+                    if (Mouse.screenPos.y >= CurActsWin.y + 30 && Mouse.screenPos.y <= CurActsWin.y + 130 && new Rect(CurActsWin.x + 10, (CurActsWin.y + 30 + ((RowCnt - 1) * 20)) - CurGroupsWin.y, 300, 20).Contains(Mouse.screenPos))
+                    {
+                        highlightPartThisFrameActsWin = true;
+                        //print("part found to highlight acts " + highlightPartThisFrameActsWin + " " + ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.transform.position);
+                        partToHighlight = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part;
+                    }
 
                     TextAnchor TxtAnch4 = new TextAnchor();
 
@@ -1674,7 +1706,7 @@ namespace ActionGroupsExtended
 
             
             String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySet.ToString());
-            print("Keyset load " + CurrentKeySet + " " + LoadString);
+            //print("Keyset load " + CurrentKeySet + " " + LoadString);
 
             for (int i = 1; i <= 250; i++)
             {
@@ -1725,7 +1757,7 @@ namespace ActionGroupsExtended
 
         public void SaveCurrentKeyBindings()
         {
-            print("Saving current keybinds");
+            //print("Saving current keybinds");
        
             AGExtNode.SetValue("KeySetName" + CurrentKeySet, CurrentKeySetName);
             string SaveString = "";
@@ -1901,12 +1933,21 @@ namespace ActionGroupsExtended
                 ButtonCount = 1;
 
                 ScrollPosSelParts = GUI.BeginScrollView(new Rect(SelPartsLeft + 20, 30, 220, 110), ScrollPosSelParts, new Rect(0, 0, 200, (20 * Math.Max(5, SelectedPartsCount)) + 10));
-
+                highlightPartThisFrameSelWin = false;
                 //GUI.Box(new Rect(SelPartsLeft, 25, 200, (20 * Math.Max(5, SelectedPartsCount)) + 10), "");
                 while (ButtonCount <= SelectedPartsCount)
                 {
 
-                    if (GUI.Button(new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20), AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.partInfo.title,AGXBtnStyle))
+                    if (Mouse.screenPos.y >= SelPartsWin.y + 30 && Mouse.screenPos.y <= SelPartsWin.y + 140 && new Rect(SelPartsWin.x + SelPartsLeft + 25, (SelPartsWin.y + 30 + ((ButtonCount - 1) * 20)) - ScrollPosSelParts.y, 190, 20).Contains(Mouse.screenPos))
+                    {
+                        highlightPartThisFrameSelWin = true;
+                        //print("part found to highlight " + AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.ConstructID);
+                        partToHighlight = AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart;
+                    }
+
+                    
+                    //highlight code here
+                    if (GUI.Button(new Rect(5, 0 + ((ButtonCount - 1) * 20), 190, 20), AGEditorSelectedParts.ElementAt(ButtonCount - 1).AGPart.partInfo.title, AGXBtnStyle))
                     {
 
                         AGEditorSelectedParts.RemoveAt(ButtonCount - 1);
@@ -2635,15 +2676,15 @@ namespace ActionGroupsExtended
                     //loadFinished = false;
                     if (AGXRoot != null)
                     {
-                        print("Root part changed, AGX reloadinga");
+                       // print("Root part changed, AGX reloadinga");
                         ConfigNode oldVsl = new ConfigNode(AGXRoot.vessel.id.ToString());
                         if(AGXFlightNode.HasNode(AGXRoot.vessel.id.ToString()))
                         {
-                            print("Root part changed, AGX reloadingb");
+                            //print("Root part changed, AGX reloadingb");
                             oldVsl = AGXFlightNode.GetNode(AGXRoot.vessel.id.ToString());
                             AGXFlightNode.RemoveNode(AGXRoot.vessel.id.ToString());
                         }
-                        print("Root part changed, AGX reloadingc");
+                        //print("Root part changed, AGX reloadingc");
                         if(oldVsl.HasValue("name"));
                         {
                             oldVsl.RemoveValue("name");
@@ -2674,18 +2715,18 @@ namespace ActionGroupsExtended
                         }
                         oldVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                         AGXFlightNode.AddNode(oldVsl);
-                        print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
+                        //print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
                     }
-                    print("Root part changed, AGX reloadinge");
+                    //print("Root part changed, AGX reloadinge");
                     if (flightNodeIsLoaded && AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
                     {
-                        print("Root part changed, AGX reloadingf");
+                        //print("Root part changed, AGX reloadingf");
                         ConfigNode currentVessel = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
                         CurrentKeySet = Convert.ToInt32(currentVessel.GetValue("currentKeyset"));
                         LoadGroupNames(currentVessel.GetValue("groupNames"));
                         LoadGroupVisibility(currentVessel.GetValue("groupVisibility"));
                         LoadGroupVisibilityNames(currentVessel.GetValue("groupVisibilityNames"));
-                        print("Root part changed, AGX reloadingg");
+                        //print("Root part changed, AGX reloadingg");
                     }
                     else
                     {
@@ -3357,7 +3398,7 @@ namespace ActionGroupsExtended
                 //}
                 
                 //print(p.partName + " " + SaveStringNames);
-                    print("Savegroup return " + SaveStringNames);
+                    //print("Savegroup return " + SaveStringNames);
                 return SaveStringNames;
             }
             catch (Exception e)

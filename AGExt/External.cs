@@ -76,9 +76,8 @@ namespace ActionGroupsExtended
 }
 
 //TO DO LIST
-//-Remove ModuleManger dependancy
-//-check joystick keybinding assignment
+
+
 //-add staging
-//-shrink FlightWin keybind to Numpad 0
-//add option to show/hide flightwin keybind
-//add option to size flightwin
+
+
