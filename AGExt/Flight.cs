@@ -129,6 +129,8 @@ namespace ActionGroupsExtended
         Part partToHighlight = null;
         Texture2D PartCenter = new Texture2D(41, 41);
         
+        bool showAllPartsList = false; //show list of all parts in group window?
+        List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
 
 
 
@@ -1963,8 +1965,35 @@ namespace ActionGroupsExtended
 
                 GUI.EndScrollView();
 
+            }
 
-
+            else //no parts selected, show list all parts button
+            {
+                if (GUI.Button(new Rect(SelPartsLeft + 50, 45, 140, 70), "Show list of\nall parts?", AGXBtnStyle)) //button itself
+                {
+                    showAllPartsListTitles = new List<string>(); //generate list of all parts 
+                    showAllPartsListTitles.Clear(); //this probably isn't needed, but it works as is, not messing with it
+                    foreach (Part p in FlightGlobals.ActiveVessel.parts) //cycle all parts
+                    {
+                        List<BaseAction> actCheck = new List<BaseAction>(); //start check to see if p has any actions
+                        actCheck.AddRange(p.Actions); //add actions on part
+                        foreach (PartModule pm in p.Modules) //add actions from each partModule on part
+                        {
+                            actCheck.AddRange(pm.Actions);
+                        }
+                        if (actCheck.Count > 0) //only add part to showAllPartsListTitles if part has actions on it
+                        {
+                            if (!showAllPartsListTitles.Contains(p.partInfo.title))
+                            {
+                                showAllPartsListTitles.Add(p.partInfo.title);
+                            }
+                        }
+                    }
+                    showAllPartsListTitles.Sort(); //sort alphabetically
+                    //ScrollGroups = Vector2.zero;
+                    showAllPartsList = true; //change groups win to all parts list
+                    TempShowGroupsWin = true; // if autohide enabled, show group win
+                }
             }
 
             if (SelPartsIncSym)
@@ -2328,85 +2357,124 @@ namespace ActionGroupsExtended
             {
                 GroupsPage = 5;
             }
-            AGXBtnStyle.normal.background = ButtonTexture;
-            AGXBtnStyle.hover.background = ButtonTexture;
-            ScrollGroups = GUI.BeginScrollView(new Rect(5, 25, 240, 500), ScrollPosSelParts, new Rect(0, 0, 240, 500));
 
-            int ButtonID = new int();
-            ButtonID = 1 + (50 * (GroupsPage - 1));
-            int ButtonPos = new int();
-            ButtonPos = 1;
-            TextAnchor TxtAnch3 = new TextAnchor();
-            TxtAnch3 = GUI.skin.button.alignment;
-            AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
-            while (ButtonPos <= 25)
+            if (showAllPartsList) //show all parts list is clicked so change to that mode
             {
-                if (ShowKeySetWin)
+                ScrollGroups = GUI.BeginScrollView(new Rect(5, 25, 240, 500), ScrollGroups, new Rect(0, 0, 240, Mathf.Max(500, showAllPartsListTitles.Count * 20))); //scroll view just in case there are a lot of parts to list
+                int listCount = 1; //track which button we are on in list
+                while (listCount <= showAllPartsListTitles.Count) //procedurally generate buttons
                 {
-                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+                    if (GUI.Button(new Rect(0, (listCount - 1) * 20, 240, 20), showAllPartsListTitles.ElementAt(listCount - 1), AGXBtnStyle)) //button code
                     {
-                        
-                        AGXCurActGroup = ButtonID;
-                        ShowKeyCodeWin = true;
+                        string partNameToSelect = showAllPartsListTitles.ElementAt(listCount - 1); //title of part clicked on as string, not a Part object
+                        AGEditorSelectedParts.Clear(); //selected parts list should be clear if we are in this mode, but check anyways
+                        foreach (Part p in FlightGlobals.ActiveVessel.parts) //add all Parts with matching title to selected parts list, converting from string to Part
+                        {
+                            if (p.partInfo.title == partNameToSelect)
+                            {
+                                AGEditorSelectedParts.Add(new AGXPart(p));
+                            }
+                        }
+                        AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
+                        PartActionsList.Clear(); //populate actions list from selected parts
+                        PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                        foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
+                        {
+                            PartActionsList.AddRange(pm.Actions);
+                        }
+                        //ScrollGroups = Vector2.zero;
+                        showAllPartsList = false; //exit show all parts mode
+                        TempShowGroupsWin = false; //hide window if auto hide enabled
+                        AGEEditorSelectedPartsSame = true; //all selected parts are the same type as per the check above
                     }
+
+                    listCount = listCount + 1; //moving to next button
                 }
 
-                else
-                {
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
-                    //{
-                    //    GUI.DrawTexture(new Rect(1, ((ButtonPos - 1) * 20) + 1, 118, 18), BtnTexGrn);
-                    //}
-
-
-                    if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
-                    {
-                        AGXCurActGroup = ButtonID;
-                        TempShowGroupsWin = false;
-                    }
-                    AGXBtnStyle.normal.background = ButtonTexture;
-                    AGXBtnStyle.hover.background = ButtonTexture;
-                }
-                ButtonPos = ButtonPos + 1;
-                ButtonID = ButtonID + 1;
+                GUI.EndScrollView();
             }
-            while (ButtonPos <= 50)
+            else
             {
-                if (ShowKeySetWin)
+
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
+                ScrollGroups = GUI.BeginScrollView(new Rect(5, 25, 240, 500), ScrollPosSelParts, new Rect(0, 0, 240, 500));
+
+                int ButtonID = new int();
+                ButtonID = 1 + (50 * (GroupsPage - 1));
+                int ButtonPos = new int();
+                ButtonPos = 1;
+                TextAnchor TxtAnch3 = new TextAnchor();
+                TxtAnch3 = GUI.skin.button.alignment;
+                AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
+                while (ButtonPos <= 25)
                 {
-                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+                    if (ShowKeySetWin)
                     {
-                        AGXCurActGroup = ButtonID;
-                        ShowKeyCodeWin = true;
+                        if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+                        {
+
+                            AGXCurActGroup = ButtonID;
+                            ShowKeyCodeWin = true;
+                        }
                     }
+
+                    else
+                    {
+                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
+                        //{
+                        //    GUI.DrawTexture(new Rect(1, ((ButtonPos - 1) * 20) + 1, 118, 18), BtnTexGrn);
+                        //}
+
+
+                        if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
+                        {
+                            AGXCurActGroup = ButtonID;
+                            TempShowGroupsWin = false;
+                        }
+                        AGXBtnStyle.normal.background = ButtonTexture;
+                        AGXBtnStyle.hover.background = ButtonTexture;
+                    }
+                    ButtonPos = ButtonPos + 1;
+                    ButtonID = ButtonID + 1;
                 }
-                else
+                while (ButtonPos <= 50)
                 {
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
-                    if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
-                    //{
-                    //    GUI.DrawTexture(new Rect(121, ((ButtonPos - 26) * 20) + 1, 118, 18), BtnTexGrn);
-                    //}
-                    if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
+                    if (ShowKeySetWin)
                     {
-
-
-                        AGXCurActGroup = ButtonID;
-                        TempShowGroupsWin = false;
-
+                        if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+                        {
+                            AGXCurActGroup = ButtonID;
+                            ShowKeyCodeWin = true;
+                        }
                     }
-                    AGXBtnStyle.normal.background = ButtonTexture;
-                    AGXBtnStyle.hover.background = ButtonTexture;
+                    else
+                    {
+                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
+                        //{
+                        //    GUI.DrawTexture(new Rect(121, ((ButtonPos - 26) * 20) + 1, 118, 18), BtnTexGrn);
+                        //}
+                        if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + ": " + AGXguiNames[ButtonID], AGXBtnStyle))
+                        {
+
+
+                            AGXCurActGroup = ButtonID;
+                            TempShowGroupsWin = false;
+
+                        }
+                        AGXBtnStyle.normal.background = ButtonTexture;
+                        AGXBtnStyle.hover.background = ButtonTexture;
+                    }
+                    ButtonPos = ButtonPos + 1;
+                    ButtonID = ButtonID + 1;
                 }
-                ButtonPos = ButtonPos + 1;
-                ButtonID = ButtonID + 1;
+                GUI.skin.button.alignment = TxtAnch3;
+
+                GUI.EndScrollView();
+
             }
-            GUI.skin.button.alignment = TxtAnch3;
-
-            GUI.EndScrollView();
-
-
             GUI.DragWindow();
         }
 
@@ -2868,7 +2936,11 @@ namespace ActionGroupsExtended
             //{
             //    print("action " + agact.ba.listParent.part.vessel.id.ToString() + " " + agact.ba.listParent.part.ConstructID);
             //}
-            //print("actions count " + AllVesselsActions.Count);
+        //    print("Vessel Id " +FlightGlobals.ActiveVessel.id);
+        //    print("Part Flight Id " + FlightGlobals.ActiveVessel.rootPart.flightID);
+        //    print("Part UID " + FlightGlobals.ActiveVessel.rootPart.uid);
+        //    print("Part mission id " + FlightGlobals.ActiveVessel.rootPart.missionID);
+        //    print("Vessel ref" + FlightGlobals.ActiveVessel.referenceTransformId);
         }
 
         public void partDead(Part p)

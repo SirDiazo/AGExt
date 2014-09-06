@@ -25,7 +25,81 @@ namespace ActionGroupsExtended //add scenario module for data storage
             //{
             //    psm2 = game.AddProtoScenarioModule(typeof(AGextScenarioEditor), GameScenes.EDITOR,GameScenes.SPH);
             //}
+
+            DeleteOldSaveGames(); //delete old AGext000000.cfg files
         }
+
+        public void DeleteOldSaveGames()
+        {
+            //print("Deleteing old save games");
+
+            string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
+            List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
+            List<int> persistentGamesNum = new List<int>(); //number in the .sfs save files
+            int dirLength = (new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder).Length; //character length of file path
+            foreach (string fileName in existingGames) //cycle through found files
+            {
+                //print("gamename " + fileName.Substring(dirLength + 1));
+                if(fileName.Substring(dirLength + 1,5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
+                {
+                    //print("gamenameb " + fileName.Substring(dirLength + 6,5));
+                    try //this will work if file fould is an AGX flight file
+                    {
+                        int gameNum = Convert.ToInt32(fileName.Substring(dirLength + 6, 5));
+                        existingGamesNum.Add(gameNum);
+                        //print("gameNumb " + gameNum);
+                    }
+                    catch //did not work, was not an AGX flight file, but not actually an error so silently fail
+                    {
+                    }
+                }
+                else if (fileName.Trim().EndsWith(".sfs")) //is file an .sfs file?
+                {
+                    try //this will work on KSP save files
+                    {
+                       // print("sfsa");
+                        ConfigNode saveNode = ConfigNode.Load(fileName); //load the .sfs file
+                        //print("sfsb");
+                        if(saveNode.HasNode("GAME")) //is a KSP save file?//move from the 'root' to "GAME" node
+                        {
+                            ConfigNode saveNode2 = saveNode.GetNode("GAME");//move from the 'root' to "GAME" node
+                            //print("sfsc");
+                            foreach (ConfigNode scenNode in saveNode2.GetNodes("SCENARIO")) //cycle through all SCENARIO nodes
+                            {
+                                //print("sfsd");
+                                if (scenNode.HasValue("name") && scenNode.GetValue("name") == "AGextScenario") //stop at AGExtScenario node
+                                {
+                                    //print("sfse");
+                                    persistentGamesNum.Add(Convert.ToInt32(scenNode.GetValue("LastSave"))); //add lastsave num to list
+                                    //print("sfsf");
+                                }
+                            }
+                        }
+                    }
+                    catch //did not work, not an KSP save file, silently fail
+                    {
+                    }
+                }
+            }
+            foreach (int iGame in existingGamesNum) //check each existing game
+            {
+                //print("Games " + iGame);
+                //if (!persistentGamesNum.Contains(i)) //is the AGX flight file found in a persistent file? if not, delete it. not sure what quicksave is doing, leave a one back file just in case
+                foreach(int iPersist in persistentGamesNum)
+                {
+                    if (iGame != iPersist && iGame != iPersist - 1)
+                    {
+                        //print("Deleted " + new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt" + iGame.ToString("00000") + ".cfg");
+                        File.Delete(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt" + iGame.ToString("00000") + ".cfg");
+                    }
+
+                }
+            }
+
+            
+        }
+
+
     }
 
     //AGXData per part
@@ -165,64 +239,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
             }
         }
 
-        //        print("AGXScenSaving");
-        //        //EditorSave();
-        //        string errLine = "1";
-        //        try
-        //        {
-        //            string hashedShipName = EditorHashShipName(EditorLogic.fetch.shipNameField.Text);
-        //            errLine = "2";
-        //            //if (!AGXEditorNode.nodes.Contains(hashedShipName))
-        //            //{
-        //            //    errLine = "3";
-        //            //    AGXEditorNode.AddNode(hashedShipName);
-        //            //}
-        //            print("n1 " + AGXEditorNode);
-        //            errLine = "4";
-        //            ConfigNode thisVsl = new ConfigNode(hashedShipName);
-        //            errLine = "5";
-        //            thisVsl.AddValue("AGXNames", "namesTest");
-        //            errLine = "6";
-        //            thisVsl.AddValue("AGXKeySet", "KeysetTest");
-        //            errLine = "7";
-        //            errLine = "13";
-        //            print("n2 " + thisVsl);
-        //            foreach (Part p in EditorLogic.SortedShipList)
-        //            {
-
-        //                errLine = "8";
-                        
-        //                ConfigNode partTemp = new ConfigNode(p.name);
-        //                errLine = "10";
-        //                partTemp.AddValue("name", "partTest");
-        //                partTemp.AddValue("relLoc", (p.transform.position - EditorLogic.startPod.transform.position).ToString());
-        //                errLine = "11";
-        //                thisVsl.AddNode(partTemp);
-        //                errLine = "12";
-        //            }
-        //            if (AGXEditorNode.nodes.Contains(hashedShipName))
-        //            {
-        //                errLine = "3";
-        //                AGXEditorNode.RemoveNode(hashedShipName);
-        //            }
-        //            AGXEditorNode.AddNode(thisVsl);
-        //            errLine = "14";
-        //            print("n2a " + AGXEditorNode);
-        //            AGXBaseNode.RemoveNode("EDITOR");
-        //            AGXBaseNode.AddNode(AGXEditorNode);
-        //            errLine = "15";
-        //            print("n3 " + AGXBaseNode);
-        //            AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-        //            errLine = "16";
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            print("AGXScen EditorSave Error " + errLine + " " + e);
-        //        }
-        //    }
-     
-
-        //}
+        
 
         public static string EditorHashShipName(string name, bool isVAB)
         {
@@ -463,62 +480,6 @@ namespace ActionGroupsExtended //add scenario module for data storage
 
         }
 
-        //public void EditorSave()
-        //{
-        //    string errLine = "1";
-        //    try
-        //    {
-        //        string hashedShipName = EditorHashShipName(EditorLogic.fetch.shipNameField.Text);
-        //        errLine = "2";
-        //        if (!AGXEditorNode.nodes.Contains(hashedShipName))
-        //        {
-        //            errLine = "3";
-        //            AGXEditorNode.AddNode(hashedShipName);
-        //        }
-        //        print("n1 " + AGXEditorNode);
-        //        errLine = "4";
-        //        ConfigNode thisVsl = new ConfigNode();
-        //        errLine = "5";
-        //        thisVsl.AddValue("AGXNames", "namesTest");
-        //        errLine = "6";
-        //        thisVsl.AddValue("AGXKeySet", "KeysetTest");
-        //        errLine = "7";
-        //        print("n2 " + thisVsl);
-        //        //foreach (Part p in EditorLogic.SortedShipList)
-        //        //{
-
-        //        //    errLine = "8";
-        //        //    if (!thisVsl.HasNode(p.name.Remove(p.name.Length - 8)))
-        //        //    {
-        //        //        errLine = "9";
-        //        //        thisVsl.AddNode(p.name.Remove(p.name.Length - 8));
-        //        //    }
-        //        //    ConfigNode partTemp = new ConfigNode();
-        //        //    errLine = "10";
-        //        //    partTemp.AddValue("relLoc", (p.transform.position - EditorLogic.startPod.transform.position).ToString());
-        //        //    errLine = "11";
-        //        //    thisVsl.SetNode(p.name.Remove(p.name.Length - 8), partTemp);
-        //        //    errLine = "12";
-        //        //}
-        //        errLine = "13";
-        //        AGXEditorNode.SetNode(hashedShipName, thisVsl);
-        //        errLine = "14";
-        //        AGXBaseNode.SetNode("EDITOR", AGXEditorNode);
-        //        errLine = "15";
-        //        print("n3 " + AGXBaseNode);
-        //        AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-        //        errLine = "16";
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        print("AGXScen EditorSave Error " + errLine + " " + e);
-        //    }
-        //}
-
-        //public void Update()
-        //{
-        //    //print("path? " + new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/"+HighLogic.SaveFolder+"/AGExt.cfg" );
-        //    //print("Shipname " + EditorLogic.SortedShipList.First().name + " " + EditorLogic.SortedShipList.First().partName);
-        //}
+        
     }
 }
