@@ -215,3 +215,5 @@ pip-log.txt
 .mr.developer.cfg
 us.stackdump
 AGExt/TutorialImages/EditorShow.xcf
+AGExt/TutorialImages/MouseIcon.xcf
+*.xcf
