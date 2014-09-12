@@ -168,6 +168,16 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 }
                 //print("AGXScenLoad " + lastAGXSave);
                 AGXFlight.AGXFlightNode = currentFlightNode;
+                if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg"))
+                {
+                    AGXFlight.RootParts = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg");
+                }
+                else
+                {
+                    AGXFlight.RootParts = new ConfigNode("ROOTPARTS");
+                    AGXFlight.RootParts.AddValue("name", "rootParts");
+                }
+
                 AGXFlight.flightNodeIsLoaded = true;
                 //print("Node laeded! "+ currentFlightNode);
             

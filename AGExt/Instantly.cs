@@ -22,7 +22,7 @@ namespace ActionGroupsExtended
             KeysWriteKSPtoAGX(); //copy over keybinds
             SaveCurrentKeyBindings(); //save keyset1 back to disk
 
-            
+          
 
         }
 

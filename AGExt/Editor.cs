@@ -2172,54 +2172,6 @@ namespace ActionGroupsExtended
             }
 
 
-            //bool RootPartExists = new bool();
-            //try
-            //{
-            //    if (EditorLogic.startPod != null)
-            //    {
-            //    }
-            //    RootPartExists = true;
-            //}
-            //catch
-            //{
-            //    RootPartExists = false;
-            //}
-           
-           
-            //if (RootPartExists)
-            //{
-                
-            //    if (AGXRoot != EditorLogic.startPod) //load keyset also
-            //    {
-            //        LoadFinished = false;
-
-            //        ConfigNode AGXBaseNode = AGextScenario.LoadBaseNode();
-            //        ConfigNode AGXEditorNode = AGXBaseNode.GetNode("EDITOR");
-
-            //        LoadCurrentKeySet();
-            //        LoadActionGroups();
-            //        LoadGroupNames();
-            //        LoadCurrentKeyBindings();
-            //        LoadGroupVisibility();
-
-            //        foreach (ModuleAGExtData agData in EditorLogic.startPod.Modules.OfType<ModuleAGExtData>())
-            //        {
-            //            ShowGroupInFlightNames = agData.LoadShowGroupNames();
-            //        }
-            //        LoadFinished = true;
-                    
-
-
-
-            //        AGXRoot = EditorLogic.startPod;
-
-            //    }
-            //    if (NeedToLoadActions)
-            //{
-            //    LoadActionGroups();
-            //}
-            //}
-            
             
             EditorLogic ELCur = new EditorLogic();
             ELCur = EditorLogic.fetch;//get current editor logic instance
@@ -2268,12 +2220,6 @@ namespace ActionGroupsExtended
             {
 
                
-                //if (!LoadGroupsOnceCheck)
-                //{
-                   
-                //    LoadActionGroups();
-                //    LoadGroupsOnceCheck = true;
-                //}
 
                 if (EditorActionGroups.Instance.GetSelectedParts() != null) //on first run, list is null
                 {
@@ -2328,7 +2274,12 @@ namespace ActionGroupsExtended
             {
                 MonitorDefaultActions();
             }
-            
+
+            //foreach (Part p in EditorLogic.SortedShipList)
+            //{
+            //    print("PartLoc " + p.ConstructID + " " + p.orgPos);
+            //}
+
             }
 
 
