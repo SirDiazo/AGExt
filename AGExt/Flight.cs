@@ -575,7 +575,7 @@ namespace ActionGroupsExtended
 
         public void VesselOffRails(Vessel vsl) //load vessels here
         {
-            //print("Vessel off rails! " + vsl.vesselName);
+            print("Vessel off rails! " + vsl.vesselName);
             ConfigNode vslNode = new ConfigNode();
             bool checkIsVab = true;
             try
@@ -738,7 +738,7 @@ namespace ActionGroupsExtended
 
         public void VesselOnRails(Vessel vsl)
         {
-            print("Vessel on rails! " );
+            print("Vessel on rails! " + vsl.name );
             partOldVessel.RemoveAll(vsl2 => vsl2.pVsl == vsl);
             List<AGXAction> UnloadVslActionsCheck = new List<AGXAction>();
             UnloadVslActionsCheck.AddRange(AllVesselsActions.Where(agx => agx.ba.listParent.part.vessel == vsl));
@@ -755,6 +755,35 @@ namespace ActionGroupsExtended
                     vslToUnload = AGXFlightNode.GetNode(vsl.id.ToString());
                     vslToUnload.RemoveNodes("PART");
                     AGXFlightNode.RemoveNode(vsl.id.ToString());
+                }
+
+                if (vsl == FlightGlobals.ActiveVessel)
+                {
+                    if(vslToUnload.HasValue("name"))
+                    {
+                        vslToUnload.RemoveValue("name");
+                    }
+                    vslToUnload.AddValue("name",FlightGlobals.ActiveVessel.vesselName);
+                    if (vslToUnload.HasValue("currentKeyset"))
+                    {
+                        vslToUnload.RemoveValue("currentKeyset");
+                    }
+                    vslToUnload.AddValue("currentKeyset", CurrentKeySet.ToString());
+                    if (vslToUnload.HasValue("groupNames"))
+                    {
+                        vslToUnload.RemoveValue("groupNames");
+                    }
+                    vslToUnload.AddValue("groupNames", SaveGroupNames(""));
+                    if (vslToUnload.HasValue("groupVisibility"))
+                    {
+                        vslToUnload.RemoveValue("groupVisibility");
+                    }
+                    vslToUnload.AddValue("groupVisibility", SaveGroupVisibility(""));
+                    if (vslToUnload.HasValue("groupVisibilityNames"))
+                    {
+                        vslToUnload.RemoveValue("groupVisibilityNames");
+                    }
+                    vslToUnload.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                 }
 
                 foreach (Part p in vsl.Parts)
@@ -988,7 +1017,7 @@ namespace ActionGroupsExtended
             //    SettingsWinRect = GUI.Window(673467780, SettingsWinRect, AGXMethods.SettingsWindow, "AGX Settings", AGXWinStyle);
             //}
 
-            if (ShowAGXMod)
+            if (ShowAGXMod && TimeWarp.CurrentRate ==1)
             {
                 if (ShowAGXFlightWin)
                 {
@@ -1153,6 +1182,8 @@ namespace ActionGroupsExtended
                 
                 ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
             }
+            
+
             if (GUI.Button(new Rect(5, 5, 75, 20), "Edit", AGXBtnStyle))
             {
 
@@ -1193,6 +1224,7 @@ namespace ActionGroupsExtended
                 //print("AGX " + ToggleState);
 
             }
+        
            
             
             //for (int i = 1; i <= 250; i = i + 1)
@@ -3215,7 +3247,17 @@ namespace ActionGroupsExtended
         //    print("Part Flight Id " + FlightGlobals.ActiveVessel.rootPart.flightID);
         //    print("Part UID " + FlightGlobals.ActiveVessel.rootPart.uid);
         //    print("Part mission id " + FlightGlobals.ActiveVessel.rootPart.missionID);
-          //print("Vessel landedat" + FlightGlobals.ActiveVessel.landedAt);
+            if (TimeWarp.CurrentRate != 1)
+            {
+                if (ShowSelectedWin || ShowKeySetWin)
+                {
+
+                    SaveEverything();
+                    ShowSelectedWin = false;
+                    ShowKeySetWin = false;
+                }
+
+            }
         }
             catch(Exception e)
             {
