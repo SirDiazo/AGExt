@@ -926,8 +926,8 @@ namespace ActionGroupsExtended
             //    SettingsWinRect = GUI.Window(673467780, SettingsWinRect, AGXMethods.SettingsWindow, "AGX Settings", AGXWinStyle);
             //}
 
-            //if (ShowAGXMod && TimeWarp.CurrentRate ==1)
-            //{
+            if (ShowAGXMod)
+            {
                 if (ShowAGXFlightWin)
                 {
                     GroupsInFlightWin.x = FlightWin.x + 235;
@@ -982,7 +982,7 @@ namespace ActionGroupsExtended
                        // TrapMouse |= CurActsWin.Contains(RealMousePos);
                     }
                 
-            //}
+            }
             if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin || highlightPartThisFrameGroupWin)
             {
                 //Camera edCam = EditorCamera.fe
@@ -3319,10 +3319,27 @@ namespace ActionGroupsExtended
             //    }
 
             //}
+            //PrintPartPos();
         }
             catch(Exception e)
             {
                 print("AGX Update error: " + errLine + " " + e);
+            }
+        }
+
+        public void PrintPartPos()
+        {
+            try
+            {
+                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                {
+                    print(p.ConstructID + " " + p.orgPos + " " + p.vessel.rootPart.transform.InverseTransformPoint(p.transform.position));
+
+                }
+            }
+            catch
+            {
+                print("Print fail!");
             }
         }
 
@@ -3414,7 +3431,7 @@ namespace ActionGroupsExtended
         {
             try
             {
-                print("Docking event!");
+               // print("Docking event!");
                 if (loadFinished)
                 {
                     Vessel vsl1 = htAct.host.vessel;

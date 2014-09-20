@@ -2279,10 +2279,24 @@ namespace ActionGroupsExtended
             //{
             //    print("PartLoc " + p.ConstructID + " " + p.orgPos);
             //}
-
+            //PrintPartPos();
             }
 
+        public void PrintPartPos()
+        {
+            try
+            {
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    print(p.partInfo.title + " " + p.orgPos + " " + EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position));
 
+                }
+            }
+            catch
+            {
+                print("Print fail!");
+            }
+        }
         public void MonitorDefaultActions()
         {
             //print("2a");
@@ -2549,7 +2563,7 @@ namespace ActionGroupsExtended
                     Part gamePart = new Part();
                     foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                     {
-                        float thisPartDist = Vector3.Distance(partLoc, p.transform.position - EditorLogic.startPod.transform.position);
+                        float thisPartDist = Vector3.Distance(partLoc, EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position));
                         if (thisPartDist < partDist)
                         {
                             gamePart = p;
@@ -2882,17 +2896,20 @@ namespace ActionGroupsExtended
                             errLine = "19";
                             partTemp.AddValue("name", p.name);
                             partTemp.AddValue("vesselID", "0");
-                            partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.startPod.transform.position).x);
-                            if (!inVAB)
-                            {
-                                partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.startPod.transform.position).y) * -1f);
-                                partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).z);
-                            }
-                            else
-                            {
-                                partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).y);
-                                partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.startPod.transform.position).z);
-                            }
+                            //partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.startPod.transform.position).x);
+                            //if (!inVAB)
+                            //{
+                            //    partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.startPod.transform.position).y) * -1f);
+                            //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                            //}
+                            //else
+                            //{
+                            //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).y);
+                            //    partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                            //}
+                            partTemp.AddValue("relLocX", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).x);
+                            partTemp.AddValue("relLocY", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).y);
+                            partTemp.AddValue("relLocZ", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).z);
                             errLine = "20";
                             foreach (AGXAction agxAct in thisPartsActions)
                             {
