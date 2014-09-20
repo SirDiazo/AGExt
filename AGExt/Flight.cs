@@ -60,7 +60,7 @@ namespace ActionGroupsExtended
         //private bool TrapMouse = false;
         private int LastPartCount = 0;
         public static List<AGXAction> CurrentVesselActions;
-        public static List<AGXAction> AllVesselsActions;
+        //public static List<AGXAction> AllVesselsActions;
 
         private static Dictionary<int, bool> ActiveGroups;
         private List<KeyCode> ActiveKeys;
@@ -139,6 +139,7 @@ namespace ActionGroupsExtended
         List<BaseAction> defaultActionsListAll; //list of all default actions on vessel, only used in non-numeric mode when going to other mode
         Vector2 groupWinScroll = new Vector2();
         bool highlightPartThisFrameGroupWin = false;
+        private bool overrideRootChange = false; //if docking event, do NOT run root change code
 
 
 
@@ -328,11 +329,12 @@ namespace ActionGroupsExtended
             PartCenter.Apply();
             SettingsWinRect = new Rect(500, 500, 150, 75);
             partOldVessel = new List<AGXPartVesselCheck>();
-            GameEvents.onVesselGoOffRails.Add(VesselOffRails); //triggers when vessel loads at flight scene start also
-            GameEvents.onVesselGoOnRails.Add(VesselOnRails);
+            //GameEvents.onVesselGoOffRails.Add(VesselOffRails); //triggers when vessel loads at flight scene start also
+            //GameEvents.onVesselGoOnRails.Add(VesselOnRails);
             //GameEvents.onPartDestroyed.Add(partDead);
             GameEvents.onPartDie.Add(partDead);
             //GameEvents.onPartExplode.Add(partDead2);
+            GameEvents.onPartAttach.Add(DockingEvent);
             
             //AGXBaseNode = AGextScenario.LoadBaseNode();
             AGXFlightNode = new ConfigNode();
@@ -346,7 +348,7 @@ namespace ActionGroupsExtended
                 AGXEditorNode.AddValue("name", "editor");
             }
             //AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"); 
-            AllVesselsActions = new List<AGXAction>();
+            //AllVesselsActions = new List<AGXAction>();
             loadedVessels = new List<Vessel>();
             LoadCurrentKeyBindings();
             
@@ -358,21 +360,21 @@ namespace ActionGroupsExtended
 
         public static ConfigNode FlightSaveToFile(ConfigNode origNode)  
         {
-            //print("FlightSaveToFile " + AGXFlightNode);
+           // print("FlightSaveToFile ");
             
             string errLine = "1";
             try
             {
                 if (loadFinished)
                 {
-                    List<AGXAction> actionsToSave = new List<AGXAction>();
-                    actionsToSave.AddRange(AllVesselsActions.Where(ag => ag.ba != null));
+                    //List<AGXAction> actionsToSave = new List<AGXAction>();
+                    //actionsToSave.AddRange(AllVesselsActions.Where(ag => ag.ba != null));
                     //foreach (AGXAction agAct in actionsToSave)
                     //{
                     //    print("FlightSave " + agAct.ba.name + " " + agAct.ba.listParent.part.ConstructID);
                     //}
-                    if(loadedVessels.Contains(FlightGlobals.ActiveVessel))
-                    {
+                    //if(loadedVessels.Contains(FlightGlobals.ActiveVessel))
+                    //{
                     ConfigNode thisVsl = new ConfigNode(FlightGlobals.ActiveVessel.id.ToString());
                     ConfigNode thisRootPart = new ConfigNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString()); //copy values to root part save for future undockings
                     thisVsl.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
@@ -404,14 +406,14 @@ namespace ActionGroupsExtended
                     foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                     {
                         List<AGXAction> thisPartsActions = new List<AGXAction>();
-                        thisPartsActions.AddRange(actionsToSave.FindAll(p2 => p2.ba.listParent.part == p));
+                        thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
                         errLine = "18";
                         if (thisPartsActions.Count > 0)
                         {
                             //print("acts count " + thisPartsActions.Count);
                             ConfigNode partTemp = new ConfigNode("PART");
                             errLine = "19";
-                            partTemp.AddValue("name", p.vessel.vesselName);
+                            partTemp.AddValue("name", p.vessel.name);
                             partTemp.AddValue("vesselID", p.vessel.id);
                             partTemp.AddValue("relLocX", p.orgPos.x);
                             partTemp.AddValue("relLocY", p.orgPos.y);
@@ -433,111 +435,16 @@ namespace ActionGroupsExtended
                     {
                         AGXFlightNode.RemoveNode(FlightGlobals.ActiveVessel.id.ToString());
                     }
+                    //print("save node " + thisVsl);
                     AGXFlightNode.AddNode(thisVsl);
-                }
-                    actionsToSave.RemoveAll(p3 => p3.ba.listParent.part.vessel == FlightGlobals.ActiveVessel);
-                    //print("step1");
-
-                    //foreach (AGXAction agAct in actionsToSave)
-                    //{
-                    //    print("FlightSaveFocusDone " + agAct.ba.name + " " + agAct.ba.listParent.part.ConstructID);
-                    //}
-                    //print("step2");
-                    while (actionsToSave.Count > 0)
-                    {
-                        //print("step3");
-                        //foreach (AGXAction agAct in actionsToSave)
-                        //{
-                        //    print("FlightSaveWhile " + agAct.ba.name + " " + agAct.ba.listParent.part.ConstructID);
-                        //}
-                        //print("step4");
-                        Vessel vslToSave = actionsToSave.First().ba.listParent.part.vessel;
-                        if(loadedVessels.Contains(vslToSave))
-                        {
-                        
-                        ConfigNode thisVslNode = new ConfigNode(vslToSave.id.ToString());
-                        if (AGXFlightNode.HasNode(vslToSave.id.ToString()))
-                        {
-                            thisVslNode = AGXFlightNode.GetNode(vslToSave.id.ToString());
-                            thisVslNode.RemoveValue("name");
-                            thisVslNode.AddValue("name", vslToSave.vesselName);
-                        }
-                        else
-                        {
-                            thisVslNode.AddValue("name", vslToSave.vesselName);
-                            errLine = "13";
-                            thisVslNode.AddValue("currentKeyset", "1");
-                            errLine = "14";
-                            thisVslNode.AddValue("groupNames", "");
-                            errLine = "15";
-                            thisVslNode.AddValue("groupVisibility", "");
-                            errLine = "16";
-                            thisVslNode.AddValue("groupVisibilityNames", "");
-                        }
-                        thisVslNode.RemoveNodes("PART");
-
-
-                        foreach (Part p in vslToSave.parts)
-                        {
-                            List<AGXAction> thisPartsActions = new List<AGXAction>();
-                            thisPartsActions.AddRange(actionsToSave.FindAll(p2 => p2.prt == p));
-                            errLine = "18";
-                            if (thisPartsActions.Count > 0)
-                            {
-                                ConfigNode partTemp = new ConfigNode("PART");
-                                errLine = "19";
-                                partTemp.AddValue("name", p.vessel.name);
-                                partTemp.AddValue("vesselID", vslToSave.id.ToString());
-                                partTemp.AddValue("relLocX", p.orgPos.x);
-                                partTemp.AddValue("relLocY", p.orgPos.y);
-                                partTemp.AddValue("relLocZ", p.orgPos.z);
-                                errLine = "20";
-                                foreach (AGXAction agxAct in thisPartsActions)
-                                {
-                                    errLine = "21";
-                                    partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
-                                }
-                                errLine = "22";
-
-                                thisVslNode.AddNode(partTemp);
-                                errLine = "23";
-                            }
-                        }
-                        
-                        if (AGXFlightNode.HasNode(vslToSave.id.ToString()))
-                        {
-                            AGXFlightNode.RemoveNode(vslToSave.id.ToString());
-                        }
-                        AGXFlightNode.AddNode(thisVslNode);
-                        }
-                        actionsToSave.RemoveAll(p3 => p3.ba.listParent.part.vessel == vslToSave);
-                        if (vslToSave.loaded == false)
-                        {
-                            AllVesselsActions.RemoveAll(p4 => p4.ba.listParent.part.vessel == vslToSave);
-                        }
-                    }
-                    //AGXBaseNode.RemoveNode("FLIGHT");
-                    //AGXBaseNode.AddNode(AGXFlightNode);
-                    //AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
                     return AGXFlightNode;
+            
+
                 }
                 else
                 {
                     return origNode;
                 }
-                //while(AllVesselsActions.Count>0)
-                //{
-                //    Vessel vslSaving = AllVesselsActions.First().prt.vessel;
-                //    ConfigNode vslNode = new ConfigNode();
-
-                //}
-                //print("save 2g " + loadFinished + " " + AGXFlightNode);
-
-                
-
-
-
-                
             }
             catch (Exception e)
             {
@@ -548,17 +455,17 @@ namespace ActionGroupsExtended
 
         public void RefreshCurrentActions()
     {
-        CurrentVesselActions.Clear();
+        //CurrentVesselActions.Clear();
         //print("cleared " + CurrentVesselActions.Count());
 
-        foreach (AGXAction agAct in AllVesselsActions)
-        {
-            if (FlightGlobals.ActiveVessel == agAct.ba.listParent.part.vessel)
-            {
-                CurrentVesselActions.Add(agAct);
-                //print("Added " + agAct.ba.listParent.part.ConstructID + " " + agAct.ba.listParent.part.vessel.id.ToString() + " " + FlightGlobals.ActiveVessel.id.ToString());
-            }
-        }
+        //foreach (AGXAction agAct in AllVesselsActions)
+        //{
+        //    if (FlightGlobals.ActiveVessel == agAct.ba.listParent.part.vessel)
+        //    {
+        //        CurrentVesselActions.Add(agAct);
+        //        //print("Added " + agAct.ba.listParent.part.ConstructID + " " + agAct.ba.listParent.part.vessel.id.ToString() + " " + FlightGlobals.ActiveVessel.id.ToString());
+        //    }
+        //}
         CalculateActiveActions();
     }
 
@@ -573,251 +480,251 @@ namespace ActionGroupsExtended
             ShowGroupInFlightNames[5] = LoadString;
         }
 
-        public void VesselOffRails(Vessel vsl) //load vessels here
-        {
-            print("Vessel off rails! " + vsl.vesselName);
-            ConfigNode vslNode = new ConfigNode();
-            bool checkIsVab = true;
-            try
-            {
-                if (vsl.landedAt == "Runway")
-                {
-                    //print("Runway found");
-                    checkIsVab = false;
-                }
-                else
-                {
-                    //print("runway not found");
-                    checkIsVab = true;
-                }
+        //public void VesselOffRails(Vessel vsl) //load vessels here
+        //{
+        //    print("Vessel off rails! " + vsl.vesselName);
+        //    ConfigNode vslNode = new ConfigNode();
+        //    bool checkIsVab = true;
+        //    try
+        //    {
+        //        if (vsl.landedAt == "Runway")
+        //        {
+        //            //print("Runway found");
+        //            checkIsVab = false;
+        //        }
+        //        else
+        //        {
+        //            //print("runway not found");
+        //            checkIsVab = true;
+        //        }
 
-            }
-            catch
-            {
-                //print("runway iffy");
-                checkIsVab = true;
-            }
-            if (AGXFlightNode.HasNode(vsl.id.ToString()))
-            {
-                //print("Vessel off rails! case 1 " + vsl.vesselName); 
-                vslNode = AGXFlightNode.GetNode(vsl.id.ToString());
+        //    }
+        //    catch
+        //    {
+        //        //print("runway iffy");
+        //        checkIsVab = true;
+        //    }
+        //    if (AGXFlightNode.HasNode(vsl.id.ToString()))
+        //    {
+        //        //print("Vessel off rails! case 1 " + vsl.vesselName); 
+        //        vslNode = AGXFlightNode.GetNode(vsl.id.ToString());
              
-            }
-            else if(AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,checkIsVab)))
-            {
-                //print("Vessel off rails! case2 " + vsl.vesselName);
-                vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,checkIsVab));
-                vslNode.name = vsl.id.ToString();
-                AGXFlightNode.AddNode(vslNode);
-            }
-            else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
-            {
-                //print("Vessel off rails! case3 " + vsl.vesselName);
-                vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,!checkIsVab));
-                vslNode.name = vsl.id.ToString();
-                AGXFlightNode.AddNode(vslNode);
-            }
-            else
-            {
-               // print("Vessel off rails! case4 " + vsl.vesselName);
-                vslNode = new ConfigNode(vsl.id.ToString());
-                vslNode.AddValue("name", vsl.vesselName);
-                vslNode.AddValue("currentKeyset", "1");
-                vslNode.AddValue("groupNames", "");
-                vslNode.AddValue("groupVisibility", "1011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111");
-                vslNode.AddValue("groupVisibilityNames", "Group 1‣Group 2‣Group 3‣Group 4‣Group 5");
-                AGXFlightNode.AddNode(vslNode);
-            }
+        //    }
+        //    else if(AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,checkIsVab)))
+        //    {
+        //        //print("Vessel off rails! case2 " + vsl.vesselName);
+        //        vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,checkIsVab));
+        //        vslNode.name = vsl.id.ToString();
+        //        AGXFlightNode.AddNode(vslNode);
+        //    }
+        //    else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
+        //    {
+        //        //print("Vessel off rails! case3 " + vsl.vesselName);
+        //        vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName,!checkIsVab));
+        //        vslNode.name = vsl.id.ToString();
+        //        AGXFlightNode.AddNode(vslNode);
+        //    }
+        //    else
+        //    {
+        //       // print("Vessel off rails! case4 " + vsl.vesselName);
+        //        vslNode = new ConfigNode(vsl.id.ToString());
+        //        vslNode.AddValue("name", vsl.vesselName);
+        //        vslNode.AddValue("currentKeyset", "1");
+        //        vslNode.AddValue("groupNames", "");
+        //        vslNode.AddValue("groupVisibility", "1011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111");
+        //        vslNode.AddValue("groupVisibilityNames", "Group 1‣Group 2‣Group 3‣Group 4‣Group 5");
+        //        AGXFlightNode.AddNode(vslNode);
+        //    }
 
 
 
-            foreach (ConfigNode prtNode in vslNode.nodes)
-                    {
-                        Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
-                        float partDist = 100f;
-                        Part gamePart = new Part();
-                        foreach (Part p in vsl.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
-                        {
-                            float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
-                            if (thisPartDist < partDist)
-                            {
-                                gamePart = p;
-                                partDist = thisPartDist;
-                            }
-                        }
-                        foreach (ConfigNode actNode in prtNode.nodes)
-                        {
-                            //print("node " + actNode + " " + gamePart.ConstructID);
-                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
-                            //print("act to add " + actToAdd.ba);
-                            if (actToAdd.ba != null)
-                            {
-                                AllVesselsActions.Add(actToAdd);
-                            }
-                        }
-                    }
+        //    foreach (ConfigNode prtNode in vslNode.nodes)
+        //            {
+        //                Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+        //                float partDist = 100f;
+        //                Part gamePart = new Part();
+        //                foreach (Part p in vsl.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+        //                {
+        //                    float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+        //                    if (thisPartDist < partDist)
+        //                    {
+        //                        gamePart = p;
+        //                        partDist = thisPartDist;
+        //                    }
+        //                }
+        //                foreach (ConfigNode actNode in prtNode.nodes)
+        //                {
+        //                    //print("node " + actNode + " " + gamePart.ConstructID);
+        //                    AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+        //                    //print("act to add " + actToAdd.ba);
+        //                    if (actToAdd.ba != null)
+        //                    {
+        //                        AllVesselsActions.Add(actToAdd);
+        //                    }
+        //                }
+        //            }
 
-            List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
-            CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
-            CustomActions.Add(KSPActionGroup.Custom02);
-            CustomActions.Add(KSPActionGroup.Custom03);
-            CustomActions.Add(KSPActionGroup.Custom04);
-            CustomActions.Add(KSPActionGroup.Custom05);
-            CustomActions.Add(KSPActionGroup.Custom06);
-            CustomActions.Add(KSPActionGroup.Custom07);
-            CustomActions.Add(KSPActionGroup.Custom08);
-            CustomActions.Add(KSPActionGroup.Custom09);
-            CustomActions.Add(KSPActionGroup.Custom10);
+        //    List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
+        //    CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
+        //    CustomActions.Add(KSPActionGroup.Custom02);
+        //    CustomActions.Add(KSPActionGroup.Custom03);
+        //    CustomActions.Add(KSPActionGroup.Custom04);
+        //    CustomActions.Add(KSPActionGroup.Custom05);
+        //    CustomActions.Add(KSPActionGroup.Custom06);
+        //    CustomActions.Add(KSPActionGroup.Custom07);
+        //    CustomActions.Add(KSPActionGroup.Custom08);
+        //    CustomActions.Add(KSPActionGroup.Custom09);
+        //    CustomActions.Add(KSPActionGroup.Custom10);
 
-            //errLine = "16";
-            // string AddGroup = "";
-            List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
-            foreach (Part p in vsl.parts)
-            {
-                partAllActions.AddRange(p.Actions);
-                foreach (PartModule pm in p.Modules)
-                {
-                    partAllActions.AddRange(pm.Actions);
-                }
+        //    //errLine = "16";
+        //    // string AddGroup = "";
+        //    List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
+        //    foreach (Part p in vsl.parts)
+        //    {
+        //        partAllActions.AddRange(p.Actions);
+        //        foreach (PartModule pm in p.Modules)
+        //        {
+        //            partAllActions.AddRange(pm.Actions);
+        //        }
 
-               // print("part orgpos " + p.ConstructID+ " "  + p.orgPos + " " + p.orgRot);
-            }
+        //       // print("part orgpos " + p.ConstructID+ " "  + p.orgPos + " " + p.orgRot);
+        //    }
 
-            foreach (BaseAction baLoad in partAllActions)
-            {
-                foreach (KSPActionGroup agrp in CustomActions)
-                {
+        //    foreach (BaseAction baLoad in partAllActions)
+        //    {
+        //        foreach (KSPActionGroup agrp in CustomActions)
+        //        {
 
-                    if ((baLoad.actionGroup & agrp) == agrp)
-                    {
-                       // errLine = "17";
-                        ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
-                        //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
-                        AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
-                        List<AGXAction> Checking = new List<AGXAction>();
-                        Checking.AddRange(AllVesselsActions);
-                        Checking.RemoveAll(p => p.group != ToAdd.group);
+        //            if ((baLoad.actionGroup & agrp) == agrp)
+        //            {
+        //               // errLine = "17";
+        //                ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
+        //                //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
+        //                AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
+        //                List<AGXAction> Checking = new List<AGXAction>();
+        //                Checking.AddRange(AllVesselsActions);
+        //                Checking.RemoveAll(p => p.group != ToAdd.group);
 
-                        Checking.RemoveAll(p => p.prt != ToAdd.prt);
+        //                Checking.RemoveAll(p => p.prt != ToAdd.prt);
 
-                        Checking.RemoveAll(p => p.ba != ToAdd.ba);
-
-
-
-                        if (Checking.Count == 0)
-                        {
-
-                            AllVesselsActions.Add(ToAdd);
-
-                        }
-                    }
-                }
-               // errLine = "18";
-            }
+        //                Checking.RemoveAll(p => p.ba != ToAdd.ba);
 
 
-            if (vsl == FlightGlobals.ActiveVessel)
-            {
-                CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
-                LoadCurrentKeyBindings();
-                LoadGroupNames(vslNode.GetValue("groupNames"));
-                LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
-                LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
-                loadFinished = true;
-            }
+
+        //                if (Checking.Count == 0)
+        //                {
+
+        //                    AllVesselsActions.Add(ToAdd);
+
+        //                }
+        //            }
+        //        }
+        //       // errLine = "18";
+        //    }
 
 
-            RefreshCurrentActions();
+        //    if (vsl == FlightGlobals.ActiveVessel)
+        //    {
+        //        CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
+        //        LoadCurrentKeyBindings();
+        //        LoadGroupNames(vslNode.GetValue("groupNames"));
+        //        LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
+        //        LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
+        //        loadFinished = true;
+        //    }
 
-            foreach (Part p in vsl.Parts) //add parts to checking list to see if the vessel cahnges (undock, break, etc.)
-            {
-                partOldVessel.Add(new AGXPartVesselCheck() { prt = p, pVsl = vsl });
-            }
-            loadedVessels.Add(vsl); //add this vessel to loaded vessels list
-        }
 
-        public void VesselOnRails(Vessel vsl)
-        {
-            print("Vessel on rails! " + vsl.name );
-            partOldVessel.RemoveAll(vsl2 => vsl2.pVsl == vsl);
-            List<AGXAction> UnloadVslActionsCheck = new List<AGXAction>();
-            UnloadVslActionsCheck.AddRange(AllVesselsActions.Where(agx => agx.ba.listParent.part.vessel == vsl));
-            //print("count check " + UnloadVslActionsCheck.Count + vsl.id.ToString());
-            //foreach (AGXAction agact in UnloadVslActionsCheck)
-            //{
-            //    print("actionunload " + agact.ba.listParent.part.vessel.id.ToString() + " " + agact.ba.listParent.part.ConstructID);
-            //}
-            if (UnloadVslActionsCheck.Count > 0)
-            {
-                ConfigNode vslToUnload = new ConfigNode(vsl.id.ToString());
-                if(AGXFlightNode.HasNode(vsl.id.ToString()))
-                {
-                    vslToUnload = AGXFlightNode.GetNode(vsl.id.ToString());
-                    vslToUnload.RemoveNodes("PART");
-                    AGXFlightNode.RemoveNode(vsl.id.ToString());
-                }
+        //    RefreshCurrentActions();
 
-                if (vsl == FlightGlobals.ActiveVessel)
-                {
-                    if(vslToUnload.HasValue("name"))
-                    {
-                        vslToUnload.RemoveValue("name");
-                    }
-                    vslToUnload.AddValue("name",FlightGlobals.ActiveVessel.vesselName);
-                    if (vslToUnload.HasValue("currentKeyset"))
-                    {
-                        vslToUnload.RemoveValue("currentKeyset");
-                    }
-                    vslToUnload.AddValue("currentKeyset", CurrentKeySet.ToString());
-                    if (vslToUnload.HasValue("groupNames"))
-                    {
-                        vslToUnload.RemoveValue("groupNames");
-                    }
-                    vslToUnload.AddValue("groupNames", SaveGroupNames(""));
-                    if (vslToUnload.HasValue("groupVisibility"))
-                    {
-                        vslToUnload.RemoveValue("groupVisibility");
-                    }
-                    vslToUnload.AddValue("groupVisibility", SaveGroupVisibility(""));
-                    if (vslToUnload.HasValue("groupVisibilityNames"))
-                    {
-                        vslToUnload.RemoveValue("groupVisibilityNames");
-                    }
-                    vslToUnload.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
-                }
+        //    foreach (Part p in vsl.Parts) //add parts to checking list to see if the vessel cahnges (undock, break, etc.)
+        //    {
+        //        partOldVessel.Add(new AGXPartVesselCheck() { prt = p, pVsl = vsl });
+        //    }
+        //    loadedVessels.Add(vsl); //add this vessel to loaded vessels list
+        //}
 
-                foreach (Part p in vsl.Parts)
-                {
-                    List<AGXAction> thisPartsActions = new List<AGXAction>();
-                    thisPartsActions.AddRange(UnloadVslActionsCheck.FindAll(p2 => p2.ba.listParent.part == p));
-                    //errLine = "18";
-                    if (thisPartsActions.Count > 0)
-                    {
-                        ConfigNode partTemp = new ConfigNode("PART");
-                        //errLine = "19";
-                        partTemp.AddValue("name", p.vessel.vesselName);
-                        partTemp.AddValue("vesselID", p.vessel.id);
-                        partTemp.AddValue("relLocX", p.orgPos.x);
-                        partTemp.AddValue("relLocY", p.orgPos.y);
-                        partTemp.AddValue("relLocZ", p.orgPos.z);
-                        //errLine = "20";
-                        foreach (AGXAction agxAct in thisPartsActions)
-                        {
-                            //errLine = "21";
-                            partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
-                        }
-                       // errLine = "22";
+        //public void VesselOnRails(Vessel vsl)
+        //{
+        //    print("Vessel on rails! " + vsl.name );
+        //    partOldVessel.RemoveAll(vsl2 => vsl2.pVsl == vsl);
+        //    List<AGXAction> UnloadVslActionsCheck = new List<AGXAction>();
+        //    UnloadVslActionsCheck.AddRange(AllVesselsActions.Where(agx => agx.ba.listParent.part.vessel == vsl));
+        //    //print("count check " + UnloadVslActionsCheck.Count + vsl.id.ToString());
+        //    //foreach (AGXAction agact in UnloadVslActionsCheck)
+        //    //{
+        //    //    print("actionunload " + agact.ba.listParent.part.vessel.id.ToString() + " " + agact.ba.listParent.part.ConstructID);
+        //    //}
+        //    if (UnloadVslActionsCheck.Count > 0)
+        //    {
+        //        ConfigNode vslToUnload = new ConfigNode(vsl.id.ToString());
+        //        if(AGXFlightNode.HasNode(vsl.id.ToString()))
+        //        {
+        //            vslToUnload = AGXFlightNode.GetNode(vsl.id.ToString());
+        //            vslToUnload.RemoveNodes("PART");
+        //            AGXFlightNode.RemoveNode(vsl.id.ToString());
+        //        }
 
-                        vslToUnload.AddNode(partTemp);
-                        //errLine = "23";
-                    }
-                }
-                AGXFlightNode.AddNode(vslToUnload);
-            }
-            AllVesselsActions.RemoveAll(act2 => act2.ba.listParent.part.vessel == vsl);
-            loadedVessels.Remove(vsl); //remove vessel from loaded vessels list
+        //        if (vsl == FlightGlobals.ActiveVessel)
+        //        {
+        //            if(vslToUnload.HasValue("name"))
+        //            {
+        //                vslToUnload.RemoveValue("name");
+        //            }
+        //            vslToUnload.AddValue("name",FlightGlobals.ActiveVessel.vesselName);
+        //            if (vslToUnload.HasValue("currentKeyset"))
+        //            {
+        //                vslToUnload.RemoveValue("currentKeyset");
+        //            }
+        //            vslToUnload.AddValue("currentKeyset", CurrentKeySet.ToString());
+        //            if (vslToUnload.HasValue("groupNames"))
+        //            {
+        //                vslToUnload.RemoveValue("groupNames");
+        //            }
+        //            vslToUnload.AddValue("groupNames", SaveGroupNames(""));
+        //            if (vslToUnload.HasValue("groupVisibility"))
+        //            {
+        //                vslToUnload.RemoveValue("groupVisibility");
+        //            }
+        //            vslToUnload.AddValue("groupVisibility", SaveGroupVisibility(""));
+        //            if (vslToUnload.HasValue("groupVisibilityNames"))
+        //            {
+        //                vslToUnload.RemoveValue("groupVisibilityNames");
+        //            }
+        //            vslToUnload.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+        //        }
 
-        }
+        //        foreach (Part p in vsl.Parts)
+        //        {
+        //            List<AGXAction> thisPartsActions = new List<AGXAction>();
+        //            thisPartsActions.AddRange(UnloadVslActionsCheck.FindAll(p2 => p2.ba.listParent.part == p));
+        //            //errLine = "18";
+        //            if (thisPartsActions.Count > 0)
+        //            {
+        //                ConfigNode partTemp = new ConfigNode("PART");
+        //                //errLine = "19";
+        //                partTemp.AddValue("name", p.vessel.vesselName);
+        //                partTemp.AddValue("vesselID", p.vessel.id);
+        //                partTemp.AddValue("relLocX", p.orgPos.x);
+        //                partTemp.AddValue("relLocY", p.orgPos.y);
+        //                partTemp.AddValue("relLocZ", p.orgPos.z);
+        //                //errLine = "20";
+        //                foreach (AGXAction agxAct in thisPartsActions)
+        //                {
+        //                    //errLine = "21";
+        //                    partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+        //                }
+        //               // errLine = "22";
+
+        //                vslToUnload.AddNode(partTemp);
+        //                //errLine = "23";
+        //            }
+        //        }
+        //        AGXFlightNode.AddNode(vslToUnload);
+        //    }
+        //    AllVesselsActions.RemoveAll(act2 => act2.ba.listParent.part.vessel == vsl);
+        //    loadedVessels.Remove(vsl); //remove vessel from loaded vessels list
+
+        //}
 
         //public void LoadEverything()
         //{
@@ -921,7 +828,9 @@ namespace ActionGroupsExtended
             {
                 AGXBtn.Destroy();
             }
-            GameEvents.onVesselGoOffRails.Remove(VesselOffRails);
+            GameEvents.onPartAttach.Remove(DockingEvent);
+            flightNodeIsLoaded = false;
+            loadFinished = false;
 
         }
 
@@ -1017,8 +926,8 @@ namespace ActionGroupsExtended
             //    SettingsWinRect = GUI.Window(673467780, SettingsWinRect, AGXMethods.SettingsWindow, "AGX Settings", AGXWinStyle);
             //}
 
-            if (ShowAGXMod && TimeWarp.CurrentRate ==1)
-            {
+            //if (ShowAGXMod && TimeWarp.CurrentRate ==1)
+            //{
                 if (ShowAGXFlightWin)
                 {
                     GroupsInFlightWin.x = FlightWin.x + 235;
@@ -1073,7 +982,7 @@ namespace ActionGroupsExtended
                        // TrapMouse |= CurActsWin.Contains(RealMousePos);
                     }
                 
-            }
+            //}
             if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin || highlightPartThisFrameGroupWin)
             {
                 //Camera edCam = EditorCamera.fe
@@ -1439,8 +1348,7 @@ namespace ActionGroupsExtended
                         AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
                         if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group], AGXBtnStyle))
                         {
-                            //print("Action check " + ThisGroupActions.ElementAt(RowCnt - 1).ba.name + " " +ThisGroupActions.ElementAt(RowCnt - 1).group);
-                            AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                             RefreshCurrentActions();
                             ////BaseAction actToDel = ThisGroupActions.ElementAt(RowCnt - 1).ba;
                             ////int groupToDel = ThisGroupActions.ElementAt(RowCnt - 1).group;
@@ -1482,7 +1390,7 @@ namespace ActionGroupsExtended
 
                         if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title, AGXBtnStyle))
                         {
-                            AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                             RefreshCurrentActions();
                             //    int ToDel = 0;
                             //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -1510,7 +1418,7 @@ namespace ActionGroupsExtended
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName, AGXBtnStyle))
                             {
-                                AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                                CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                                 RefreshCurrentActions();
                                 //    int ToDel = 0;
                                 //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -1539,7 +1447,7 @@ namespace ActionGroupsExtended
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error", AGXBtnStyle))
                             {
-                                AllVesselsActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                                CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                                 RefreshCurrentActions();
                                 //    int ToDel = 0;
                                 //    foreach (AGXAction AGXToRemove in CurrentVesselActions)
@@ -2231,7 +2139,7 @@ namespace ActionGroupsExtended
                                     if (Checking.Count == 0)
                                     {
                                         //CurrentVesselActions.Add(ToAdd);
-                                        AllVesselsActions.Add(ToAdd);
+                                        CurrentVesselActions.Add(ToAdd);
                                         RefreshCurrentActions();
                                         // SaveCurrentVesselActions();
                                     }
@@ -3020,127 +2928,280 @@ namespace ActionGroupsExtended
             }
             errLine = "7";
 
-            if (RootPartExists)
+            if (flightNodeIsLoaded)
             {
-                errLine = "8";
-                if (AGXRoot != FlightGlobals.ActiveVessel.rootPart && flightNodeIsLoaded) //load keyset also
+                if (RootPartExists)
                 {
-                    print("Root part changed, AGX reloading");
-                    //loadFinished = false;
-                    if (AGXRoot != null)
+                    errLine = "8";
+                    if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //load keyset also
                     {
-                        errLine = "9";
-                       // print("Root part changed, AGX reloadinga");
-                        ConfigNode oldVsl = new ConfigNode(AGXRoot.vessel.id.ToString());
-                        if(AGXFlightNode.HasNode(AGXRoot.vessel.id.ToString()))
+                        //print("Root prt ch");
+                        if(!overrideRootChange)
                         {
-                            errLine = "10";
-                            //print("Root part changed, AGX reloadingb");
-                            oldVsl = AGXFlightNode.GetNode(AGXRoot.vessel.id.ToString());
-                            AGXFlightNode.RemoveNode(AGXRoot.vessel.id.ToString());
-                        }
-                        errLine = "11";
-                        //print("Root part changed, AGX reloadingc");
-                        if(oldVsl.HasValue("name"));
+
+                        print("Root part changed, AGX reloading");
+                        //loadFinished = false;
+                        if (AGXRoot != null)
                         {
-                            oldVsl.RemoveValue("name");
-                        }
-                        oldVsl.AddValue("name", AGXRoot.vessel.vesselName);
-                        errLine = "12";
-                       // errLine = "13";
-                        if (oldVsl.HasValue("currentKeyset")) ;
-                        {
-                            oldVsl.RemoveValue("currentKeyset");
-                        }
-                        oldVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
-                        errLine = "13";
-                        //errLine = "14";
-                        if (oldVsl.HasValue("groupNames")) ;
-                        {
-                            oldVsl.RemoveValue("groupNames");
-                        }
-                        oldVsl.AddValue("groupNames", SaveGroupNames(""));
-                        errLine = "14";
-                        //errLine = "15";
-                        if (oldVsl.HasValue("groupVisibility")) ;
-                        {
-                            oldVsl.RemoveValue("groupVisibility");
-                        }
-                        oldVsl.AddValue("groupVisibility", SaveGroupVisibility(""));
-                        errLine = "15";
-                        //errLine = "16";
-                        if (oldVsl.HasValue("groupVisibilityNames")) ;
-                        {
-                            oldVsl.RemoveValue("groupVisibilityNames");
-                        }
-                        oldVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
-                        errLine = "16";
-                        AGXFlightNode.AddNode(oldVsl);
-                        //print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
-                    }
-                    errLine = "17";
-                    //print("Root part changed, AGX reloadinge");
-                    if (flightNodeIsLoaded && AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
-                    {
-                        errLine = "18";
-                        //print("Root part changed, AGX reloadingf");
-                        ConfigNode currentVessel = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
-                        CurrentKeySet = Convert.ToInt32(currentVessel.GetValue("currentKeyset"));
-                        LoadGroupNames(currentVessel.GetValue("groupNames"));
-                        LoadGroupVisibility(currentVessel.GetValue("groupVisibility"));
-                        LoadGroupVisibilityNames(currentVessel.GetValue("groupVisibilityNames"));
-                        //print("Root part changed, AGX reloadingg");
-                        errLine = "19";
-                    }
-                        
-                    else
-                    {
-                        errLine = "20";
-                        CurrentKeySet = 1;
-                        for (int i = 1; i <= 250; i = i + 1)
-                        {
-                            AGXguiNames[i] = "";
-                        }
-                        ShowGroupInFlightCurrent = 1;
-                        for (int i = 1; i <= 250; i++)
-                        {
-                            IsGroupToggle[i] = false;
-                            for (int i2 = 1; i2 <= 5; i2++)
+                            errLine = "9";
+                            // print("Root part changed, AGX reloadinga");
+                            ConfigNode oldVsl = new ConfigNode(AGXRoot.vessel.id.ToString());
+                            if (AGXFlightNode.HasNode(AGXRoot.vessel.id.ToString()))
                             {
-                                ShowGroupInFlight[i2, i] = true;
+                                errLine = "10";
+                                //print("Root part changed, AGX reloadingb");
+                                oldVsl = AGXFlightNode.GetNode(AGXRoot.vessel.id.ToString());
+                                AGXFlightNode.RemoveNode(AGXRoot.vessel.id.ToString());
+                            }
+                            errLine = "11";
+                            //print("Root part changed, AGX reloadingc");
+                            if (oldVsl.HasValue("name")) ;
+                            {
+                                oldVsl.RemoveValue("name");
+                            }
+                            oldVsl.AddValue("name", AGXRoot.vessel.vesselName);
+                            errLine = "12";
+                            // errLine = "13";
+                            if (oldVsl.HasValue("currentKeyset")) ;
+                            {
+                                oldVsl.RemoveValue("currentKeyset");
+                            }
+                            oldVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
+                            errLine = "13";
+                            //errLine = "14";
+                            if (oldVsl.HasValue("groupNames")) ;
+                            {
+                                oldVsl.RemoveValue("groupNames");
+                            }
+                            oldVsl.AddValue("groupNames", SaveGroupNames(""));
+                            errLine = "14";
+                            //errLine = "15";
+                            if (oldVsl.HasValue("groupVisibility")) ;
+                            {
+                                oldVsl.RemoveValue("groupVisibility");
+                            }
+                            oldVsl.AddValue("groupVisibility", SaveGroupVisibility(""));
+                            errLine = "15";
+                            //errLine = "16";
+                            if (oldVsl.HasValue("groupVisibilityNames")) ;
+                            {
+                                oldVsl.RemoveValue("groupVisibilityNames");
+                            }
+                            oldVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                            errLine = "16";
+
+                            oldVsl.RemoveNodes("PART");
+
+                            foreach (Part p in AGXRoot.vessel.Parts)
+                            {
+                                List<AGXAction> thisPartsActions = new List<AGXAction>();
+                                thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
+                                //errLine = "18";
+                                if (thisPartsActions.Count > 0)
+                                {
+                                    ConfigNode partTemp = new ConfigNode("PART");
+                                    //errLine = "19";
+                                    partTemp.AddValue("name", p.vessel.vesselName);
+                                    partTemp.AddValue("vesselID", p.vessel.id);
+                                    partTemp.AddValue("relLocX", p.orgPos.x);
+                                    partTemp.AddValue("relLocY", p.orgPos.y);
+                                    partTemp.AddValue("relLocZ", p.orgPos.z);
+                                    //errLine = "20";
+                                    foreach (AGXAction agxAct in thisPartsActions)
+                                    {
+                                        //errLine = "21";
+                                        partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                                    }
+                                    // errLine = "22";
+
+                                    oldVsl.AddNode(partTemp);
+                                    //errLine = "23";
+                                }
+                            }
+
+
+
+                            AGXFlightNode.AddNode(oldVsl);
+                            //print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
+                        }
+                        CurrentVesselActions.Clear(); //we have saved old ship so clear actions
+
+                        errLine = "17";
+                        bool checkIsVab = true;
+                        ConfigNode vslNode = new ConfigNode();
+                        try
+                        {
+                            if (FlightGlobals.ActiveVessel.landedAt == "Runway")
+                            {
+                                //print("Runway found");
+                                checkIsVab = false;
+                            }
+                            else
+                            {
+                                //print("runway not found");
+                                checkIsVab = true;
+                            }
+
+                        }
+                        catch
+                        {
+                            //print("runway iffy");
+                            checkIsVab = true;
+                        }
+
+                        if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
+                        {
+                            //print("node found"); 
+                            vslNode = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
+
+                        }
+                        else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
+                        {
+                            //print("vab1"); 
+                            vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab));
+                            vslNode.name = FlightGlobals.ActiveVessel.id.ToString();
+                            AGXFlightNode.AddNode(vslNode);
+                        }
+                        else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
+                        {
+                            //print("vab2");
+                            vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab));
+                            vslNode.name = FlightGlobals.ActiveVessel.id.ToString();
+                            AGXFlightNode.AddNode(vslNode);
+                        }
+                        else
+                        {
+                            //print("notfound");
+                            vslNode = new ConfigNode(FlightGlobals.ActiveVessel.id.ToString());
+                            vslNode.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
+                            vslNode.AddValue("currentKeyset", "1");
+                            vslNode.AddValue("groupNames", "");
+                            vslNode.AddValue("groupVisibility", "1011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111");
+                            vslNode.AddValue("groupVisibilityNames", "Group 1‣Group 2‣Group 3‣Group 4‣Group 5");
+                            AGXFlightNode.AddNode(vslNode);
+                        }
+
+                        CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
+                        LoadGroupNames(vslNode.GetValue("groupNames"));
+                        LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
+                        LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
+
+                        foreach (ConfigNode prtNode in vslNode.nodes)
+                        {
+                            Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+                            float partDist = 100f;
+                            Part gamePart = new Part();
+                            foreach (Part p in FlightGlobals.ActiveVessel.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                            {
+                                float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                if (thisPartDist < partDist)
+                                {
+                                    gamePart = p;
+                                    partDist = thisPartDist;
+                                }
+                            }
+                            foreach (ConfigNode actNode in prtNode.nodes)
+                            {
+                                //print("node " + actNode + " " + gamePart.ConstructID);
+                                AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+                                //print("act to add " + actToAdd.ba);
+                                if (actToAdd.ba != null)
+                                {
+                                    CurrentVesselActions.Add(actToAdd);
+                                }
                             }
                         }
-                        ShowGroupInFlightNames[1] = "Group1";
-                        ShowGroupInFlightNames[2] = "Group2";
-                        ShowGroupInFlightNames[3] = "Group3";
-                        ShowGroupInFlightNames[4] = "Group4";
-                        ShowGroupInFlightNames[5] = "Group5";
-                        errLine = "21";
+
+                        List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
+                        CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
+                        CustomActions.Add(KSPActionGroup.Custom02);
+                        CustomActions.Add(KSPActionGroup.Custom03);
+                        CustomActions.Add(KSPActionGroup.Custom04);
+                        CustomActions.Add(KSPActionGroup.Custom05);
+                        CustomActions.Add(KSPActionGroup.Custom06);
+                        CustomActions.Add(KSPActionGroup.Custom07);
+                        CustomActions.Add(KSPActionGroup.Custom08);
+                        CustomActions.Add(KSPActionGroup.Custom09);
+                        CustomActions.Add(KSPActionGroup.Custom10);
+
+                        //errLine = "16";
+                        // string AddGroup = "";
+                        List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
+                        foreach (Part p in FlightGlobals.ActiveVessel.parts)
+                        {
+                            partAllActions.AddRange(p.Actions);
+                            foreach (PartModule pm in p.Modules)
+                            {
+                                partAllActions.AddRange(pm.Actions);
+                            }
+
+                            // print("part orgpos " + p.ConstructID+ " "  + p.orgPos + " " + p.orgRot);
+                        }
+
+                        foreach (BaseAction baLoad in partAllActions)
+                        {
+                            foreach (KSPActionGroup agrp in CustomActions)
+                            {
+
+                                if ((baLoad.actionGroup & agrp) == agrp)
+                                {
+                                    // errLine = "17";
+                                    ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
+                                    //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
+                                    AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
+                                    List<AGXAction> Checking = new List<AGXAction>();
+                                    Checking.AddRange(CurrentVesselActions);
+                                    Checking.RemoveAll(p => p.group != ToAdd.group);
+
+                                    Checking.RemoveAll(p => p.prt != ToAdd.prt);
+
+                                    Checking.RemoveAll(p => p.ba != ToAdd.ba);
+
+
+
+                                    if (Checking.Count == 0)
+                                    {
+
+                                        CurrentVesselActions.Add(ToAdd);
+
+                                    }
+                                }
+                            }
+                            // errLine = "18";
+                        }
                     }
-                    
-                   errLine = "22";
 
 
-                    AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+                        errLine = "22";
+
+
+                        AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+                        overrideRootChange = false;
+                        LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
+                        AGEditorSelectedParts.Clear();
+                        PartActionsList.Clear();
+                        RefreshCurrentActions();
+                        loadFinished = true;
+                        //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
+                        errLine = "23";
+                    }
+                }
+                errLine = "24";
+                if (LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //parts count changed, remove any actions assigned to parts that have disconnected/been destroyed
+                {
+                    print("Part count change, reload AGX");
+                    if (LastPartCount > FlightGlobals.ActiveVessel.parts.Count) //new count is larger was a docking op, see the dock gameevent to handle that
+                    {
+                        CheckListForMultipleVessels();
+                    }
                     AGEditorSelectedParts.Clear();
                     PartActionsList.Clear();
+                    //LoadActionGroups();
                     RefreshCurrentActions();
-                    //loadFinished = true;
-                    //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
-                    errLine = "23";
+                    LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
+                    errLine = "25";
+
                 }
-            }
-            errLine = "24";
-            if (LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //parts count changed, remove any actions assigned to parts that have disconnected/been destroyed
-            {
-                print("Part count change, reload AGX");
-                AGEditorSelectedParts.Clear();
-                PartActionsList.Clear();
-                //LoadActionGroups();
-                RefreshCurrentActions();
-                LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
-                errLine = "25";
-                
             }
             errLine = "26";
             foreach (KeyCode KC in ActiveKeys)
@@ -3229,7 +3290,7 @@ namespace ActionGroupsExtended
             if (actionsCheckFrameCount >= 20)
             {
                 CheckActionsActive();
-                PartVesselChangeCheck();
+                //PartVesselChangeCheck();
                 actionsCheckFrameCount = 0;
             }
             else
@@ -3247,17 +3308,17 @@ namespace ActionGroupsExtended
         //    print("Part Flight Id " + FlightGlobals.ActiveVessel.rootPart.flightID);
         //    print("Part UID " + FlightGlobals.ActiveVessel.rootPart.uid);
         //    print("Part mission id " + FlightGlobals.ActiveVessel.rootPart.missionID);
-            if (TimeWarp.CurrentRate != 1)
-            {
-                if (ShowSelectedWin || ShowKeySetWin)
-                {
+            //if (TimeWarp.CurrentRate != 1)
+            //{
+            //    if (ShowSelectedWin || ShowKeySetWin)
+            //    {
 
-                    SaveEverything();
-                    ShowSelectedWin = false;
-                    ShowKeySetWin = false;
-                }
+            //        SaveEverything();
+            //        ShowSelectedWin = false;
+            //        ShowKeySetWin = false;
+            //    }
 
-            }
+            //}
         }
             catch(Exception e)
             {
@@ -3267,7 +3328,7 @@ namespace ActionGroupsExtended
 
         public void partDead(Part p)
         {
-            AllVesselsActions.RemoveAll(act => act.ba.listParent.part == p);
+            CurrentVesselActions.RemoveAll(act => act.ba.listParent.part == p);
             RefreshCurrentActions();
 
             if(RootParts.HasNode(p.flightID.ToString()))
@@ -3276,11 +3337,209 @@ namespace ActionGroupsExtended
                 RootParts.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg");
             }
         }
-        
-        
 
-        public void PartVesselChangeCheck()
+
+
+        public void CheckListForMultipleVessels() //call this when part count on vessel decrease to check for actions on split vessels
         {
+            List<Vessel> curActsVessels = new List<Vessel>(); //find out if actions exist on vessel that left
+            foreach (AGXAction agAct in CurrentVesselActions)
+            {
+                if(!curActsVessels.Contains(agAct.ba.listParent.part.vessel))
+                {
+                    curActsVessels.Add(agAct.ba.listParent.part.vessel); //make a list of all vessels from actions in currentVesselActions list
+                }
+            }
+
+            foreach (Vessel vsl2 in curActsVessels) //our list of vessels from actions in currentVesselActions lsit
+            {
+                if (vsl2 != FlightGlobals.ActiveVessel) //this runs only on the seperated vessel, not our focus vessel
+                {
+                    ConfigNode vsl2node = new ConfigNode(vsl2.id.ToString()); //make our confignode
+                    if (AGXFlightNode.HasNode(vsl2.id.ToString())) //does this vessel exist in flight node?
+                    {
+                        vsl2node = AGXFlightNode.GetNode(vsl2.id.ToString()); //vessel exists?  load existing node, this should not happend but might if the same vessel docks/undocks in the same scene multiple times
+                        vsl2node.RemoveNodes("PART");
+                        AGXFlightNode.RemoveNode(vsl2.id.ToString());
+                    }
+                    //RootPart elseif check here
+                    else //new vessel, copy current values
+                    {
+                        vsl2node.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
+                        vsl2node.AddValue("currentKeyset", CurrentKeySet.ToString());
+                        vsl2node.AddValue("groupNames", SaveGroupNames(""));
+                        vsl2node.AddValue("groupVisibility", SaveGroupVisibility(""));
+                        vsl2node.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                    }
+
+                    foreach (Part p in vsl2.Parts) //cycle parts in separated vessel to find actions
+                    {
+                        List<AGXAction> thisPartsActions = new List<AGXAction>();
+                        thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
+                        //errLine = "18";
+                        if (thisPartsActions.Count > 0)
+                        {
+                            //print("acts count " + thisPartsActions.Count);
+                            ConfigNode partTemp = new ConfigNode("PART");
+                            //errLine = "19";
+                            partTemp.AddValue("name", p.vessel.name);
+                            partTemp.AddValue("vesselID", p.vessel.id);
+                            partTemp.AddValue("relLocX", p.orgPos.x);
+                            partTemp.AddValue("relLocY", p.orgPos.y);
+                            partTemp.AddValue("relLocZ", p.orgPos.z);
+                            //errLine = "20";
+                            foreach (AGXAction agxAct in thisPartsActions)
+                            {
+                                //print("acts countb " + thisPartsActions.Count);
+                                //errLine = "21";
+                                partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                            }
+                            //errLine = "22";
+
+                            vsl2node.AddNode(partTemp);
+                            //errLine = "23";
+                        }
+                    }
+
+                    AGXFlightNode.AddNode(vsl2node);
+                    CurrentVesselActions.RemoveAll(ag => ag.ba.listParent.part.vessel == vsl2);
+
+
+                }
+            }
+            RefreshCurrentActions();
+        }
+
+        public void DockingEvent(GameEvents.HostTargetAction<Part, Part> htAct) //docking event happend, merge two vessel actions
+        {
+            try
+            {
+                print("Docking event!");
+                if (loadFinished)
+                {
+                    Vessel vsl1 = htAct.host.vessel;
+                    Vessel vsl2 = htAct.target.vessel;
+                    //print(vsl1.id + " " + vsl2.id);
+                    if (vsl1 != vsl2) //check to make sure this is not the same vessel docking to itself somehow, both vsl1 and vsl2 would be FG.AC then.
+                    {
+                        //print("Docking event2!");
+                        overrideRootChange = true;
+                        if (vsl1 == FlightGlobals.ActiveVessel || vsl2 == FlightGlobals.ActiveVessel) //check to make sure at least one vessel is FG.AC  Not sure how a docking event could happen when neither vessel is active but make sure
+                        {
+                            if (AGXFlightNode.HasNode(vsl1.id.ToString()))
+                            {
+                                // print("vsl1 found");
+                                ConfigNode vsl1Node = AGXFlightNode.GetNode(vsl1.id.ToString());
+
+                                foreach (ConfigNode prtNode in vsl1Node.nodes)
+                                {
+                                    Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+                                    float partDist = 100f;
+                                    Part gamePart = new Part();
+                                    foreach (Part p in vsl1.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                                    {
+                                        float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                        if (thisPartDist < partDist)
+                                        {
+                                            gamePart = p;
+                                            partDist = thisPartDist;
+                                        }
+                                    }
+                                    foreach (ConfigNode actNode in prtNode.nodes)
+                                    {
+                                        //print("node " + actNode + " " + gamePart.ConstructID);
+                                        AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+                                        //print("act to add " + actToAdd.ba);
+                                        if (actToAdd.ba != null)
+                                        {
+                                            List<AGXAction> Checking = new List<AGXAction>();
+                                            Checking.AddRange(CurrentVesselActions);
+                                            Checking.RemoveAll(p => p.group != actToAdd.group);
+
+                                            Checking.RemoveAll(p => p.prt != actToAdd.prt);
+
+                                            Checking.RemoveAll(p => p.ba != actToAdd.ba);
+
+
+
+                                            if (Checking.Count == 0)
+                                            {
+
+                                                CurrentVesselActions.Add(actToAdd);
+
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            if (AGXFlightNode.HasNode(vsl2.id.ToString()))
+                            {
+                                //print("vsl2 found");
+                                ConfigNode vsl2Node = AGXFlightNode.GetNode(vsl2.id.ToString());
+
+                                foreach (ConfigNode prtNode in vsl2Node.nodes)
+                                {
+                                    Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+                                    float partDist = 100f;
+                                    Part gamePart = new Part();
+                                    foreach (Part p in vsl2.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                                    {
+                                        float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                        if (thisPartDist < partDist)
+                                        {
+                                            gamePart = p;
+                                            partDist = thisPartDist;
+                                        }
+                                    }
+                                    foreach (ConfigNode actNode in prtNode.nodes)
+                                    {
+                                        //print("node " + actNode + " " + gamePart.ConstructID);
+                                        AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+                                        //print("act to add " + actToAdd.ba);
+                                        if (actToAdd.ba != null)
+                                        {
+                                            List<AGXAction> Checking = new List<AGXAction>();
+                                            Checking.AddRange(CurrentVesselActions);
+                                            Checking.RemoveAll(p => p.group != actToAdd.group);
+
+                                            Checking.RemoveAll(p => p.prt != actToAdd.prt);
+
+                                            Checking.RemoveAll(p => p.ba != actToAdd.ba);
+
+
+
+                                            if (Checking.Count == 0)
+                                            {
+
+                                                CurrentVesselActions.Add(actToAdd);
+
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+
+
+
+                        }
+                    }
+                    RefreshCurrentActions();
+                }
+            }
+            catch (Exception e)
+            {
+                print("Docking fail. Ignore this error if you did not just dock. " + e);
+            }
+        }
+
+        public void PartCheckTemp()
+        {
+
+            
+            
             foreach (AGXPartVesselCheck prtCheck in partOldVessel)
             {
                 if (prtCheck.prt == null)
@@ -3305,7 +3564,7 @@ namespace ActionGroupsExtended
                         {
                             vslUpdate.RemoveValue("currentKeyset");
                         }
-                        vslUpdate.AddValue("currentKeyset", CurrentKeySet.ToString());
+                        vslUpdate.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
                         if (vslUpdate.HasValue("groupNames"))
                         {
                             vslUpdate.RemoveValue("groupNames");
@@ -3452,24 +3711,24 @@ namespace ActionGroupsExtended
                     else if (AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString()))
                     {
                      ConfigNode newVsl = new ConfigNode(prtCheck.prt.vessel.id.ToString());
-                        if(RootParts.HasNode(prtCheck.prt.vessel.rootPart.flightID.ToString()))
-                        {
-                            ConfigNode existRoot = RootParts.GetNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
-                            newVsl.AddValue("currentKeyset",existRoot.GetValue("currentKeyset"));
-                        newVsl.AddValue("groupNames", existRoot.GetValue("groupNames"));
-                        newVsl.AddValue("groupVisibility", existRoot.GetValue("groupVisibility"));
-                        newVsl.AddValue("groupVisibilityNames", existRoot.GetValue("groupVisibilityNames"));
-                        }
+                        //if(RootParts.HasNode(prtCheck.prt.vessel.rootPart.flightID.ToString()))
+                        //{
+                        //    ConfigNode existRoot = RootParts.GetNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
+                        //    newVsl.AddValue("currentKeyset",existRoot.GetValue("currentKeyset"));
+                        //newVsl.AddValue("groupNames", existRoot.GetValue("groupNames"));
+                        //newVsl.AddValue("groupVisibility", existRoot.GetValue("groupVisibility"));
+                        //newVsl.AddValue("groupVisibilityNames", existRoot.GetValue("groupVisibilityNames"));
+                        //}
 
-                        else
-                        {
+                        //else
+                        //{
                         ConfigNode oldVsl = AGXFlightNode.GetNode(prtCheck.pVsl.id.ToString());
                         
                         newVsl.AddValue("currentKeyset",oldVsl.GetValue("currentKeyset"));
                         newVsl.AddValue("groupNames", oldVsl.GetValue("groupNames"));
                         newVsl.AddValue("groupVisibility", oldVsl.GetValue("groupVisibility"));
                         newVsl.AddValue("groupVisibilityNames", oldVsl.GetValue("groupVisibilityNames"));
-                        }
+                        //}
                         AGXFlightNode.AddNode(newVsl);
                         loadedVessels.Add(prtCheck.prt.vessel);
                         //print("part change case 2 " +newVsl);
@@ -3479,23 +3738,23 @@ namespace ActionGroupsExtended
                     else if (AGXFlightNode.HasNode(prtCheck.prt.vessel.id.ToString()))
                     {
                         ConfigNode newVsl = new ConfigNode(prtCheck.pVsl.id.ToString());
-                        if (RootParts.HasNode(prtCheck.pVsl.rootPart.flightID.ToString()))
-                        {
-                            ConfigNode existRoot = RootParts.GetNode(prtCheck.pVsl.rootPart.flightID.ToString());
-                            newVsl.AddValue("currentKeyset", existRoot.GetValue("currentKeyset"));
-                            newVsl.AddValue("groupNames", existRoot.GetValue("groupNames"));
-                            newVsl.AddValue("groupVisibility", existRoot.GetValue("groupVisibility"));
-                            newVsl.AddValue("groupVisibilityNames", existRoot.GetValue("groupVisibilityNames"));
-                        }
-                        else
-                        {
+                        //if (RootParts.HasNode(prtCheck.pVsl.rootPart.flightID.ToString()))
+                        //{
+                        //    ConfigNode existRoot = RootParts.GetNode(prtCheck.pVsl.rootPart.flightID.ToString());
+                        //    newVsl.AddValue("currentKeyset", existRoot.GetValue("currentKeyset"));
+                        //    newVsl.AddValue("groupNames", existRoot.GetValue("groupNames"));
+                        //    newVsl.AddValue("groupVisibility", existRoot.GetValue("groupVisibility"));
+                        //    newVsl.AddValue("groupVisibilityNames", existRoot.GetValue("groupVisibilityNames"));
+                        //}
+                        //else
+                        //{
                            
                             ConfigNode oldVsl = AGXFlightNode.GetNode(prtCheck.prt.vessel.id.ToString());
                             newVsl.AddValue("currentKeyset", oldVsl.GetValue("currentKeyset"));
                             newVsl.AddValue("groupNames", oldVsl.GetValue("groupNames"));
                             newVsl.AddValue("groupVisibility", oldVsl.GetValue("groupVisibility"));
                             newVsl.AddValue("groupVisibilityNames", oldVsl.GetValue("groupVisibilityNames"));
-                        }
+                       // }
                         AGXFlightNode.AddNode(newVsl);
                         loadedVessels.Add(prtCheck.pVsl);
                        // print("part change case 3 " + newVsl);
@@ -3554,11 +3813,11 @@ namespace ActionGroupsExtended
 
                 
             }
-            if (ActiveActionsState.Count > 0)
-            {
+            //if (ActiveActionsState.Count > 0)
+            //{
                 CalculateActionsState();
                 CalculateActionsToShow();
-            }
+           // }
            // ActiveActionsCalculated = true;
         }
 
@@ -3696,7 +3955,7 @@ namespace ActionGroupsExtended
                 
                 
             //}
-            LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
+           // LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
 
             for (int i = 1; i <= 10; i++)
             {

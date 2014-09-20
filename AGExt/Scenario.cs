@@ -83,18 +83,34 @@ namespace ActionGroupsExtended //add scenario module for data storage
             }
             foreach (int iGame in existingGamesNum) //check each existing game
             {
+                bool keep = false; // CCraigen - file should be kept
                 //print("Games " + iGame);
                 //if (!persistentGamesNum.Contains(i)) //is the AGX flight file found in a persistent file? if not, delete it. not sure what quicksave is doing, leave a one back file just in case
                 foreach(int iPersist in persistentGamesNum)
                 {
-                    if (iGame != iPersist && iGame != iPersist - 1)
+                    /*if (iGame != iPersist && iGame != iPersist - 1)
                     {
                         //print("Deleted " + new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt" + iGame.ToString("00000") + ".cfg");
                         File.Delete(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt" + iGame.ToString("00000") + ".cfg");
+                    }*/
+
+
+                    // CCraigen - slight change to logic to prevent a mass clobber of all files if there's significantly differing .sfs files present
+                    if (iGame == iPersist || iGame == iPersist - 1)
+                    {
+                        keep = true;
                     }
+                }
+
+                if (!keep)
+                {
+                    File.Delete(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt" + iGame.ToString("00000") + ".cfg");
+                }
+
+                // CCraigen - new logic ends
 
                 }
-            }
+            
 
             
         }

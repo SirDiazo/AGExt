@@ -15,7 +15,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
-            print("AGExt Ver. 1.14 loaded");
+            print("AGExt Ver. 1.16 loaded");
             AGXguiKeys = new Dictionary<int, KeyCode>();
             AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
             LoadCurrentKeyBindings(); //load keyset1 keybindings to assign keys 1 to 10 from KSP settings. need to load entire keyset because it saves as a single string. loading only first 10 would lose keybinds on groups 11-250 when save happens
