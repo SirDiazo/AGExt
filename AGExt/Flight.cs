@@ -224,7 +224,8 @@ namespace ActionGroupsExtended
                 FlightWinShowKeycodes = false;
             }
             
-            UnbindDefaultKeys();
+           // UnbindDefaultKeys();  //obsolete with INputLockManager
+            InputLockManager.SetControlLock(ControlTypes.CUSTOM_ACTION_GROUPS, "AGExtControlLock");
 
             if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
             {
@@ -415,9 +416,9 @@ namespace ActionGroupsExtended
                             errLine = "19";
                             partTemp.AddValue("name", p.vessel.name);
                             partTemp.AddValue("vesselID", p.vessel.id);
-                            partTemp.AddValue("relLocX", p.orgPos.x);
-                            partTemp.AddValue("relLocY", p.orgPos.y);
-                            partTemp.AddValue("relLocZ", p.orgPos.z);
+                            partTemp.AddValue("relLocX", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).x);
+                            partTemp.AddValue("relLocY", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).y);
+                            partTemp.AddValue("relLocZ", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).z);
                             errLine = "20";
                             foreach (AGXAction agxAct in thisPartsActions)
                             {
@@ -753,7 +754,7 @@ namespace ActionGroupsExtended
       
 
 
-        private void UnbindDefaultKeys()
+        private void UnbindDefaultKeys() //not called any more
         {
            //Unbind default keys from Custom 1 through 10. Note this does not save across sessions and so gets reapplied.
            // Save10Keys[1] = GameSettings.CustomActionGroup1.primary;
@@ -831,6 +832,7 @@ namespace ActionGroupsExtended
             GameEvents.onPartAttach.Remove(DockingEvent);
             flightNodeIsLoaded = false;
             loadFinished = false;
+            InputLockManager.RemoveControlLock("AGExtControlLock");
 
         }
 
@@ -2935,11 +2937,12 @@ namespace ActionGroupsExtended
                     errLine = "8";
                     if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //load keyset also
                     {
+                        print("Root part changed, AGX reloading");
                         //print("Root prt ch");
                         if(!overrideRootChange)
                         {
 
-                        print("Root part changed, AGX reloading");
+                        print("Root part changed, AGX reloading B");
                         //loadFinished = false;
                         if (AGXRoot != null)
                         {
@@ -3003,9 +3006,9 @@ namespace ActionGroupsExtended
                                     //errLine = "19";
                                     partTemp.AddValue("name", p.vessel.vesselName);
                                     partTemp.AddValue("vesselID", p.vessel.id);
-                                    partTemp.AddValue("relLocX", p.orgPos.x);
-                                    partTemp.AddValue("relLocY", p.orgPos.y);
-                                    partTemp.AddValue("relLocZ", p.orgPos.z);
+                                    partTemp.AddValue("relLocX", AGXRoot.vessel.rootPart.transform.InverseTransformPoint(p.transform.position).x);
+                                    partTemp.AddValue("relLocY", AGXRoot.vessel.rootPart.transform.InverseTransformPoint(p.transform.position).y);
+                                    partTemp.AddValue("relLocZ", AGXRoot.vessel.rootPart.transform.InverseTransformPoint(p.transform.position).z);
                                     //errLine = "20";
                                     foreach (AGXAction agxAct in thisPartsActions)
                                     {
@@ -3093,7 +3096,7 @@ namespace ActionGroupsExtended
                             Part gamePart = new Part();
                             foreach (Part p in FlightGlobals.ActiveVessel.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                             {
-                                float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                float thisPartDist = Vector3.Distance(partLoc, FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position));
                                 if (thisPartDist < partDist)
                                 {
                                     gamePart = p;
@@ -3333,7 +3336,7 @@ namespace ActionGroupsExtended
             {
                 foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 {
-                    print(p.ConstructID + " " + p.orgPos + " " + p.vessel.rootPart.transform.InverseTransformPoint(p.transform.position));
+                    print(p.ConstructID + " " + p.orgPos + " " + p.vessel.rootPart.transform.InverseTransformPoint(p.transform.position) + " " + p.orgRot);
 
                 }
             }
@@ -3401,9 +3404,9 @@ namespace ActionGroupsExtended
                             //errLine = "19";
                             partTemp.AddValue("name", p.vessel.name);
                             partTemp.AddValue("vesselID", p.vessel.id);
-                            partTemp.AddValue("relLocX", p.orgPos.x);
-                            partTemp.AddValue("relLocY", p.orgPos.y);
-                            partTemp.AddValue("relLocZ", p.orgPos.z);
+                            partTemp.AddValue("relLocX", vsl2.rootPart.transform.InverseTransformPoint(p.transform.position).x);
+                            partTemp.AddValue("relLocY", vsl2.rootPart.transform.InverseTransformPoint(p.transform.position).y);
+                            partTemp.AddValue("relLocZ", vsl2.rootPart.transform.InverseTransformPoint(p.transform.position).z);
                             //errLine = "20";
                             foreach (AGXAction agxAct in thisPartsActions)
                             {
@@ -3439,7 +3442,7 @@ namespace ActionGroupsExtended
                     //print(vsl1.id + " " + vsl2.id);
                     if (vsl1 != vsl2) //check to make sure this is not the same vessel docking to itself somehow, both vsl1 and vsl2 would be FG.AC then.
                     {
-                        //print("Docking event2!");
+                        print("Docking event!");
                         overrideRootChange = true;
                         if (vsl1 == FlightGlobals.ActiveVessel || vsl2 == FlightGlobals.ActiveVessel) //check to make sure at least one vessel is FG.AC  Not sure how a docking event could happen when neither vessel is active but make sure
                         {
@@ -3455,7 +3458,7 @@ namespace ActionGroupsExtended
                                     Part gamePart = new Part();
                                     foreach (Part p in vsl1.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                                     {
-                                        float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                        float thisPartDist = Vector3.Distance(partLoc, vsl1.rootPart.transform.InverseTransformPoint(p.transform.position));
                                         if (thisPartDist < partDist)
                                         {
                                             gamePart = p;
@@ -3503,7 +3506,7 @@ namespace ActionGroupsExtended
                                     Part gamePart = new Part();
                                     foreach (Part p in vsl2.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                                     {
-                                        float thisPartDist = Vector3.Distance(partLoc, p.orgPos);
+                                        float thisPartDist = Vector3.Distance(partLoc, vsl2.rootPart.transform.InverseTransformPoint(p.transform.position));
                                         if (thisPartDist < partDist)
                                         {
                                             gamePart = p;

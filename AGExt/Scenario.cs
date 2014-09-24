@@ -110,37 +110,9 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 // CCraigen - new logic ends
 
                 }
-            
-
-            
         }
-
-
     }
 
-    //AGXData per part
-    //AGXNames per vessel
-    //AGXKeyset per vessel
-    //AGXLOaded no longer needed?
-    //AGXGroupStates per vessel
-    //partAllActions per part, baseAction list
-    
-    
-    //public class AGExtScenVessel
-    //{
-    //    string VslId = "";
-    //    string AGXNames = "";
-    //    int AGXKeySet = 1;
-    //    List<AGXAction> VslActionsList;
-    //}
-
-    //public class AGextScenarioEditor : ScenarioModule //this runs on flight scene start
-    //{
-    //    public override void OnLoad(ConfigNode node)
-    //    {
-    //        AGXEditor.EditorLoadFromFile();
-    //    }
-    //}
     public class AGextScenario : ScenarioModule //this runs on flight scene start
     {
         //public ConfigNode AGXBaseNode = new ConfigNode();
@@ -382,6 +354,36 @@ namespace ActionGroupsExtended //add scenario module for data storage
                     //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                     actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
                 }
+                else if (pmName == "BTSMModuleReactionWheel")
+                {
+                    //string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
+                }
+                else if (pmName == "BTSMModuleCrewReport" || pmName == "BTSMModuleScienceExperiment" || pmName == "BTSMModuleScienceExperimentWithTime")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("experimentActionName") != startEventName);
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
@@ -401,6 +403,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 {
                     errLine = "4";
                     print("AGX actsToCompare.count != 1 "+actsToCompare.Count);
+                    ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 }
                 errLine = "5";
                 if (actsToCompare.Count > 0)
@@ -489,6 +492,15 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("startEventGUIName")); //u2021 is sciencemodule
                 errLine = "22";
             }
+            else if (agxAct.ba.listParent.module.moduleName == "BTSMModuleCrewReport" || agxAct.ba.listParent.module.moduleName == "BTSMModuleScienceExperiment" || agxAct.ba.listParent.module.moduleName == "BTSMModuleScienceExperimentWithTime") //DMagic orbital science mod
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("experimentActionName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            //BTSMModuleReactionWheel does not need custom save, just load
             else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
             {
                 errLine = "23";
@@ -498,6 +510,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
             }
                 return actionNode;
             }
+
             catch(Exception e)
             {
                 print("AGX SaveAGXAction2 FAIL " + errLine+ " " + agxAct.prt.partName+" " + agxAct.ba.name+ " " + e);
