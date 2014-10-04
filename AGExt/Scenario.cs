@@ -20,18 +20,37 @@ namespace ActionGroupsExtended //add scenario module for data storage
             {
                 psm = game.AddProtoScenarioModule(typeof(AGextScenario), GameScenes.FLIGHT);
             }
-            //ProtoScenarioModule psm2 = game.scenarios.Find(s2 => s2.moduleName == typeof(AGextScenarioEditor).Name);
-            //if (psm2 == null)
-            //{
-            //    psm2 = game.AddProtoScenarioModule(typeof(AGextScenarioEditor), GameScenes.EDITOR,GameScenes.SPH);
-            //}
-
-            DeleteOldSaveGames(); //delete old AGext000000.cfg files
+            ProtoScenarioModule psm2 = game.scenarios.Find(s2 => s2.moduleName == typeof(AGextScenarioEditor).Name);
+            if (psm2 == null)
+            {
+                psm2 = game.AddProtoScenarioModule(typeof(AGextScenarioEditor), GameScenes.EDITOR, GameScenes.SPH);
+            }
+            bool ClearOldSaves = true;
+            try
+            {
+                ConfigNode AGXSettings = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                if (AGXSettings.GetValue("DeleteOldSaves") == "0")
+                {
+                    ClearOldSaves = false;
+                }
+                else
+                {
+                    ClearOldSaves = true;
+                }
+            }
+            catch
+            {
+                ClearOldSaves = true;
+            }
+            if (ClearOldSaves)
+            {
+                DeleteOldSaveGames(); //delete old AGext000000.cfg files
+            }
         }
 
         public void DeleteOldSaveGames()
         {
-            //print("Deleteing old save games");
+            print("Deleteing old save games start: " + DateTime.Now);
 
             string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
             List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
@@ -40,7 +59,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
             foreach (string fileName in existingGames) //cycle through found files
             {
                 //print("gamename " + fileName.Substring(dirLength + 1));
-                if(fileName.Substring(dirLength + 1,5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
+                if (fileName.Substring(dirLength + 1, 5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
                 {
                     //print("gamenameb " + fileName.Substring(dirLength + 6,5));
                     try //this will work if file fould is an AGX flight file
@@ -57,10 +76,10 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 {
                     try //this will work on KSP save files
                     {
-                       // print("sfsa");
+                        // print("sfsa");
                         ConfigNode saveNode = ConfigNode.Load(fileName); //load the .sfs file
                         //print("sfsb");
-                        if(saveNode.HasNode("GAME")) //is a KSP save file?//move from the 'root' to "GAME" node
+                        if (saveNode.HasNode("GAME")) //is a KSP save file?//move from the 'root' to "GAME" node
                         {
                             ConfigNode saveNode2 = saveNode.GetNode("GAME");//move from the 'root' to "GAME" node
                             //print("sfsc");
@@ -86,7 +105,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 bool keep = false; // CCraigen - file should be kept
                 //print("Games " + iGame);
                 //if (!persistentGamesNum.Contains(i)) //is the AGX flight file found in a persistent file? if not, delete it. not sure what quicksave is doing, leave a one back file just in case
-                foreach(int iPersist in persistentGamesNum)
+                foreach (int iPersist in persistentGamesNum)
                 {
                     /*if (iGame != iPersist && iGame != iPersist - 1)
                     {
@@ -109,7 +128,21 @@ namespace ActionGroupsExtended //add scenario module for data storage
 
                 // CCraigen - new logic ends
 
-                }
+            }
+
+            print("Deleteing old save games end: " + DateTime.Now);
+        }
+    }
+
+    public class AGextScenarioEditor : ScenarioModule
+    {
+        public override void OnSave(ConfigNode node)
+        {
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                //print("Edit scen save called");
+                AGXEditor.EditorSaveToFile();
+            }
         }
     }
 
@@ -308,7 +341,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         }
                     }
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                   // actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                 }
                 else if (pmName == "ModuleAnimateGeneric")
                 {
@@ -324,6 +357,24 @@ namespace ActionGroupsExtended //add scenario module for data storage
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
                     actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                 }
+                else if (pmName == "FSanimateGeneric")
+                {
+                    print("load it");
+                    string animName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        //ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
+                        if (pm.moduleName == pmName)
+                        {
+                            if ((string)pm.Fields.GetValue("animationName") == animName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                        }
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                }
                 else if (pmName == "DMModuleScienceAnimate")
                 {
                     string startEventName = actNode.GetValue("custom1");
@@ -337,7 +388,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                     }
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
                     //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
                 }
                 else if (pmName == "DMSolarCollector")
                 {
@@ -352,7 +403,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                     }
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
                     //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
                 }
                 else if (pmName == "BTSMModuleReactionWheel")
                 {
@@ -382,7 +433,108 @@ namespace ActionGroupsExtended //add scenario module for data storage
                     }
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
                     //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("experimentActionName") != startEventName);
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("experimentActionName") != (string)startEventName);
+                }
+                else if (pmName == "BTSMModuleResourceActionToggle")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                           // print("Batest " + actNode.GetValue("actionName") + " " + pm.Fields.GetValue("resourceName") + " " + startEventName); 
+                        }
+
+                    }
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{
+                    //    print("1 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{  
+                    //    print("2 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //print("2a " + startEventName);
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("resourceName") != (string)startEventName);
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{
+                    //    print("3 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                }
+                else if (pmName == "Capacitor" || pmName == "DischargeCapacitor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "Capacitor" || pm.moduleName == "DischargeCapacitor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "FissionReprocessor" || pmName == "Nuclear Fuel Reprocessor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "FissionReprocessor" || pm.moduleName == "Nuclear Fuel Reprocessor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "FissionGenerator" || pmName == "Fission Reactor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "FissionGenerator" || pm.moduleName == "Fission Reactor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "ModuleCurvedSolarPanel" || pmName == "Curved Solar Panel") //NearFutureSolar
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "ModuleCurvedSolarPanel" || pm.moduleName == "Curved Solar Panel")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "VariableISPEngine" || pmName == "Variable ISP Engine") //NearFutureSolar
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "VariableISPEngine" || pm.moduleName == "Variable ISP Engine")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "ModuleRTAntenna") //Remotetech
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                       // actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
                 }
                 else
                 {
@@ -392,8 +544,8 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         {
                             actsToCompare.AddRange(pm.Actions);
                         }
-                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
                     }
 
                 }
@@ -476,6 +628,15 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 errLine = "16";
                 //print(MAnim.animationName);
             }
+            else if (agxAct.ba.listParent.module.moduleName == "FSanimateGeneric") //add this to the agxactions list somehow and add to save.load serialze
+            {
+                errLine = "14";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agxAct.ba.listParent.module; //all other modules use guiname
+                errLine = "15";
+                actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("animationName")); //u2021 is sciencemodule
+                errLine = "16";
+                //print(MAnim.animationName);
+            }
             else if (agxAct.ba.listParent.module.moduleName == "DMModuleScienceAnimate") //DMagic orbital science mod
             {
                 errLine = "17";
@@ -498,6 +659,14 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
                 errLine = "21";
                 actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("experimentActionName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "BTSMModuleResourceActionToggle") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("resourceName")); //u2021 is sciencemodule
                 errLine = "22";
             }
             //BTSMModuleReactionWheel does not need custom save, just load

@@ -17,6 +17,7 @@ namespace ActionGroupsExtended
     public class AGXEditor : PartModule
     {
 
+        //private Part AGXRootPart = null;
         private string LastKeyCode = "";
         public static Dictionary<int, bool> IsGroupToggle; //is group a toggle group?
         public static bool[,] ShowGroupInFlight; //Show group in flight?
@@ -80,7 +81,7 @@ namespace ActionGroupsExtended
 
         private static List<BaseAction> PartActionsList;
 
-
+        public static ConfigNode AGXEditorNode;
 
         private static bool ShipListOk = false;
         static Texture2D BtnTexRed = new Texture2D(1, 1);
@@ -262,7 +263,7 @@ namespace ActionGroupsExtended
            EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
            EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
            EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
-           GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
+           //GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
 
            IsGroupToggle = new Dictionary<int, bool>();
            ShowGroupInFlight = new bool[6, 251];
@@ -334,6 +335,8 @@ namespace ActionGroupsExtended
             GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
             GameEvents.onPartRemove.Add(PartRemove);
             EditorLoadFromFile();
+            EditorLoadFromNode();
+
             //print("Loading now");
            LoadFinished = true;
            
@@ -509,6 +512,7 @@ namespace ActionGroupsExtended
                 EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
             }
             AGEditorSelectedParts.Clear();
+            EditorSaveToNode();
             
         }
 
@@ -551,6 +555,7 @@ namespace ActionGroupsExtended
             
             DetachedPartReset.Stop();
             DetachedPartActions.Clear();
+            EditorSaveToNode();
 
         }
 
@@ -631,7 +636,7 @@ namespace ActionGroupsExtended
             //EditorSaveToFile(); //some of my data has already been deleted by this point
             GameEvents.onPartAttach.Remove(PartAttaching);
             GameEvents.onPartRemove.Remove(PartRemove);
-            GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
+            //GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
 
 
             EditorPanels.Instance.actions.RemoveValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
@@ -2296,12 +2301,54 @@ namespace ActionGroupsExtended
                 MonitorDefaultActions();
             }
 
+            if (AGXRoot != EditorLogic.startPod)
+            {
+                print("Root diff");
+                EditorLoadFromNode();
+            }
+
             //foreach (Part p in EditorLogic.SortedShipList)
             //{
             //    print("PartLoc " + p.ConstructID + " " + p.orgPos);
             //}
             //PrintPartPos();
+            //PrintPartActs();
+            //PrintSelectedPart();
             }
+
+        public void PrintSelectedPart()
+        {
+            //print("Selpart " + EditorLogic.fetch.UndoRedo());
+        }
+
+        public void PrintPartActs()
+        {
+            try
+            {
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    
+                    //List<BaseAction> partActs = new List<BaseAction>();
+                   // partActs.AddRange(p.Actions);
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        print(pm.moduleName); 
+                        //partActs.AddRange(pm.Actions);
+                    }
+                    //print(p.ConstructID);
+                    //foreach (BaseAction ba in partActs)
+                    //{
+                    //    print(ba.listParent.module.moduleName + " " + ba.name + " " + ba.guiName);
+                    //}
+                }
+                
+
+            }
+            catch
+            {
+                print("Print fail!");
+            } 
+        }
 
         public void PrintPartPos()
         {
@@ -2487,33 +2534,13 @@ namespace ActionGroupsExtended
             CurrentVesselActions.Clear();
             try
             {
-                if (EditorLogic.SortedShipList.Count > 0)
-                {
+                //if (EditorLogic.SortedShipList.Count > 0)
+                //{
                     //ConfigNode AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
                     errLine = "2";
-                    //if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg"))
-                    //{
-                    //    errLine = "3";
-                    //    AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-                    //    print("AGX ConfigNode Load Okay! (Loading)");
-                    //}
-                    //else
-                    //{
-                    //    errLine = "4";
-                    //    print("AGX ConfigNode not found, creating..... (Loading)");
-                    //    errLine = "5";
-                    //    AGXBaseNode.AddValue("name", "Action Groups Extended save file");
-                    //    AGXBaseNode.AddNode("FLIGHT");
-                    //    errLine = "6";
-                    //    AGXBaseNode.AddNode("EDITOR");
-                    //    errLine = "7";
-                    //    AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-                    //    errLine = "8";
-                    //}
-                    //print("Load 1");
 
                     errLine = "9";
-                    ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
+                    AGXEditorNode = new ConfigNode("EDITOR");
                     AGXEditorNode.AddValue("name", "editor");
 
                     //print("Load 2");
@@ -2530,10 +2557,27 @@ namespace ActionGroupsExtended
                         errLine = "9c";
                         AGXEditorNode = new ConfigNode("EDITOR");
                     }
+                //}
+            }
+            catch(Exception e)
+            {
+                print("AGX EditorLoadFromFile Fail " + errLine + " " + e);
+            }
+        }
 
+            public static void EditorLoadFromNode()
+            {
+                //print("LoadFromNode Called");
+                string errLine = "1";
+                try
+                {
                     errLine = "10";
                     string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
+                    errLine = "10a";
+                    //print(hashedShipName);
                     ConfigNode thisVsl = new ConfigNode();
+                    errLine = "10b";
+                   // print(AGXEditorNode);
                     if (AGXEditorNode.HasNode(hashedShipName))
                     {
                         errLine = "11";
@@ -2579,30 +2623,39 @@ namespace ActionGroupsExtended
                     {
                         LoadGroupVisibilityNames("Group1" + '\u2023' + "Group2" + '\u2023' + "Group3" + '\u2023' + "Group4" + '\u2023' + "Group5");
                     }
+                    errLine = "15a";
+                    //print("adfg " + thisVsl.CountNodes);
                     foreach (ConfigNode prtNode in thisVsl.nodes)
                     {
                         Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
                         float partDist = 100f;
                         Part gamePart = new Part();
-                        foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                        try
                         {
-                            float thisPartDist = Vector3.Distance(partLoc, EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position));
-                            if (thisPartDist < partDist)
+                            foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                             {
-                                gamePart = p;
-                                partDist = thisPartDist;
+                                float thisPartDist = Vector3.Distance(partLoc, EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position));
+                                if (thisPartDist < partDist)
+                                {
+                                    gamePart = p;
+                                    partDist = thisPartDist;
+                                }
+                            }
+                            foreach (ConfigNode actNode in prtNode.nodes)
+                            {
+                                AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+                                if (actToAdd.ba != null)
+                                {
+                                    CurrentVesselActions.Add(actToAdd);
+                                }
                             }
                         }
-                        foreach (ConfigNode actNode in prtNode.nodes)
+                        catch
                         {
-                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
-                            if (actToAdd.ba != null)
-                            {
-                                CurrentVesselActions.Add(actToAdd);
-                            }
+                            //Silently fail, if we hit this it is because EditorLogic.sorted ship list is not valid
                         }
                     }
-
+                    errLine = "15b";
                     List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
                     CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
                     CustomActions.Add(KSPActionGroup.Custom02);
@@ -2618,54 +2671,63 @@ namespace ActionGroupsExtended
                     errLine = "16";
                     // string AddGroup = "";
                     List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
-                    foreach (Part p in EditorLogic.SortedShipList)
+                    try
                     {
-                        partAllActions.AddRange(p.Actions);
-                        foreach (PartModule pm in p.Modules)
+                        foreach (Part p in EditorLogic.SortedShipList)
                         {
-                            partAllActions.AddRange(pm.Actions);
-                        }
-                    }
-
-                    foreach (BaseAction baLoad in partAllActions)
-                    {
-                        foreach (KSPActionGroup agrp in CustomActions)
-                        {
-
-                            if ((baLoad.actionGroup & agrp) == agrp)
+                            partAllActions.AddRange(p.Actions);
+                            foreach (PartModule pm in p.Modules)
                             {
-                                errLine = "17";
-                                ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
-                                //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
-                                AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
-                                List<AGXAction> Checking = new List<AGXAction>();
-                                Checking.AddRange(CurrentVesselActions);
-                                Checking.RemoveAll(p => p.group != ToAdd.group);
-
-                                Checking.RemoveAll(p => p.prt != ToAdd.prt);
-
-                                Checking.RemoveAll(p => p.ba != ToAdd.ba);
-
-
-
-                                if (Checking.Count == 0)
-                                {
-
-                                    CurrentVesselActions.Add(ToAdd);
-
-                                }
+                                partAllActions.AddRange(pm.Actions);
                             }
                         }
-                        errLine = "18";
+
+                        foreach (BaseAction baLoad in partAllActions)
+                        {
+                            foreach (KSPActionGroup agrp in CustomActions)
+                            {
+
+                                if ((baLoad.actionGroup & agrp) == agrp)
+                                {
+                                    errLine = "17";
+                                    ////AddGroup = AddGroup + '\u2023' + (CustomActions.IndexOf(agrp) + 1).ToString("000") + baLoad.guiName;
+                                    //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
+                                    AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
+                                    List<AGXAction> Checking = new List<AGXAction>();
+                                    Checking.AddRange(CurrentVesselActions);
+                                    Checking.RemoveAll(p => p.group != ToAdd.group);
+
+                                    Checking.RemoveAll(p => p.prt != ToAdd.prt);
+
+                                    Checking.RemoveAll(p => p.ba != ToAdd.ba);
+
+
+
+                                    if (Checking.Count == 0)
+                                    {
+
+                                        CurrentVesselActions.Add(ToAdd);
+
+                                    }
+                                }
+                            }
+                            errLine = "18";
+                        }
                     }
+                    catch
+                    {
+                        //silently fail, if we hit this EditorLogic.sortedShipList is not valid
+                    }
+                    AGXRoot = EditorLogic.startPod;
                 }
 
-            }
+            
             catch (Exception e)
             {
-                print("AGXEd EditorLoadFromFile Fail " + errLine + " " + e);
+                print("AGXEd EditorLoadFromNode Fail " + errLine + " " + e);
             }
         }
+
 
         //public void LoadActionGroups()
         //{
@@ -2861,21 +2923,33 @@ namespace ActionGroupsExtended
 
         public static void EditorSaveToFile()
         {
-            //print("EditorSaveToFile called"); 
+            EditorSaveToNode();
+            EditorWriteNodeToFile();
+
+        }
+
+        public static void EditorWriteNodeToFile()
+        {
+            AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        }
+
+        public static void EditorSaveToNode()
+        {
+            print("AGX EditorSaveToFile called"); 
             string errLine = "1";
             try
             {
                 if (EditorLogic.SortedShipList.Count > 0)
                 {
-                    ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
-                    AGXEditorNode.AddValue("name", "editor");
+                    //ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
+                    //AGXEditorNode.AddValue("name", "editor");
                     errLine = "2";
-                    if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
-                    {
-                        errLine = "3";
-                        AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                        //print("AGX ConfigNode Load Okay! (Saving)");
-                    }
+                    //if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+                    //{
+                    //    errLine = "3";
+                    //    AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                    //    //print("AGX ConfigNode Load Okay! (Saving)");
+                    //}
                     // else
                     //{
                     //errLine = "4";
@@ -2969,7 +3043,7 @@ namespace ActionGroupsExtended
                     errLine = "26";
                     //AGXBaseNode.AddNode(AGXEditorNode);
                     errLine = "27";
-                    AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                   // AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
                     //print("Saved this node " + AGXEditorNode);
                     errLine = "28";
                 }

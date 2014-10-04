@@ -1008,7 +1008,17 @@ namespace ActionGroupsExtended
         public static void ActivateActionGroup(int group)
         {
 
-           
+            Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+            CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
+            CustomActions.Add(2, KSPActionGroup.Custom02);
+            CustomActions.Add(3, KSPActionGroup.Custom03);
+            CustomActions.Add(4, KSPActionGroup.Custom04);
+            CustomActions.Add(5, KSPActionGroup.Custom05);
+            CustomActions.Add(6, KSPActionGroup.Custom06);
+            CustomActions.Add(7, KSPActionGroup.Custom07);
+            CustomActions.Add(8, KSPActionGroup.Custom08);
+            CustomActions.Add(9, KSPActionGroup.Custom09);
+            CustomActions.Add(10, KSPActionGroup.Custom10);
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
@@ -1025,6 +1035,10 @@ namespace ActionGroupsExtended
                             agxAct.activated = false;
                         }
                     }
+                    if (group <= 10)
+                    {
+                        FlightGlobals.ActiveVessel.ActionGroups[CustomActions[group]] = false;
+                    }
                   
                 }
                 else
@@ -1038,6 +1052,10 @@ namespace ActionGroupsExtended
                         {
                             agxAct.activated = true;
                         }
+                    }
+                    if (group <= 10)
+                    {
+                        FlightGlobals.ActiveVessel.ActionGroups[CustomActions[group]] = true;
                     }
                   
                     
@@ -3138,6 +3156,10 @@ namespace ActionGroupsExtended
                                 partAllActions.AddRange(pm.Actions);
                             }
 
+                            //foreach (BaseAction ba in partAllActions)
+                            //{
+                            //    print(ba.listParent.part + " " + ba.listParent.module.moduleName + " " + ba.name + " " + ba.guiName);
+                            //}
                             // print("part orgpos " + p.ConstructID+ " "  + p.orgPos + " " + p.orgRot);
                         }
 
@@ -3179,6 +3201,9 @@ namespace ActionGroupsExtended
 
 
                         AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+
+                       
+
                         overrideRootChange = false;
                         LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
                         AGEditorSelectedParts.Clear();
@@ -3323,10 +3348,39 @@ namespace ActionGroupsExtended
 
             //}
             //PrintPartPos();
+            //PrintPartActs();
+            //print("Acts " + FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Custom01]);
         }
             catch(Exception e)
             {
                 print("AGX Update error: " + errLine + " " + e);
+            }
+        }
+
+        public void PrintPartActs()
+        {
+            try
+            {
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    List<BaseAction> partActs = new List<BaseAction>();
+                    partActs.AddRange(p.Actions);
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        partActs.AddRange(pm.Actions);
+                    }
+                    print(p.ConstructID);
+                    foreach (BaseAction ba in partActs)
+                    {
+                        print(ba.listParent.module.moduleName + " " + ba.name + " " + ba.guiName);
+                    }
+                }
+
+
+            }
+            catch
+            {
+                print("Print fail!");
             }
         }
 
