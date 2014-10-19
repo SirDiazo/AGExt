@@ -15,7 +15,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
-            print("AGExt Ver. 1.18 loaded");
+            print("AGExt Ver. 1.19 loaded");
             //below no longer needed with InputLockManager
             //AGXguiKeys = new Dictionary<int, KeyCode>();
             //AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
@@ -47,21 +47,21 @@ namespace ActionGroupsExtended
             AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg"); //save config node to disk
         }
 
-        public void KeysWriteKSPtoAGX()
-        {
+        //public void KeysWriteKSPtoAGX()
+        //{
 
-            AGXguiKeys[1] = GameSettings.CustomActionGroup1.primary;
-            AGXguiKeys[2] = GameSettings.CustomActionGroup2.primary;
-            AGXguiKeys[3] = GameSettings.CustomActionGroup3.primary;
-            AGXguiKeys[4] = GameSettings.CustomActionGroup4.primary;
-            AGXguiKeys[5] = GameSettings.CustomActionGroup5.primary;
-            AGXguiKeys[6] = GameSettings.CustomActionGroup6.primary;
-            AGXguiKeys[7] = GameSettings.CustomActionGroup7.primary;
-            AGXguiKeys[8] = GameSettings.CustomActionGroup8.primary;
-            AGXguiKeys[9] = GameSettings.CustomActionGroup9.primary;
-            AGXguiKeys[10] = GameSettings.CustomActionGroup10.primary;
+        //    AGXguiKeys[1] = GameSettings.CustomActionGroup1.primary;
+        //    AGXguiKeys[2] = GameSettings.CustomActionGroup2.primary;
+        //    AGXguiKeys[3] = GameSettings.CustomActionGroup3.primary;
+        //    AGXguiKeys[4] = GameSettings.CustomActionGroup4.primary;
+        //    AGXguiKeys[5] = GameSettings.CustomActionGroup5.primary;
+        //    AGXguiKeys[6] = GameSettings.CustomActionGroup6.primary;
+        //    AGXguiKeys[7] = GameSettings.CustomActionGroup7.primary;
+        //    AGXguiKeys[8] = GameSettings.CustomActionGroup8.primary;
+        //    AGXguiKeys[9] = GameSettings.CustomActionGroup9.primary;
+        //    AGXguiKeys[10] = GameSettings.CustomActionGroup10.primary;
             
-        }
+        //}
 
         public void LoadCurrentKeyBindings()
         {

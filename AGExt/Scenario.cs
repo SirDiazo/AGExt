@@ -189,15 +189,15 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 }
                 //print("AGXScenLoad " + lastAGXSave);
                 AGXFlight.AGXFlightNode = currentFlightNode;
-                if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg"))
-                {
-                    AGXFlight.RootParts = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg");
-                }
-                else
-                {
-                    AGXFlight.RootParts = new ConfigNode("ROOTPARTS");
-                    AGXFlight.RootParts.AddValue("name", "rootParts");
-                }
+                //if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg"))
+                //{
+                //    AGXFlight.RootParts = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtRootParts.cfg");
+                //}
+                //else
+                //{
+                //    AGXFlight.RootParts = new ConfigNode("ROOTPARTS");
+                //    AGXFlight.RootParts.AddValue("name", "rootParts");
+                //}
 
                 AGXFlight.flightNodeIsLoaded = true;
                 //print("Node laeded! "+ currentFlightNode);
@@ -292,7 +292,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
             return hashedName;
         }
 
-        public static AGXAction LoadAGXActionVer2(ConfigNode actNode, Part actPart)
+        public static AGXAction LoadAGXActionVer2(ConfigNode actNode, Part actPart, bool showAmbiguousMessage)
         {
             string errLine ="1";
             //print("load action " + actPart.partName + " " + actNode);
@@ -555,7 +555,10 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 {
                     errLine = "4";
                     print("AGX actsToCompare.count != 1 "+actsToCompare.Count);
-                    ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"), 10F, ScreenMessageStyle.UPPER_CENTER);
+                    if (showAmbiguousMessage)
+                    {
+                        ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"), 10F, ScreenMessageStyle.UPPER_CENTER);
+                    }
                 }
                 errLine = "5";
                 if (actsToCompare.Count > 0)

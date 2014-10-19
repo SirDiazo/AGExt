@@ -125,221 +125,240 @@ namespace ActionGroupsExtended
         public void Start()
         {
             //foreach (Part p in 
-
+            string errLine = "1";
             //var EdPnl = EditorPanels.Instance.actions;
             //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
-            KSPActs[1] = KSPActionGroup.Custom01;
-            KSPActs[2] = KSPActionGroup.Custom02;
-            KSPActs[3] = KSPActionGroup.Custom03;
-            KSPActs[4] = KSPActionGroup.Custom04;
-            KSPActs[5] = KSPActionGroup.Custom05;
-            KSPActs[6] = KSPActionGroup.Custom06;
-            KSPActs[7] = KSPActionGroup.Custom07;
-            KSPActs[8] = KSPActionGroup.Custom08;
-            KSPActs[9] = KSPActionGroup.Custom09;
-            KSPActs[10] = KSPActionGroup.Custom10;
-            
-            TestWin = new Rect(600, 300, 100, 200);
-            RenderingManager.AddToPostDrawQueue(0, AGXOnDraw);
-            AGEditorSelectedParts = new List<AGXPart>();
-            PartActionsList = new List<BaseAction>();
-            ScrollPosSelParts = Vector2.zero;
-            ScrollPosSelPartsActs = Vector2.zero;
-            ScrollGroups = Vector2.zero;
-            CurGroupsWin = Vector2.zero;
-            
-            //AGXVsl = new AGXVessel();
-            
-            AGXWinStyle = new GUIStyle(HighLogic.Skin.window);
-            
-            BtnTexRed.SetPixel(0, 0, new Color(1, 0, 0, .5f));
-            BtnTexRed.Apply();
-            BtnTexGrn.SetPixel(0, 0, new Color(0, 1, 0, .5f));
-            BtnTexGrn.Apply();
-            
-            AGXguiNames = new Dictionary<int,string>();
-            
-            
-            AGXguiKeys = new Dictionary<int, KeyCode>();
-           
-
-           
-            for (int i = 1; i <= 250; i = i + 1)
+            try
             {
-                AGXguiNames[i] = "";
-                AGXguiKeys[i] = KeyCode.None;
+                errLine = "2";
+                KSPActs[1] = KSPActionGroup.Custom01;
+                KSPActs[2] = KSPActionGroup.Custom02;
+                KSPActs[3] = KSPActionGroup.Custom03;
+                KSPActs[4] = KSPActionGroup.Custom04;
+                KSPActs[5] = KSPActionGroup.Custom05;
+                KSPActs[6] = KSPActionGroup.Custom06;
+                KSPActs[7] = KSPActionGroup.Custom07;
+                KSPActs[8] = KSPActionGroup.Custom08;
+                KSPActs[9] = KSPActionGroup.Custom09;
+                KSPActs[10] = KSPActionGroup.Custom10;
+
+                TestWin = new Rect(600, 300, 100, 200);
+                RenderingManager.AddToPostDrawQueue(0, AGXOnDraw);
+                AGEditorSelectedParts = new List<AGXPart>();
+                PartActionsList = new List<BaseAction>();
+                ScrollPosSelParts = Vector2.zero;
+                ScrollPosSelPartsActs = Vector2.zero;
+                ScrollGroups = Vector2.zero;
+                CurGroupsWin = Vector2.zero;
+
+                //AGXVsl = new AGXVessel();
+
+                AGXWinStyle = new GUIStyle(HighLogic.Skin.window);
+
+                BtnTexRed.SetPixel(0, 0, new Color(1, 0, 0, .5f));
+                BtnTexRed.Apply();
+                BtnTexGrn.SetPixel(0, 0, new Color(0, 1, 0, .5f));
+                BtnTexGrn.Apply();
+
+                AGXguiNames = new Dictionary<int, string>();
+
+
+                AGXguiKeys = new Dictionary<int, KeyCode>();
+
+
+
+                for (int i = 1; i <= 250; i = i + 1)
+                {
+                    AGXguiNames[i] = "";
+                    AGXguiKeys[i] = KeyCode.None;
+                }
+                errLine = "3";
+
+                KeyCodeNames = new List<String>();
+                KeyCodeNames.AddRange(Enum.GetNames(typeof(KeyCode)));
+                KeyCodeNames.Remove("None");
+                JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
+                KeyCodeNames.RemoveAll(JoySticks);
+                AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                errLine = "4";
+                if (AGExtNode.GetValue("EditShow") == "0")
+                {
+                    AGXShow = false;
+                }
+                else
+                {
+                    AGXShow = true;
+                }
+                errLine = "5";
+                CurrentKeySet = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
+                errLine = "6";
+                //LoadCurrentKeySet();
+                CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
+                errLine = "7";
+                CurrentVesselActions = new List<AGXAction>();
+                errLine = "8";
+                AGXRoot = null;
+                errLine = "9";
+                GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdGroupsX")), Convert.ToInt32(AGExtNode.GetValue("EdGroupsY")), 250, 530);
+                errLine = "10";
+                SelPartsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdSelPartsX")), Convert.ToInt32(AGExtNode.GetValue("EdSelPartsY")), 365, 270);
+                errLine = "11";
+                KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeY")), 410, 730);
+                errLine = "12";
+                KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeySetX")), Convert.ToInt32(AGExtNode.GetValue("EdKeySetY")), 185, 335);
+                errLine = "13";
+                CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdCurActsX")), Convert.ToInt32(AGExtNode.GetValue("EdCurActsY")), 345, 140);
+                errLine = "14";
+
+
+
+                LoadCurrentKeyBindings();
+
+                errLine = "15";
+                if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
+                {
+
+
+                    AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
+                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
+                    AGXBtn.ToolTip = "Action Groups Extended";
+                    AGXBtn.OnClick += (e) =>
+                    {
+                        //List<UnityEngine.Transform> UIPanelList = new List<UnityEngine.Transform>(); //setup list to find Editor Actions UI transform into a list. Could not figure out how to find just a transform
+                        //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
+                        if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                        {
+                            if (AGXShow)
+                            {
+                                //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                                AGXShow = false;
+                                AGExtNode.SetValue("EditShow", "0");
+                                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+
+                            }
+                            else
+                            {
+                                // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                                AGXShow = true;
+                                AGExtNode.SetValue("EditShow", "1");
+                                EditorPanels.Instance.panelManager.Dismiss();
+                            }
+                            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                        }
+                        else
+                        {
+                            EditorLogic.fetch.SelectPanelActions();
+                        }
+                    };
+                }
+                else
+                {
+                    AGXShow = true; //toolbar not installed, show AGX regardless
+                }
+                errLine = "16";
+
+                DetachedPartActions = new List<AGXAction>();
+
+                DetachedPartReset = new Timer();
+                DetachedPartReset.Interval = 500;
+
+                DetachedPartReset.Stop();
+                DetachedPartReset.AutoReset = true;
+
+                DetachedPartReset.Elapsed += new ElapsedEventHandler(ResetDetachedParts);
+
+                SelectedWithSym = new List<Part>();
+                SelectedWithSymActions = new List<AGXDefaultCheck>();
+                errLine = "17";
+                EditorPanels.Instance.actions.AddValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
+                EditorLogic.fetch.crewPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Part button clicked at top of screen
+                EditorLogic.fetch.partPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Crew button clicked at top of screen
+                EditorLogic.fetch.loadBtn.AddValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
+                EditorLogic.fetch.saveBtn.AddValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
+                EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                //GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
+                errLine = "18";
+                IsGroupToggle = new Dictionary<int, bool>();
+                ShowGroupInFlight = new bool[6, 251];
+                ShowGroupInFlightNames = new string[6];
+
+                ShowGroupInFlightNames[1] = "Group 1";
+                ShowGroupInFlightNames[2] = "Group 2";
+                ShowGroupInFlightNames[3] = "Group 3";
+                ShowGroupInFlightNames[4] = "Group 4";
+                ShowGroupInFlightNames[5] = "Group 5";
+
+                errLine = "19";
+
+                for (int i = 1; i <= 250; i++)
+                {
+                    IsGroupToggle[i] = false;
+                    for (int i2 = 1; i2 <= 5; i2++)
+                    {
+                        ShowGroupInFlight[i2, i] = true;
+                    }
+                }
+                AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
+                AGXWinStyle = new GUIStyle(AGXSkin.window);
+                AGXLblStyle = new GUIStyle(AGXSkin.label);
+                AGXFldStyle = new GUIStyle(AGXSkin.textField);
+                AGXFldStyle.fontStyle = FontStyle.Normal;
+                //AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1);
+                AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                AGXLblStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                AGXLblStyle.wordWrap = false;
+                errLine = "20";
+                AGXBtnStyle = new GUIStyle(AGXSkin.button);
+                AGXBtnStyle.fontStyle = FontStyle.Normal;
+                AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+                AGXBtnStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+                //AGXScrollStyle.normal.background = null;
+                //print("AGX " + AGXBtnStyle.normal.background);
+                byte[] importTxt = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTexture.png");
+                byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
+                byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
+                byte[] importPartCenter = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocationCross.png");
+                //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
+                //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
+                ButtonTexture.LoadImage(importTxt);
+                ButtonTexture.Apply();
+                ButtonTextureRed.LoadImage(importTxtRed);
+                ButtonTextureRed.Apply();
+                ButtonTextureGreen.LoadImage(importTxtGreen);
+                ButtonTextureGreen.Apply();
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.onNormal.background = ButtonTexture;
+                AGXBtnStyle.onActive.background = ButtonTexture;
+                AGXBtnStyle.onFocused.background = ButtonTexture;
+                AGXBtnStyle.onHover.background = ButtonTexture;
+                AGXBtnStyle.active.background = ButtonTexture;
+                AGXBtnStyle.focused.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
+                PartCenter.LoadImage(importPartCenter);
+                PartCenter.Apply();
+                //EditorLoadFromFile();
+                if (HighLogic.LoadedScene == GameScenes.EDITOR)
+                {
+                    inVAB = true;
+                }
+                else
+                {
+                    inVAB = false;
+                }
+                GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
+                GameEvents.onPartRemove.Add(PartRemove);
+                EditorLoadFromFile();
+                EditorLoadFromNode();
+                errLine = "21";
+                //print("Loading now");
+                LoadFinished = true;
             }
-
-            
-            KeyCodeNames = new List<String>();
-            KeyCodeNames.AddRange(Enum.GetNames(typeof(KeyCode)));
-            KeyCodeNames.Remove("None");
-            JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
-            KeyCodeNames.RemoveAll(JoySticks);
-           AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-           if (AGExtNode.GetValue("EditShow") == "0")
-           {
-               AGXShow = false;
-           }
-           else
-           {
-               AGXShow = true;
-           }
-           CurrentKeySet = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
-           //LoadCurrentKeySet();
-           CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
-           CurrentVesselActions = new List<AGXAction>();
-           AGXRoot = null;
-           GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdGroupsX")), Convert.ToInt32(AGExtNode.GetValue("EdGroupsY")), 250, 530);
-           SelPartsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdSelPartsX")), Convert.ToInt32(AGExtNode.GetValue("EdSelPartsY")), 365, 270);
-           KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeY")), 410, 730);
-           KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeySetX")), Convert.ToInt32(AGExtNode.GetValue("EdKeySetY")), 185, 335);
-           CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdCurActsX")), Convert.ToInt32(AGExtNode.GetValue("EdCurActsY")), 345, 140);
-            
-
-
-           LoadCurrentKeyBindings();
-
-
-           if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
-           {
-
-
-               AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
-               AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
-               AGXBtn.ToolTip = "Action Groups Extended";
-               AGXBtn.OnClick += (e) =>
-               {
-                   //List<UnityEngine.Transform> UIPanelList = new List<UnityEngine.Transform>(); //setup list to find Editor Actions UI transform into a list. Could not figure out how to find just a transform
-                   //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
-                   if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
-                   {
-                       if (AGXShow)
-                       {
-                           //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
-                           AGXShow = false;
-                           AGExtNode.SetValue("EditShow", "0");
-                           EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-
-                       }
-                       else
-                       {
-                           // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
-                           AGXShow = true;
-                           AGExtNode.SetValue("EditShow", "1");
-                           EditorPanels.Instance.panelManager.Dismiss();
-                       }
-                       AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-                   }
-                   else
-                   {
-                       EditorLogic.fetch.SelectPanelActions();
-                   }
-               };
-           }
-           else
-           {
-               AGXShow = true; //toolbar not installed, show AGX regardless
-           }
-           
-           DetachedPartActions = new List<AGXAction>();
-          
-            DetachedPartReset = new Timer();
-           DetachedPartReset.Interval = 500;
-           
-           DetachedPartReset.Stop();
-           DetachedPartReset.AutoReset = true;
-           
-           DetachedPartReset.Elapsed += new ElapsedEventHandler(ResetDetachedParts);
-
-           SelectedWithSym = new List<Part>();
-           SelectedWithSymActions = new List<AGXDefaultCheck>();
-
-           EditorPanels.Instance.actions.AddValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
-           EditorLogic.fetch.crewPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Part button clicked at top of screen
-           EditorLogic.fetch.partPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Crew button clicked at top of screen
-           EditorLogic.fetch.loadBtn.AddValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
-           EditorLogic.fetch.saveBtn.AddValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
-           EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
-           EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
-           EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
-           //GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
-
-           IsGroupToggle = new Dictionary<int, bool>();
-           ShowGroupInFlight = new bool[6, 251];
-           ShowGroupInFlightNames = new string[6];
-           
-           ShowGroupInFlightNames[1] = "Group 1";
-           ShowGroupInFlightNames[2] = "Group 2";
-           ShowGroupInFlightNames[3] = "Group 3";
-           ShowGroupInFlightNames[4] = "Group 4";
-           ShowGroupInFlightNames[5] = "Group 5";
-           
-           
-           
-            for (int i = 1; i <= 250; i++)
-           {
-               IsGroupToggle[i] = false;
-               for (int i2 = 1; i2 <= 5; i2++)
-               {
-                   ShowGroupInFlight[i2, i] = true;
-               }
-           }
-            AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
-            AGXWinStyle = new GUIStyle(AGXSkin.window);
-            AGXLblStyle = new GUIStyle(AGXSkin.label);
-            AGXFldStyle = new GUIStyle(AGXSkin.textField);
-            AGXFldStyle.fontStyle = FontStyle.Normal;
-            //AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1);
-            AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            AGXLblStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            AGXLblStyle.wordWrap = false;
-
-            AGXBtnStyle = new GUIStyle(AGXSkin.button);
-            AGXBtnStyle.fontStyle = FontStyle.Normal;
-            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
-            AGXBtnStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-            //AGXScrollStyle.normal.background = null;
-            //print("AGX " + AGXBtnStyle.normal.background);
-            byte[] importTxt = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTexture.png");
-            byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
-            byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
-            byte[] importPartCenter = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocationCross.png");
-            //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
-            //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
-            ButtonTexture.LoadImage(importTxt);
-            ButtonTexture.Apply();
-            ButtonTextureRed.LoadImage(importTxtRed);
-            ButtonTextureRed.Apply();
-            ButtonTextureGreen.LoadImage(importTxtGreen);
-            ButtonTextureGreen.Apply();
-            AGXBtnStyle.normal.background = ButtonTexture;
-            AGXBtnStyle.onNormal.background = ButtonTexture;
-            AGXBtnStyle.onActive.background = ButtonTexture;
-            AGXBtnStyle.onFocused.background = ButtonTexture;
-            AGXBtnStyle.onHover.background = ButtonTexture;
-            AGXBtnStyle.active.background = ButtonTexture;
-            AGXBtnStyle.focused.background = ButtonTexture;
-            AGXBtnStyle.hover.background = ButtonTexture;
-            PartCenter.LoadImage(importPartCenter);
-            PartCenter.Apply();
-            //EditorLoadFromFile();
-            if (HighLogic.LoadedScene == GameScenes.EDITOR)
+            catch(Exception e)
             {
-                inVAB = true;
+                print("AGX Editor Start Fail " + errLine + " " + e);
             }
-            else
-            {
-                inVAB = false;
-            }
-            GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
-            GameEvents.onPartRemove.Add(PartRemove);
-            EditorLoadFromFile();
-            EditorLoadFromNode();
-
-            //print("Loading now");
-           LoadFinished = true;
-           
            }
 
         public void PartAttaching(GameEvents.HostTargetAction<Part,Part> host_target)
@@ -574,7 +593,7 @@ namespace ActionGroupsExtended
                         foreach(AGXAction agAct in DetachedPartActions.Where(p3 => p3.ba.listParent.part == p2))
                         {
                             //print("d5");
-                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p);
+                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p,false);
                             if (actToAdd.ba != null)
                             {
                                 List<AGXAction> Checking = new List<AGXAction>();
@@ -1224,37 +1243,37 @@ namespace ActionGroupsExtended
 
                 AGExtNode.SetValue("KeySet" + CurrentKeySet.ToString(), SaveString);
                 AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-                if (CurrentKeySet == 1)
-                {
-                    SaveDefaultCustomKeys();
-                }
+                //if (CurrentKeySet == 1)
+                //{
+                //    SaveDefaultCustomKeys();
+                //}
               
             
         }
-        public static void SaveDefaultCustomKeys()
-        {
-            GameSettings.CustomActionGroup1.primary = AGXguiKeys[1]; //copy keys to KSP itself
-            GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
-            GameSettings.CustomActionGroup3.primary = AGXguiKeys[3];
-            GameSettings.CustomActionGroup4.primary = AGXguiKeys[4];
-            GameSettings.CustomActionGroup5.primary = AGXguiKeys[5];
-            GameSettings.CustomActionGroup6.primary = AGXguiKeys[6];
-            GameSettings.CustomActionGroup7.primary = AGXguiKeys[7];
-            GameSettings.CustomActionGroup8.primary = AGXguiKeys[8];
-            GameSettings.CustomActionGroup9.primary = AGXguiKeys[9];
-            GameSettings.CustomActionGroup10.primary = AGXguiKeys[10];
-            GameSettings.SaveSettings(); //save keys to disk
-            GameSettings.CustomActionGroup1.primary = KeyCode.None; //unbind keys so they don't conflict
-            GameSettings.CustomActionGroup2.primary = KeyCode.None;
-            GameSettings.CustomActionGroup3.primary = KeyCode.None;
-            GameSettings.CustomActionGroup4.primary = KeyCode.None;
-            GameSettings.CustomActionGroup5.primary = KeyCode.None;
-            GameSettings.CustomActionGroup6.primary = KeyCode.None;
-            GameSettings.CustomActionGroup7.primary = KeyCode.None;
-            GameSettings.CustomActionGroup8.primary = KeyCode.None;
-            GameSettings.CustomActionGroup9.primary = KeyCode.None;
-            GameSettings.CustomActionGroup10.primary = KeyCode.None;
-        }
+        //public static void SaveDefaultCustomKeys()
+        //{
+        //    GameSettings.CustomActionGroup1.primary = AGXguiKeys[1]; //copy keys to KSP itself
+        //    GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
+        //    GameSettings.CustomActionGroup3.primary = AGXguiKeys[3];
+        //    GameSettings.CustomActionGroup4.primary = AGXguiKeys[4];
+        //    GameSettings.CustomActionGroup5.primary = AGXguiKeys[5];
+        //    GameSettings.CustomActionGroup6.primary = AGXguiKeys[6];
+        //    GameSettings.CustomActionGroup7.primary = AGXguiKeys[7];
+        //    GameSettings.CustomActionGroup8.primary = AGXguiKeys[8];
+        //    GameSettings.CustomActionGroup9.primary = AGXguiKeys[9];
+        //    GameSettings.CustomActionGroup10.primary = AGXguiKeys[10];
+        //    GameSettings.SaveSettings(); //save keys to disk
+        //    GameSettings.CustomActionGroup1.primary = KeyCode.None; //unbind keys so they don't conflict
+        //    GameSettings.CustomActionGroup2.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup3.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup4.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup5.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup6.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup7.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup8.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup9.primary = KeyCode.None;
+        //    GameSettings.CustomActionGroup10.primary = KeyCode.None;
+        //}
         public void KeyCodeWindow(int WindowID)
         {
             if (GUI.Button(new Rect(5, 3, 100, 25), "None", AGXBtnStyle))
@@ -2303,7 +2322,7 @@ namespace ActionGroupsExtended
 
             if (AGXRoot != EditorLogic.startPod)
             {
-                print("Root diff");
+               // print("Root diff");
                 EditorLoadFromNode();
             }
 
@@ -2641,9 +2660,18 @@ namespace ActionGroupsExtended
                                     partDist = thisPartDist;
                                 }
                             }
+                            bool ShowAmbiguousMessage = true;
+                            if (partDist < 0.3f) //do not show it if part found is more then 0.3meters off
+                            {
+                                ShowAmbiguousMessage = true;
+                            }
+                            else
+                            {
+                                ShowAmbiguousMessage = false;
+                            }
                             foreach (ConfigNode actNode in prtNode.nodes)
                             {
-                                AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart);
+                                AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage);
                                 if (actToAdd.ba != null)
                                 {
                                     CurrentVesselActions.Add(actToAdd);
@@ -2930,7 +2958,15 @@ namespace ActionGroupsExtended
 
         public static void EditorWriteNodeToFile()
         {
-            AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+            try
+            {
+                AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+            }
+            catch (Exception e)
+            {
+                print("AGX EditorWriteNodeToFileFail " + e);
+            }
+
         }
 
         public static void EditorSaveToNode()
