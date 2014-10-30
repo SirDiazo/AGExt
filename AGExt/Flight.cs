@@ -129,7 +129,8 @@ namespace ActionGroupsExtended
         bool highlightPartThisFrameActsWin = false;
         Part partToHighlight = null;
         Texture2D PartCenter = new Texture2D(41, 41);
-        
+        Texture2D PartCross = new Texture2D(21, 21);
+        Texture2D PartPlus = new Texture2D(21, 21);
         bool showAllPartsList = false; //show list of all parts in group window?
         List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
 
@@ -140,6 +141,7 @@ namespace ActionGroupsExtended
         Vector2 groupWinScroll = new Vector2();
         bool highlightPartThisFrameGroupWin = false;
         private bool overrideRootChange = false; //if docking event, do NOT run root change code
+        List<AGXAction> ThisGroupActions;
 
 
 
@@ -160,7 +162,7 @@ namespace ActionGroupsExtended
         {
             defaultActionsListThisType = new List<BaseAction>(); //initialize list
             defaultActionsListAll = new List<BaseAction>(); //initialize list
-            
+            ThisGroupActions = new List<AGXAction>();
             //Save10Keys = new Dictionary<int, KeyCode>();
             //foreach (Part p in 
             ActiveKeys = new List<KeyCode>();
@@ -333,6 +335,8 @@ namespace ActionGroupsExtended
             byte[] importTxtRed = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureRed.png");
             byte[] importTxtGreen = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/ButtonTextureGreen.png");
             byte[] importPartCenter = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocationCross.png");
+            byte[] importPartCross = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocCross.png");
+            byte[] importPartPlus = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocPlus.png");
             //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
             ButtonTexture.LoadImage(importTxt);
@@ -351,6 +355,10 @@ namespace ActionGroupsExtended
             AGXBtnStyle.hover.background = ButtonTexture;
             PartCenter.LoadImage(importPartCenter);
             PartCenter.Apply();
+            PartCross.LoadImage(importPartCross);
+            PartCross.Apply();
+            PartPlus.LoadImage(importPartPlus);
+            PartPlus.Apply();
             SettingsWinRect = new Rect(500, 500, 150, 75);
             partOldVessel = new List<AGXPartVesselCheck>();
             //GameEvents.onVesselGoOffRails.Add(VesselOffRails); //triggers when vessel loads at flight scene start also
@@ -1012,14 +1020,58 @@ namespace ActionGroupsExtended
                             KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
                             //TrapMouse |= KeyCodeWin.Contains(RealMousePos);
                         }
-
+                        string ErrLine = "1";
+                        try
+                        {
+                            ErrLine = "2";
+                            if (defaultShowingNonNumeric)
+                            {
+                                foreach (BaseAction Act in defaultActionsListThisType)
+                                {
+                                    ErrLine = "8";
+                                    Vector3 partScreenPosD = FlightCamera.fetch.mainCamera.WorldToScreenPoint(Act.listParent.part.transform.position);
+                                    ErrLine = "9";
+                                    Rect partCenterWinD = new Rect(partScreenPosD.x - 10, (Screen.height - partScreenPosD.y) - 10, 21, 21);
+                                    ErrLine = "10";
+                                    GUI.DrawTexture(partCenterWinD, PartPlus);
+                                }
+                            }
+                            else
+                            {
+                                ErrLine = "7";
+                                foreach (AGXAction agAct in ThisGroupActions)
+                                {
+                                    ErrLine = "8";
+                                    Vector3 partScreenPosC = FlightCamera.fetch.mainCamera.WorldToScreenPoint(agAct.ba.listParent.part.transform.position);
+                                    ErrLine = "9";
+                                    Rect partCenterWinC = new Rect(partScreenPosC.x - 10, (Screen.height - partScreenPosC.y) - 10, 21, 21);
+                                    ErrLine = "10";
+                                    GUI.DrawTexture(partCenterWinC, PartPlus);
+                                }
+                            }
+                            ErrLine = "11";
+                                foreach (AGXPart agPrt in AGEditorSelectedParts)
+                            {
+                                ErrLine = "3";
+                                Vector3 partScreenPosB = FlightCamera.fetch.mainCamera.WorldToScreenPoint(agPrt.AGPart.transform.position);
+                                ErrLine = "4";
+                                Rect partCenterWinB = new Rect(partScreenPosB.x - 10, (Screen.height - partScreenPosB.y) - 10, 21, 21);
+                                ErrLine = "5";
+                                GUI.DrawTexture(partCenterWinB, PartCross);
+                                ErrLine = "6";
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            print("AGX Draw cross fail. " + ErrLine + " " + e);
+                        }
                     }
                     if (ShowCurActsWin && ShowSelectedWin)
                     {
                         CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
                        // TrapMouse |= CurActsWin.Contains(RealMousePos);
                     }
-                
+                    
             }
             if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin || highlightPartThisFrameGroupWin)
             {
@@ -1030,16 +1082,16 @@ namespace ActionGroupsExtended
                 Vector3 partScreenPos = FlightCamera.fetch.mainCamera.WorldToScreenPoint(partToHighlight.transform.position);
                     //EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
                 Rect partCenterWin = new Rect(partScreenPos.x - 20, (Screen.height - partScreenPos.y) - 20, 41, 41);
-                partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
-
+                //partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
+                GUI.DrawTexture(partCenterWin, PartCenter);
 
             }
         }
 
-        public void PartTarget(int WindowID)
-        {
-            GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
-        }
+        //public void PartTarget(int WindowID)
+        //{
+        //    GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
+        //}
 
         public static void ActivateActionGroup(int group)
         {
@@ -1372,7 +1424,7 @@ namespace ActionGroupsExtended
         public void CurrentActionsWindow(int WindowID)
         {
             HighLogic.Skin.scrollView.normal.background = null;
-            List<AGXAction> ThisGroupActions = new List<AGXAction>();
+            ThisGroupActions = new List<AGXAction>();
             ThisGroupActions.AddRange(CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
             GUI.Box(new Rect(5, 25, 310, 110), "");
             CurGroupsWin = GUI.BeginScrollView(new Rect(10, 30, 330, 100), CurGroupsWin, new Rect(0, 0, 310, Math.Max(100, 0 + (20 * (ThisGroupActions.Count)))));
@@ -2612,15 +2664,65 @@ namespace ActionGroupsExtended
                     defaultGroupToShow = KSPActionGroup.Light;
                     RefreshDefaultActionsListType();
                 }
+
+                if (defaultGroupToShow == KSPActionGroup.RCS)
+                {
+                    AGXBtnStyle.normal.background = ButtonTextureGreen;
+                    AGXBtnStyle.hover.background = ButtonTextureGreen;
+                }
+                else
+                {
+                    AGXBtnStyle.normal.background = ButtonTexture;
+                    AGXBtnStyle.hover.background = ButtonTexture;
+                }
+                if (GUI.Button(new Rect(5, 45, 76, 20), "RCS", AGXBtnStyle)) //button code
+                {
+                    defaultGroupToShow = KSPActionGroup.RCS;
+                    RefreshDefaultActionsListType();
+                }
+                if (defaultGroupToShow == KSPActionGroup.SAS)
+                {
+                    AGXBtnStyle.normal.background = ButtonTextureGreen;
+                    AGXBtnStyle.hover.background = ButtonTextureGreen;
+                }
+                else
+                {
+                    AGXBtnStyle.normal.background = ButtonTexture;
+                    AGXBtnStyle.hover.background = ButtonTexture;
+                }
+                if (GUI.Button(new Rect(81, 45, 76, 20), "SAS", AGXBtnStyle)) //button code
+                {
+                    defaultGroupToShow = KSPActionGroup.SAS;
+                    RefreshDefaultActionsListType();
+                }
+                if (defaultGroupToShow == KSPActionGroup.Stage)
+                {
+                    AGXBtnStyle.normal.background = ButtonTextureGreen;
+                    AGXBtnStyle.hover.background = ButtonTextureGreen;
+                }
+                else
+                {
+                    AGXBtnStyle.normal.background = ButtonTexture;
+                    AGXBtnStyle.hover.background = ButtonTexture;
+                }
+                if (GUI.Button(new Rect(157, 45, 76, 20), "Stage", AGXBtnStyle)) //button code
+                {
+                    defaultGroupToShow = KSPActionGroup.Stage;
+                    RefreshDefaultActionsListType();
+                }
+
+
+
+
                 AGXBtnStyle.normal.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
                 //add vector2
-                groupWinScroll = GUI.BeginScrollView(new Rect(5, 50, 240, 475), groupWinScroll, new Rect(0, 0, 240, Mathf.Max(475, defaultActionsListThisType.Count * 20)));
+                groupWinScroll = GUI.BeginScrollView(new Rect(5, 70, 240, 455), groupWinScroll, new Rect(0, 0, 240, Mathf.Max(455, defaultActionsListThisType.Count * 20)));
                 int listCount2 = 1;
                 highlightPartThisFrameGroupWin = false;
                 while (listCount2 <= defaultActionsListThisType.Count)
                 {
-                    if (Mouse.screenPos.y >= GroupsWin.y + 50 && Mouse.screenPos.y <= GroupsWin.y + 525 && new Rect(GroupsWin.x + 5, (GroupsWin.y + 50 + ((listCount2 - 1) * 20)) - groupWinScroll.y, 240, 20).Contains(Mouse.screenPos))
+                    if (Mouse.screenPos.y >= GroupsWin.y + 70 && Mouse.screenPos.y <= GroupsWin.y + 525 && new Rect(GroupsWin.x + 5, (GroupsWin.y + 70 + ((listCount2 - 1) * 20)) - groupWinScroll.y, 240, 20).Contains(Mouse.screenPos))
                     {
                         highlightPartThisFrameGroupWin = true;
                         //print("part found to highlight acts " + highlightPartThisFrameActsWin + " " + ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.transform.position);
