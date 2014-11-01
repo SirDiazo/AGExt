@@ -13,23 +13,161 @@ namespace ActionGroupsExtended
     {
 
 
-        public static bool AGXInstalled()
+        public static bool AGXInstalled() //works
         {
 
             return true;
         }
 
-        public static void AGXActivateGroup(int i)
-        {
 
+        public static List<BaseAction> AGX2VslAllActions(uint FlightID) //works //all actions on specific vessel
+        {
+            print("AGX Call: List all actions for vessel " + FlightID);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    return AGXFlight.GetActionsList();
+
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    return new List<BaseAction>();
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return new List<BaseAction>();
+            }
+        } 
+
+        public static List<BaseAction> AGX2VslGroupActions(uint FlightID, int group) //works //all actions in group on specific vessel
+        {
+            print("AGX Call: List actions in group for vessel " + FlightID + " " + group);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    return AGXFlight.GetActionsList(group);
+                    
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    return new List<BaseAction>();
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return new List<BaseAction>();
+            }
+        }
+
+        public static List<BaseAction> AGXGroupActions(int group) //works //all actions on ActiveVessel in group
+        {
+            print("AGX Call: List actions in active vessel in group " + group); //works
+            return AGXFlight.GetActionsList(group);
+        }
+
+        public static List<BaseAction> AGXAllActions()//works //all actions on activevessel
+        {
+            print("AGX Call: List all actions for active vessel");
+            return AGXFlight.GetActionsList();
+        } 
+
+        public static bool AGX2VslToggleGroup(uint FlightID, int group) //7 on test, works
+        {
+            print("AGX Call: toggle action " + group + " for vessel " + FlightID);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    AGXFlight.ActivateActionGroup(group);
+                    return true;
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    return false;
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return false;
+            }
+        }
+
+        public static bool AGX2VslGroupState(uint FlightID, int group) //8 on test, owrks
+        {
+            print("AGX Call: group state for " + group + " for vessel " + FlightID);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    return AGXGroupState(group);
+                    
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    return false;
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return false;
+            }
+        }
+        
+        public static bool AGX2VslActivateGroup(uint FlightID, int group, bool forceDir) //9 on test, works
+        {
+            print("AGX Call: Activate group for " + group + " for vessel " + FlightID + " in dir " + forceDir);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    AGXFlight.ActivateActionGroup(group, true, forceDir);
+                    return true;
+                }
+                else
+                {
+                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    return false;
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return false;
+            }
+        }
+        
+        public static void AGXActivateGroup(int i, bool forceDir) //activate action group it forceDir direction, true = force activate
+        {
+            print("AGX Call: activate group for " + i + " for active vessel in dir " + forceDir);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                AGXFlight.ActivateActionGroup(i, true, forceDir);
+            }
+        }
+        
+        public static void AGXToggleGroup(int i) //2 on test, works //toggle action group on activevessel
+        {
+            print("AGX Call: toggle group " + i + " for active vessel");
             if (HighLogic.LoadedSceneIsFlight)
             {
                 AGXFlight.ActivateActionGroup(i);
             }
         }
-        public static bool AGXGroupState(int i)
-        {
 
+        public static bool AGXGroupState(int i) //is a group activated?
+        {
+            print("AGX Call: group gtate " + i + " for active vessel");
             if (HighLogic.LoadedSceneIsFlight)
             {
                 try

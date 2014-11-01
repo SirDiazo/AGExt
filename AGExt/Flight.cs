@@ -1093,7 +1093,12 @@ namespace ActionGroupsExtended
         //    GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
         //}
 
-        public static void ActivateActionGroup(int group)
+        public static void ActivateActionGroup(int group) //backwards compatibility, toggle group
+        {
+            ActivateActionGroup(group, false, false);
+        }
+
+        public static void ActivateActionGroup(int group, bool force, bool forceDir)
         {
 
             Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
@@ -1110,7 +1115,15 @@ namespace ActionGroupsExtended
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
-               
+
+                if (force) //are we forcing a direction or toggling?
+                {
+                    if (forceDir) //we are forcing a direction so set the agAct.activated to trigger the direction below correctly
+                    {
+                        agAct.activated = false; //we are forcing activation so activated is false
+                    }
+                }
+                
                 if (agAct.activated)
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
@@ -1154,6 +1167,31 @@ namespace ActionGroupsExtended
                 //pmAgx.AGXData = pmAgx.SaveActionGroups();
             }
             CalculateActionsState();
+        }
+
+        public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
+        {
+            List<BaseAction> baList = new List<BaseAction>();
+            foreach (AGXAction agAct in CurrentVesselActions)
+            {
+                if (agAct.group == grp)
+                {
+                    baList.Add(agAct.ba);
+                }
+            }
+                    return baList;
+        }
+
+        public static List<BaseAction> GetActionsList() //return all actions on vessel
+        {
+            List<BaseAction> baList = new List<BaseAction>();
+            foreach (AGXAction agAct in CurrentVesselActions)
+            {
+                
+                    baList.Add(agAct.ba);
+                
+            }
+            return baList;
         }
 
         public void GroupsInFlightWindow(int WindowID)
@@ -3791,7 +3829,7 @@ namespace ActionGroupsExtended
 
         public void CheckListForMultipleVessels() //call this when part count on vessel decrease to check for actions on split vessels
         {
-            print("call checklistformulti");
+            //print("call checklistformulti");
             List<Vessel> curActsVessels = new List<Vessel>(); //find out if actions exist on vessel that left
             foreach (AGXAction agAct in CurrentVesselActions)
             {
