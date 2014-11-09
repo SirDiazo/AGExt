@@ -774,39 +774,42 @@ namespace ActionGroupsExtended
                     ErrLine = "2";
                     
                     ErrLine = "7";
-                    if (defaultShowingNonNumeric)
+                    if (ShowSelectedWin)
                     {
-                        foreach (BaseAction Act in defaultActionsListThisType)
+                        if (defaultShowingNonNumeric)
                         {
-                            ErrLine = "8";
-                            Vector3 partScreenPosD = EditorLogic.fetch.editorCamera.WorldToScreenPoint(Act.listParent.part.transform.position);
-                            ErrLine = "9";
-                            Rect partCenterWinD = new Rect(partScreenPosD.x - 10, (Screen.height - partScreenPosD.y) - 10, 21, 21);
-                            ErrLine = "10";
-                            GUI.DrawTexture(partCenterWinD, PartPlus);
+                            foreach (BaseAction Act in defaultActionsListThisType)
+                            {
+                                ErrLine = "8";
+                                Vector3 partScreenPosD = EditorLogic.fetch.editorCamera.WorldToScreenPoint(Act.listParent.part.transform.position);
+                                ErrLine = "9";
+                                Rect partCenterWinD = new Rect(partScreenPosD.x - 10, (Screen.height - partScreenPosD.y) - 10, 21, 21);
+                                ErrLine = "10";
+                                GUI.DrawTexture(partCenterWinD, PartPlus);
+                            }
                         }
-                    }
-                    else
-                    {
-                        foreach (AGXAction agAct in ThisGroupActions)
+                        else
                         {
-                            ErrLine = "8";
-                            Vector3 partScreenPosC = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agAct.ba.listParent.part.transform.position);
-                            ErrLine = "9";
-                            Rect partCenterWinC = new Rect(partScreenPosC.x - 10, (Screen.height - partScreenPosC.y) - 10, 21, 21);
-                            ErrLine = "10";
-                            GUI.DrawTexture(partCenterWinC, PartPlus);
+                            foreach (AGXAction agAct in ThisGroupActions)
+                            {
+                                ErrLine = "8";
+                                Vector3 partScreenPosC = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agAct.ba.listParent.part.transform.position);
+                                ErrLine = "9";
+                                Rect partCenterWinC = new Rect(partScreenPosC.x - 10, (Screen.height - partScreenPosC.y) - 10, 21, 21);
+                                ErrLine = "10";
+                                GUI.DrawTexture(partCenterWinC, PartPlus);
+                            }
                         }
-                    }
-                    foreach (AGXPart agPrt in AGEditorSelectedParts)
-                    {
-                        ErrLine = "3";
-                        Vector3 partScreenPosB = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agPrt.AGPart.transform.position);
-                        ErrLine = "4";
-                        Rect partCenterWinB = new Rect(partScreenPosB.x - 10, (Screen.height - partScreenPosB.y) - 10, 21, 21);
-                        ErrLine = "5";
-                        GUI.DrawTexture(partCenterWinB, PartCross);
-                        ErrLine = "6";
+                        foreach (AGXPart agPrt in AGEditorSelectedParts)
+                        {
+                            ErrLine = "3";
+                            Vector3 partScreenPosB = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agPrt.AGPart.transform.position);
+                            ErrLine = "4";
+                            Rect partCenterWinB = new Rect(partScreenPosB.x - 10, (Screen.height - partScreenPosB.y) - 10, 21, 21);
+                            ErrLine = "5";
+                            GUI.DrawTexture(partCenterWinB, PartCross);
+                            ErrLine = "6";
+                        }
                     }
                     ErrLine = "11";
                 }
