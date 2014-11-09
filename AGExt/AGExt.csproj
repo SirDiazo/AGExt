@@ -53,6 +53,7 @@
     <Compile Include="Instantly.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="External.cs" />
+    <Compile Include="OtherVessel.cs" />
     <Compile Include="PartModule.cs" />
     <Compile Include="Flight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

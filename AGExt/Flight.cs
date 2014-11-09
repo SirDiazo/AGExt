@@ -22,9 +22,9 @@ namespace ActionGroupsExtended
         public static int ShowGroupInFlightCurrent;
         public static string[] ShowGroupInFlightNames;
         public bool ShowGroupsInFlightWindow = false;
-        public Rect GroupsInFlightWin;
-        public Rect SelPartsWin;
-        public Rect FlightWin;
+        public static Rect GroupsInFlightWin;
+        public static Rect SelPartsWin;
+        public static Rect FlightWin;
         private Vector2 ScrollPosSelParts;
         public Vector2 ScrollPosSelPartsActs;
         public Vector2 ScrollGroups;
@@ -34,7 +34,7 @@ namespace ActionGroupsExtended
         private bool AGEEditorSelectedPartsSame = false;
         
         private int SelectedPartsCount = 0;
-        private bool ShowSelectedWin = false;
+        private static bool ShowSelectedWin = false;
         //private Part PreviousSelectedPart = null;
         private bool SelPartsIncSym = true;
         private string BtnTxt;
@@ -47,14 +47,14 @@ namespace ActionGroupsExtended
         private string CurGroupDesc;
         private bool AutoHideGroupsWin = false;
         private bool TempShowGroupsWin = false;
-        private Rect KeyCodeWin;
-        private Rect CurActsWin;
+        private static Rect KeyCodeWin;
+        private static Rect CurActsWin;
         private bool ShowKeyCodeWin = false;
         private bool ShowJoySticks = false;
-        private bool ShowKeySetWin = false;
+        private static bool ShowKeySetWin = false;
         private static int CurrentKeySet = 1;
-        private string CurrentKeySetName;
-        private Rect KeySetWin;
+        private static string CurrentKeySetName;
+        private static Rect KeySetWin;
         public static ConfigNode AGExtNode;
         string[] KeySetNames = new string[5];
         //private bool TrapMouse = false;
@@ -71,7 +71,7 @@ namespace ActionGroupsExtended
 
 
 
-        public Rect GroupsWin;
+        public static Rect GroupsWin;
         public bool Trigger;
         //private bool Trigger2;
         //private int Value = 0;
@@ -95,7 +95,7 @@ namespace ActionGroupsExtended
         //private bool ActionsListDirty = true; //is our actions requiring update?
        // private bool LoadGroupsOnceCheck = false;
         private bool ShowCurActsWin = true;
-        private bool ShowAGXMod = true;
+        private static bool ShowAGXMod = true;
         private bool ShowAGXFlightWin = true;
         //private string ActivatedGroups = "";
         public static bool loadFinished = false;
@@ -142,6 +142,8 @@ namespace ActionGroupsExtended
         bool highlightPartThisFrameGroupWin = false;
         private bool overrideRootChange = false; //if docking event, do NOT run root change code
         List<AGXAction> ThisGroupActions;
+        private bool showGroupsIsGroups = true;
+       // private bool showGroupsIsKeySet = false;
 
 
 
@@ -384,11 +386,48 @@ namespace ActionGroupsExtended
             loadedVessels = new List<Vessel>();
             LoadCurrentKeyBindings();
             oldShipParts = new List<Part>();
+            KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
+            // /print("3a");
+            KeySetNames[1] = AGExtNode.GetValue("KeySetName2");
+            //print("4a");
+            KeySetNames[2] = AGExtNode.GetValue("KeySetName3");
+            // //print("5a");
+            KeySetNames[3] = AGExtNode.GetValue("KeySetName4");
+            //print("6a");
+            KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
+            //print("7a");
+            KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
             
            
         }
 
-        
+
+        public bool IsVesselLoaded(uint flightID) //is vessel loaded, wrapper to convert from flightID to vsl
+        {
+            try
+            {
+                Vessel vslToCheck = FlightGlobals.Vessels.First(vsl3 => vsl3.rootPart.flightID == flightID);
+                return IsVesselLoaded(vslToCheck);
+            }
+            catch //if this fails, vessel in question is not controllable, so just return false without throwing an error
+            {
+                return false;
+            }
+
+        }
+
+        public bool IsVesselLoaded(Vessel vsl) //is vessel loaded
+        {
+            try
+            {
+                return (FlightGlobals.Vessels.First(vsl2 => vsl2 == vsl).loaded); //list of vessels in game, find the asked vessel
+            }
+            catch //if this fails, vessel is not loaded so don't throw an error, just return false
+            {
+                return false;
+            }
+        }
+
         
 
         public static ConfigNode FlightSaveToFile(ConfigNode origNode)  
@@ -831,7 +870,7 @@ namespace ActionGroupsExtended
         //    GameSettings.CustomActionGroup1.primary = Save10Keys[1];
         //}
 
-        public void SaveWindowPositions()
+        public static void SaveWindowPositions()
         {
             AGExtNode.SetValue("FltGroupsX", GroupsWin.x.ToString());
             AGExtNode.SetValue("FltGroupsY", GroupsWin.y.ToString());
@@ -899,7 +938,7 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void SaveEverything()
+        public static void SaveEverything()
         {
             
             //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
@@ -1196,37 +1235,94 @@ namespace ActionGroupsExtended
 
         public void GroupsInFlightWindow(int WindowID)
         {
-            if (GUI.Button(new Rect(5, 5, 70, 20), ShowGroupInFlightNames[1],AGXBtnStyle))
+            if (showGroupsIsGroups)
             {
-                ShowGroupInFlightCurrent = 1;
-                CalculateActionsToShow();
-                ShowGroupsInFlightWindow = false;
+                if (GUI.Button(new Rect(5, 5, 70, 20), ShowGroupInFlightNames[1], AGXBtnStyle))
+                {
+                    ShowGroupInFlightCurrent = 1;
+                    CalculateActionsToShow();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 25, 70, 20), ShowGroupInFlightNames[2], AGXBtnStyle))
+                {
+                    ShowGroupInFlightCurrent = 2;
+                    CalculateActionsToShow();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 45, 70, 20), ShowGroupInFlightNames[3], AGXBtnStyle))
+                {
+                    ShowGroupInFlightCurrent = 3;
+                    CalculateActionsToShow();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 65, 70, 20), ShowGroupInFlightNames[4], AGXBtnStyle))
+                {
+                    ShowGroupInFlightCurrent = 4;
+                    CalculateActionsToShow();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 85, 70, 20), ShowGroupInFlightNames[5], AGXBtnStyle))
+                {
+                    ShowGroupInFlightCurrent = 5;
+                    CalculateActionsToShow();
+                    ShowGroupsInFlightWindow = false;
+                }
             }
-            if (GUI.Button(new Rect(5, 25, 70, 20), ShowGroupInFlightNames[2], AGXBtnStyle))
+            else
             {
-                ShowGroupInFlightCurrent = 2;
-                CalculateActionsToShow();
-                ShowGroupsInFlightWindow = false;
-            }
-            if (GUI.Button(new Rect(5, 45, 70, 20), ShowGroupInFlightNames[3], AGXBtnStyle))
-            {
-                ShowGroupInFlightCurrent = 3;
-                CalculateActionsToShow();
-                ShowGroupsInFlightWindow = false;
-            }
-            if (GUI.Button(new Rect(5, 65, 70, 20), ShowGroupInFlightNames[4], AGXBtnStyle))
-            {
-                ShowGroupInFlightCurrent = 4;
-                CalculateActionsToShow();
-                ShowGroupsInFlightWindow = false;
-            }
-            if (GUI.Button(new Rect(5, 85, 70, 20), ShowGroupInFlightNames[5], AGXBtnStyle))
-            {
-                ShowGroupInFlightCurrent = 5;
-                CalculateActionsToShow();
-                ShowGroupsInFlightWindow = false;
+                if (GUI.Button(new Rect(5, 5, 70, 20), KeySetNames[0], AGXBtnStyle))
+                {
+                    SaveCurrentKeyBindings();
+                    CurrentKeySet = 1;
+                    LoadCurrentKeyBindings();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 25, 70, 20), KeySetNames[1], AGXBtnStyle))
+                {
+                    SaveCurrentKeyBindings();
+                    CurrentKeySet = 2;
+                    LoadCurrentKeyBindings();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 45, 70, 20), KeySetNames[2], AGXBtnStyle))
+                {
+                    SaveCurrentKeyBindings();
+                    CurrentKeySet = 3;
+                    LoadCurrentKeyBindings();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 65, 70, 20), KeySetNames[3], AGXBtnStyle))
+                {
+                    SaveCurrentKeyBindings();
+                    CurrentKeySet = 4;
+                    LoadCurrentKeyBindings();
+                    ShowGroupsInFlightWindow = false;
+                }
+                if (GUI.Button(new Rect(5, 85, 70, 20), KeySetNames[4], AGXBtnStyle))
+                {
+                    SaveCurrentKeyBindings();
+                    CurrentKeySet = 5;
+                    LoadCurrentKeyBindings();
+                    ShowGroupsInFlightWindow = false;
+                }
             }
         }
+
+        public static void ClickEditButton()
+    {
+        if (ShowSelectedWin || ShowKeySetWin)
+        {
+
+            SaveEverything();
+            ShowSelectedWin = false;
+            ShowKeySetWin = false;
+        }
+        else if (!ShowSelectedWin)
+        {
+            ShowSelectedWin = true;
+            ShowAGXMod = true;
+        }
+    }
 
         public void FlightWindow(int WindowID)
         {
@@ -1234,51 +1330,71 @@ namespace ActionGroupsExtended
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
             if (GUI.Button(new Rect(160, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent], AGXBtnStyle))
             {
-                
-                ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
+                if (!showGroupsIsGroups)
+                {
+                    showGroupsIsGroups = true;
+                    ShowGroupsInFlightWindow = true;
+                }
+                else
+                {
+                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
+                }
+            }
+
+            if (GUI.Button(new Rect(5, 5, 75, 20), KeySetNames[CurrentKeySet -1], AGXBtnStyle))
+            {
+                if (showGroupsIsGroups)
+                {
+                    showGroupsIsGroups = false;
+                    ShowGroupsInFlightWindow = true;
+                }
+                else
+                {
+                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
+                }
             }
             
 
-            if (GUI.Button(new Rect(5, 5, 75, 20), "Edit", AGXBtnStyle))
-            {
+            //if (GUI.Button(new Rect(5, 5, 75, 20), "Edit", AGXBtnStyle))
+            //{
 
-                if (ShowSelectedWin || ShowKeySetWin)
-                {
+            //    if (ShowSelectedWin || ShowKeySetWin)
+            //    {
                   
-                    SaveEverything();
-                    ShowSelectedWin = false;
-                    ShowKeySetWin = false;
-                }
-                else if (!ShowSelectedWin)
-                {
-                    ShowSelectedWin = true;
-                }
+            //        SaveEverything();
+            //        ShowSelectedWin = false;
+            //        ShowKeySetWin = false;
+            //    }
+            //    else if (!ShowSelectedWin)
+            //    {
+            //        ShowSelectedWin = true;
+            //    }
 
-                foreach (AGXAction agAct in CurrentVesselActions)
-                {
-                    //print("AGX " + Planetarium.GetUniversalTime() + " " + agAct.prt.ConstructID + " " + agAct.ba.name + " " + agAct.ba.guiName + " " + agAct.activated);
-                }
+            //    //foreach (AGXAction agAct in CurrentVesselActions)
+            //    //{
+            //    //    //print("AGX " + Planetarium.GetUniversalTime() + " " + agAct.prt.ConstructID + " " + agAct.ba.name + " " + agAct.ba.guiName + " " + agAct.activated);
+            //    //}
 
-                foreach (AGXActionsState agState in ActiveActionsStateToShow)
-                {
-                    //print("AGX " + agState.group + " " + agState.actionOff + " " + agState.actionOn);
-                }
-                string ToggleState = "";
-                for (int i = 1; i <= 250; i++)
-                {
-                    if (IsGroupToggle[i])
-                    {
-                        ToggleState = ToggleState + "1";
-                    }
-                    else
-                    {
-                        ToggleState = ToggleState + "0";
+            //    //foreach (AGXActionsState agState in ActiveActionsStateToShow)
+            //    //{
+            //    //    //print("AGX " + agState.group + " " + agState.actionOff + " " + agState.actionOn);
+            //    //}
+            //    //string ToggleState = "";
+            //    //for (int i = 1; i <= 250; i++)
+            //    //{
+            //    //    if (IsGroupToggle[i])
+            //    //    {
+            //    //        ToggleState = ToggleState + "1";
+            //    //    }
+            //    //    else
+            //    //    {
+            //    //        ToggleState = ToggleState + "0";
 
-                    }
-                }
-                //print("AGX " + ToggleState);
+            //    //    }
+            //    //}
+            //    //print("AGX " + ToggleState);
 
-            }
+            //}
         
            
             
@@ -1934,7 +2050,7 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void SaveCurrentKeyBindings()
+        public static void SaveCurrentKeyBindings()
         {
             //print("Saving current keybinds");
        
@@ -1960,7 +2076,7 @@ namespace ActionGroupsExtended
             
         }
 
-        public void SaveDefaultCustomKeys()
+        public static void SaveDefaultCustomKeys()
         {
             GameSettings.CustomActionGroup1.primary = AGXguiKeys[1]; //copy keys to KSP itself
             GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
@@ -2460,17 +2576,17 @@ namespace ActionGroupsExtended
                 //print("1a");
                 SaveCurrentKeyBindings();
                 //print("2a");
-                KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
-               // /print("3a");
-                KeySetNames[1] = AGExtNode.GetValue("KeySetName2");
-                //print("4a");
-                KeySetNames[2] = AGExtNode.GetValue("KeySetName3");
-               // //print("5a");
-                KeySetNames[3] = AGExtNode.GetValue("KeySetName4");
-                //print("6a");
-                KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
-                //print("7a");
-                KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
+               // KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
+               //// /print("3a");
+               // KeySetNames[1] = AGExtNode.GetValue("KeySetName2");
+               // //print("4a");
+               // KeySetNames[2] = AGExtNode.GetValue("KeySetName3");
+               //// //print("5a");
+               // KeySetNames[3] = AGExtNode.GetValue("KeySetName4");
+               // //print("6a");
+               // KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
+               // //print("7a");
+               // KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
                 //print("8a");
                 ShowKeySetWin = true;
                 //print("9a");
@@ -2491,7 +2607,7 @@ namespace ActionGroupsExtended
                 AGXBtnStyle.normal.background = ButtonTextureRed;
                 AGXBtnStyle.hover.background = ButtonTextureRed;
             }
-            if (GUI.Button(new Rect(5, 3, 75, 20), "Auto-Hide", AGXBtnStyle))
+            if (GUI.Button(new Rect(15, 3, 65, 20), "Auto-Hide", AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
 

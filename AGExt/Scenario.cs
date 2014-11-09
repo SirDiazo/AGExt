@@ -355,7 +355,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         }
                     }
                     actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                 }
                 else if (pmName == "FSanimateGeneric")
                 {

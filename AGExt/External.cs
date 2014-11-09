@@ -147,21 +147,107 @@ namespace ActionGroupsExtended
             }
         }
         
-        public static void AGXActivateGroup(int i, bool forceDir) //activate action group it forceDir direction, true = force activate
+        public static bool AGXActivateGroup(int i, bool forceDir) //works //activate action group it forceDir direction, true = force activate
         {
             print("AGX Call: activate group for " + i + " for active vessel in dir " + forceDir);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 AGXFlight.ActivateActionGroup(i, true, forceDir);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool AGXToggleGroupName(string grpName) //untested
+        {
+            try
+            {
+                print("AGX Call: toggle group by name for " + grpName + " for active vessel");
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    int grp = 0;
+                    try
+                    {
+                        grp = AGXFlight.AGXguiNames.First(pair => pair.Value.ToLower() == grpName.ToLower()).Key; //compare strings, case does not matter
+                    }
+                    catch//poor man's error trap, name was not found. what is the correct way to do this?
+                    {
+                        return false;
+                    }
+                    if (grp >= 1 && grp <= 250) //check grp is valid
+                    {
+                        AGXFlight.ActivateActionGroup(grp, false, false);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else //not in flight
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                print("AGX Call FAIL! Catch block hit");
+                return false;
+            }
+        }
+
+        public static bool AGXActivateGroupName(string grpName, bool forceDir) //untested
+        {
+            try
+            {
+                print("AGX Call: activate group by name for " + grpName + " for active vessel in dir " + forceDir);
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    int grp = 0;
+                    try
+                    {
+                        grp = AGXFlight.AGXguiNames.First(pair => pair.Value.ToLower() == grpName.ToLower()).Key; //compare strings, case does not matter
+                    }
+                    catch//poor man's error trap, name was not found. what is the correct way to do this?
+                    {
+                        return false;
+                    }
+                    if (grp >= 1 && grp <= 250) //check grp is valid
+                    {
+                        AGXFlight.ActivateActionGroup(grp, true, forceDir);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else //not in flight
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                print("AGX Call FAIL! Catch block hit");
+                return false;
             }
         }
         
-        public static void AGXToggleGroup(int i) //2 on test, works //toggle action group on activevessel
+        public static bool AGXToggleGroup(int i) //2 on test, works //toggle action group on activevessel
         {
             print("AGX Call: toggle group " + i + " for active vessel");
             if (HighLogic.LoadedSceneIsFlight)
             {
                 AGXFlight.ActivateActionGroup(i);
+                return true;
+            }
+            else
+            {
+            return false;
             }
         }
 
