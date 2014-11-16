@@ -16,6 +16,7 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
+        
         bool defaultShowingNonNumeric = false; //are we in non-numeric (abort/brakes/gear/list) mode?
         List<BaseAction> defaultActionsListThisType; //list of default actions showing in group win when non-numeric
         List<BaseAction> defaultActionsListAll; //list of all default actions on vessel, only used in non-numeric mode when going to other mode
@@ -31,6 +32,7 @@ namespace ActionGroupsExtended
         
         private List<Part> SelectedWithSym; //selected parts from last frame for Default actions monitoring
         private List<AGXDefaultCheck> SelectedWithSymActions; //monitor baseaction.actiongroups of selected parts
+        private KSPActionGroup actionGroupLastFrame; //used when monitoring KSP default editor for actions, remember selected group last frame.
         public static bool NeedToLoadActions = true;
         public static bool LoadFinished = false;
         //Selected Parts Window Variables
@@ -121,6 +123,7 @@ namespace ActionGroupsExtended
          Texture2D PartPlus = new Texture2D(21, 21);
          bool showAllPartsList = false; //show list of all parts in group window?
          List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
+         KSPActionGroup KSPDefaultLastActionGroup = KSPActionGroup.Custom01;
         //static Part partLastHighlight = null;
         ////static Color partHighlighLastColor;
         //static Part.HighlightType partHighlightLastType;
@@ -288,6 +291,7 @@ namespace ActionGroupsExtended
                 EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
                 EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
                 EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                
                 //GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
                 errLine = "18";
                 IsGroupToggle = new Dictionary<int, bool>();
@@ -369,6 +373,7 @@ namespace ActionGroupsExtended
                 EditorLoadFromNode();
                 errLine = "21";
                 //print("Loading now");
+                //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
                 LoadFinished = true;
             }
             catch(Exception e)
@@ -376,6 +381,13 @@ namespace ActionGroupsExtended
                 print("AGX Editor Start Fail " + errLine + " " + e);
             }
            }
+
+        //public void OnGroupActionsListChange(IUIObject obj)
+        //{
+        //    print("List change " + obj.GetType());
+        //    UIScrollList lst = (UIScrollList)obj;
+        //    print(lst.
+        //}
 
         public void PartAttaching(GameEvents.HostTargetAction<Part,Part> host_target)
         { 
@@ -2118,10 +2130,12 @@ namespace ActionGroupsExtended
                         {
                             if (p.partInfo.title == partNameToSelect)
                             {
-                                AGEditorSelectedParts.Add(new AGXPart(p));
+                                
+                                    AGEditorSelectedParts.Add(new AGXPart(p));
+                                
                             }
                         }
-                        AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
+                        //AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
                         PartActionsList.Clear(); //populate actions list from selected parts
                         PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
                         foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
@@ -2632,7 +2646,7 @@ namespace ActionGroupsExtended
             }
 
 
-            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions && !AGXShow)
             {
                 MonitorDefaultActions();
             }
@@ -2650,11 +2664,39 @@ namespace ActionGroupsExtended
             //PrintPartPos();
             //PrintPartActs();
             //PrintSelectedPart();
+            //print(CurrentVesselActions.Count);
             }
 
         public void PrintSelectedPart()
         {
-            //print("Selpart " + EditorLogic.fetch.UndoRedo());
+            if (DateTime.Now.Second.ToString().Substring(DateTime.Now.Second.ToString().Length - 1, 1) == "0")
+            {
+                print("All true");
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        foreach (BaseAction ba in pm.Actions)
+                        {
+                            ba.active = true;
+                        }
+                    }
+                }
+            }
+            if (DateTime.Now.Second.ToString().Substring(DateTime.Now.Second.ToString().Length - 1, 1) == "5")
+            {
+                print("All false");
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        foreach (BaseAction ba in pm.Actions)
+                        {
+                            ba.active = false;
+                        }
+                    }
+                }
+            }
         }
 
         public void PrintPartActs()
@@ -2704,13 +2746,36 @@ namespace ActionGroupsExtended
         public void MonitorDefaultActions()
         {
             //print("2a");
+            KSPActionGroup KSPDefaultActionGroupThisFrame = KSPActionGroup.Custom01;
+            try //find which action group is selected in default ksp editor this pass
+            {
+                string grpText = "None";
+                for (int i = 0; i < EditorActionGroups.Instance.actionGroupList.Count; i++)
+                {
+                    IUIListObject lObj = EditorActionGroups.Instance.actionGroupList.GetItem(i);
+                    UIListItem LstItem = (UIListItem)lObj;
+                    if (LstItem.controlState == UIButton.CONTROL_STATE.ACTIVE)
+                    {
+                        grpText = LstItem.Text;
+                    }
+                }
+
+                KSPDefaultActionGroupThisFrame = (KSPActionGroup)Enum.Parse(typeof(KSPActionGroup), grpText);
+                //print("Selected group " + KSPDefaultLastActionGroup);
+
+            }
+            catch
+            {
+                print("Monitor default list fail");
+            }
+            
             if (EditorActionGroups.Instance.GetSelectedParts() != null) //is a part selected?
             {
               
                 if (EditorActionGroups.Instance.GetSelectedParts().Count > 0) //list can exist with no parts in it if you selected then unselect one
                 {
-                   
-                    if(SelectedWithSym.Count == 0 || SelectedWithSym.First() != EditorActionGroups.Instance.GetSelectedParts().First()) //check if there is a previously selected part, if so check if its changed
+
+                    if (SelectedWithSym.Count == 0 || SelectedWithSym.First() != EditorActionGroups.Instance.GetSelectedParts().First() || KSPDefaultActionGroupThisFrame != KSPDefaultLastActionGroup) //check if there is a previously selected part, if so check if its changed
                     {
                         //print("2b");
                         //parts are different
@@ -2735,12 +2800,56 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
+                        int groupToAdd = 1;
+                        switch (KSPDefaultActionGroupThisFrame)
+                        {
+                            case KSPActionGroup.Custom01:
+                                groupToAdd = 1;
+                                break;
+                            case KSPActionGroup.Custom02:
+                                groupToAdd = 2;
+                                break;
+                            case KSPActionGroup.Custom03:
+                                groupToAdd = 3;
+                                break;
+                            case KSPActionGroup.Custom04:
+                                groupToAdd = 4;
+                                break;
+                            case KSPActionGroup.Custom05:
+                                groupToAdd = 5;
+                                break;
+                            case KSPActionGroup.Custom06:
+                                groupToAdd = 6;
+                                break;
+                            case KSPActionGroup.Custom07:
+                                groupToAdd = 7;
+                                break;
+                            case KSPActionGroup.Custom08:
+                                groupToAdd = 8;
+                                break;
+                            case KSPActionGroup.Custom09:
+                                groupToAdd = 9;
+                                break;
+                            case KSPActionGroup.Custom10:
+                                groupToAdd = 10;
+                                break;
+                        }
+                                
+                        foreach(AGXAction agact2 in CurrentVesselActions.Where(ag => ag.group == groupToAdd))
+                        {
+                            SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = agact2.ba, agrp = agact2.ba.actionGroup });
+                        }
 
+                        KSPDefaultLastActionGroup = KSPDefaultActionGroupThisFrame;
+                        //foreach (AGXDefaultCheck dC in SelectedWithSymActions)
+                        //{
+                        //    print("Acts " + dC.ba.name); 
+                        //}
                        // print("2e");
                     }
                     else //selected part is the same a previously selected part
                     {
-                       // print("2f");
+                        //print("2f");
                         List<Part> PartsThisFrame = new List<Part>(); //get list of parts this update frame
                         PartsThisFrame.AddRange(EditorActionGroups.Instance.GetSelectedParts());
                         PartsThisFrame.AddRange(EditorActionGroups.Instance.GetSelectedParts().First().symmetryCounterparts);
@@ -2761,9 +2870,53 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
+
+                        int groupToAdd = 1;
+                        switch (KSPDefaultActionGroupThisFrame)
+                        {
+                            case KSPActionGroup.Custom01:
+                                groupToAdd = 1;
+                                break;
+                            case KSPActionGroup.Custom02:
+                                groupToAdd = 2;
+                                break;
+                            case KSPActionGroup.Custom03:
+                                groupToAdd = 3;
+                                break;
+                            case KSPActionGroup.Custom04:
+                                groupToAdd = 4;
+                                break;
+                            case KSPActionGroup.Custom05:
+                                groupToAdd = 5;
+                                break;
+                            case KSPActionGroup.Custom06:
+                                groupToAdd = 6;
+                                break;
+                            case KSPActionGroup.Custom07:
+                                groupToAdd = 7;
+                                break;
+                            case KSPActionGroup.Custom08:
+                                groupToAdd = 8;
+                                break;
+                            case KSPActionGroup.Custom09:
+                                groupToAdd = 9;
+                                break;
+                            case KSPActionGroup.Custom10:
+                                groupToAdd = 10;
+                                break;
+                        }
+
+                        foreach (AGXAction agact2 in CurrentVesselActions.Where(ag => ag.group == groupToAdd))
+                        {
+                            ThisFrameActions.Add(agact2.ba);
+                        }
+
+
+
+
                         //print("2i");
 
-                        foreach (BaseAction ba2 in ThisFrameActions) //check each action's actiongroup enum against last update frames actiongroup enum
+                        foreach (BaseAction ba2 in ThisFrameActions) //check each action's actiongroup enum against last update frames actiongroup enum, this adds/removes a group to default KSP when added/removed in agx
                         {
                             //print("2j");
                             AGXDefaultCheck ActionLastFrame = new AGXDefaultCheck();
@@ -2812,7 +2965,7 @@ namespace ActionGroupsExtended
                                 }
                                 else if (KSPActionGroup.Custom10 == (ActionLastFrame.agrp ^ ba2.actionGroup))
                                 {
-                                    NewGroup = 10;
+                                    NewGroup = 10; 
                                 }
 
                                // print("2k");
@@ -2820,6 +2973,16 @@ namespace ActionGroupsExtended
 
                                 if (NewGroup != 0) //if one of the other actiongroups (gear, lights) has changed, ignore it. newgroup will be the actiongroup if I want to process it.
                                 {
+                                   // print("Newgroup called on " + NewGroup);
+                                    if (Mouse.screenPos.x >= 130 && Mouse.screenPos.x <= 280)
+                                    {
+                                        //print("remove actions");
+                                        //AGXAction ToRemove = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = NewGroup, activated = false };
+                                        CurrentVesselActions.RemoveAll(ag3 => ag3.ba == ba2 && ag3.group == NewGroup);
+                                    }
+                                    else
+                                    {
+                                        //print("add actions");
                                         AGXAction ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = NewGroup, activated = false };
                                         List<AGXAction> Checking = new List<AGXAction>();
                                         Checking.AddRange(CurrentVesselActions);
@@ -2832,16 +2995,17 @@ namespace ActionGroupsExtended
                                             CurrentVesselActions.Add(ToAdd);
                                             //SaveCurrentVesselActions();
                                         }
+                                    }
                                     
                                 }
                                 ActionLastFrame.agrp = KSPActionGroup.None;
                                 ActionLastFrame.agrp = ActionLastFrame.agrp | ba2.actionGroup;
-                               // print("2l");
+                               //print("2l");
                             }
                            
                         }
                         SelectedWithSymActions.Clear(); //reset actions list as one of the enums changed.
-                      //  print("2k");
+                      //print("2k");
                         foreach (Part prt in SelectedWithSym)
                         {
                             
@@ -2857,10 +3021,19 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
+
+                        foreach (AGXAction agact2 in CurrentVesselActions.Where(ag => ag.group == groupToAdd))
+                        {
+                            SelectedWithSymActions.Add(new AGXDefaultCheck() { ba = agact2.ba, agrp = agact2.ba.actionGroup });
+                        }
+
+
+
                     }
                 }
             }
-           // print("2l");
+           //print("2l " + Mouse.screenPos);
+           
         }
 
         public static void EditorLoadFromFile()

@@ -2738,7 +2738,7 @@ namespace ActionGroupsExtended
                                 AGEditorSelectedParts.Add(new AGXPart(p));
                             }
                         }
-                        AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
+                        //AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
                         PartActionsList.Clear(); //populate actions list from selected parts
                         PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
                         foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
@@ -3106,7 +3106,7 @@ namespace ActionGroupsExtended
 
                     //LoadNames = (string)pm.Fields.GetValue("AGXNames");
                     //print("AGX Load Name: "+ p.partName+ " " + LoadNames);
-
+           // print("Loadnames " + LoadNames);        
                     if (LoadNames.Length > 0) //also update PartVesselCheck method
                     {
                         while (LoadNames[0] == '\u2023')
@@ -3130,9 +3130,10 @@ namespace ActionGroupsExtended
                                 LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
                             }
 
-
-                            if (AGXguiNames[groupNum].Length == 0)
+                            //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
+                            if (AGXguiNames[groupNum].Length < 1)
                             {
+                                //print("Add name in");
                                 AGXguiNames[groupNum] = groupName;
                             }
 
@@ -3227,7 +3228,7 @@ namespace ActionGroupsExtended
         public void DockingEvent()
         {
             //print("call dockingevent");
-            CurrentVesselActions.Clear();
+            CurrentVesselActions.Clear();  
             bool ShowAmbiguousMessage = true;
             ConfigNode newVsl = new ConfigNode(); //get new vessel root for vessel info
 
@@ -3276,7 +3277,7 @@ namespace ActionGroupsExtended
             //print("Nodes end!");
             foreach (ConfigNode vslNode in NodesToAdd) //cycle through all nodes to add, 
             {
-                LoadGroupNames(newVsl.GetValue("groupNames"), false);
+                LoadGroupNames(vslNode.GetValue("groupNames"), false);
                 foreach (ConfigNode prtNode in vslNode.nodes) //cycle through each part
                 {
 
@@ -3370,6 +3371,7 @@ namespace ActionGroupsExtended
                     errLine = "8";
                     if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //root part change, refresh stuff
                     {
+                        print("AGX Root change"); 
                         bool isDocking = false;
                         bool isUndocking = false;
                         try
@@ -3377,23 +3379,23 @@ namespace ActionGroupsExtended
                             if (FlightGlobals.ActiveVessel.parts.Contains(AGXRoot))
                             {
                                 isDocking = true;
-                                print("Is a dock " + AGXRoot.ConstructID + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
+                                print("AGX: Is a dock ");// + AGXRoot.ConstructID + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
                             }
                             else if (oldShipParts.Contains(FlightGlobals.ActiveVessel.rootPart))
                             {
                                 isUndocking = true;
-                                print("is an undock");
+                                print("AGX: is an undock");
                                 //only clear actions if not a docking event
                             }
                             else
                             {
-                                print("vessel switch");
+                                print("AGX: vessel switch");
                                 //CurrentVesselActions.Clear();
                             }
                         }
                         catch
                         {
-                            print("something was null in docking check");
+                            print("AGX: something was null in docking check");
                         }
                         errLine = "8a";
                         //print("Root part changed, AGX reloading");
@@ -3579,22 +3581,23 @@ namespace ActionGroupsExtended
                             //}
                             else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
                             {
-                                print("AGX VAB1");
+                                print("AGX VAB1 ");// + FlightGlobals.ActiveVessel.vesselName + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
                                 vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab));
-                                vslNode.name = FlightGlobals.ActiveVessel.id.ToString();
+                                vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                 AGXFlightNode.AddNode(vslNode);
+                               // print("node check " + vslNode.ToString());
                             }
                             else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
                             {
                                 print("AGX vab2");
                                 vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab));
-                                vslNode.name = FlightGlobals.ActiveVessel.id.ToString();
+                                vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                 AGXFlightNode.AddNode(vslNode);
                             }
                             else
                             {
                                 print("AGX notfound");
-                                vslNode = new ConfigNode(FlightGlobals.ActiveVessel.id.ToString());
+                                vslNode = new ConfigNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
                                 vslNode.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
                                 vslNode.AddValue("currentKeyset", "1");
                                 vslNode.AddValue("groupNames", "");
@@ -3644,6 +3647,7 @@ namespace ActionGroupsExtended
                                 {
                                     ShowAmbiguousMessage2 = false;
                                 }
+                                //print("gamepart " + gamePart.ConstructID + " " + partDist);
                                 foreach (ConfigNode actNode in prtNode.nodes)
                                 {
                                     //print("node " + actNode + " " + gamePart.ConstructID);
@@ -3736,6 +3740,7 @@ namespace ActionGroupsExtended
                         loadFinished = true;
                         //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
                         errLine = "23";
+                        FlightSaveToFile(AGXFlightNode);//add save current vessel here
                     }
                 }
                 errLine = "24";
@@ -3898,7 +3903,7 @@ namespace ActionGroupsExtended
                     {
                         partActs.AddRange(pm.Actions);
                     }
-                    print(p.ConstructID);
+                    //print(p.ConstructID);
                     foreach (BaseAction ba in partActs)
                     {
                         print(ba.listParent.module.moduleName + " " + ba.name + " " + ba.guiName);
@@ -3915,17 +3920,18 @@ namespace ActionGroupsExtended
 
         public void PrintPartPos()
         {
+            print("begin update pos " + CurrentVesselActions.Count);
             try
             {
                 foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 {
-                    print(p.ConstructID + " " + p.orgPos + " " + p.vessel.rootPart.transform.InverseTransformPoint(p.transform.position) + " " + p.orgRot);
+                    print(p.ConstructID);
 
                 }
             }
             catch
             {
-                print("Print fail!");
+                print("Print fail on pos!");
             }
         }
 
@@ -4025,7 +4031,7 @@ namespace ActionGroupsExtended
             RefreshCurrentActions();
         }
 
-        public void DockingEvent(GameEvents.HostTargetAction<Part, Part> htAct) //docking event happend, merge two vessel actions
+        public void DockingEventggg(GameEvents.HostTargetAction<Part, Part> htAct) //docking event happend, merge two vessel actions //never called, ggg voids it
         {
             //print("undock " + htAct.host.vessel.rootPart.ConstructID + " " + htAct.target.vessel.rootPart.ConstructID);
             
@@ -4039,14 +4045,14 @@ namespace ActionGroupsExtended
                     //print(vsl1.id + " " + vsl2.id);
                     if (vsl1 != vsl2) //check to make sure this is not the same vessel docking to itself somehow, both vsl1 and vsl2 would be FG.AC then.
                     {
-                        print("Docking event!");
+                        print("Old Docking event!");
                         overrideRootChange = true;
                         if (vsl1 == FlightGlobals.ActiveVessel || vsl2 == FlightGlobals.ActiveVessel) //check to make sure at least one vessel is FG.AC  Not sure how a docking event could happen when neither vessel is active but make sure
                         {
-                            if (AGXFlightNode.HasNode(vsl1.id.ToString()))
+                            if (AGXFlightNode.HasNode(vsl1.rootPart.flightID.ToString()))
                             {
                                 // print("vsl1 found");
-                                ConfigNode vsl1Node = AGXFlightNode.GetNode(vsl1.id.ToString());
+                                ConfigNode vsl1Node = AGXFlightNode.GetNode(vsl1.rootPart.flightID.ToString());
 
                                 foreach (ConfigNode prtNode in vsl1Node.nodes)
                                 {
@@ -4100,10 +4106,10 @@ namespace ActionGroupsExtended
                                 }
                             }
 
-                            if (AGXFlightNode.HasNode(vsl2.id.ToString()))
+                            if (AGXFlightNode.HasNode(vsl2.rootPart.flightID.ToString()))
                             {
                                 //print("vsl2 found");
-                                ConfigNode vsl2Node = AGXFlightNode.GetNode(vsl2.id.ToString());
+                                ConfigNode vsl2Node = AGXFlightNode.GetNode(vsl2.rootPart.flightID.ToString());
 
                                 foreach (ConfigNode prtNode in vsl2Node.nodes)
                                 {
@@ -4187,9 +4193,9 @@ namespace ActionGroupsExtended
                 }
                 else if (prtCheck.prt.vessel != prtCheck.pVsl)
                 {
-                    if (prtCheck.prt.vessel == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.prt.vessel.id.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
+                    if (prtCheck.prt.vessel == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.prt.vessel.rootPart.flightID.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
                     {
-                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.prt.vessel.id.ToString());
+                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
                         if (vslUpdate.HasValue("name"))
                         {
                             vslUpdate.RemoveValue("name");
@@ -4215,13 +4221,13 @@ namespace ActionGroupsExtended
                             vslUpdate.RemoveValue("groupVisibilityNames");
                         }
                         vslUpdate.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
-                        AGXFlightNode.RemoveNode(prtCheck.prt.vessel.id.ToString());
+                        AGXFlightNode.RemoveNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
                         AGXFlightNode.AddNode(vslUpdate);
                     }
 
-                    if (prtCheck.pVsl == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
+                    if (prtCheck.pVsl == FlightGlobals.ActiveVessel && AGXFlightNode.HasNode(prtCheck.pVsl.rootPart.flightID.ToString())) //if the part changing is part of the active vessel, ensure the save node is up to date
                     {
-                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.pVsl.id.ToString());
+                        ConfigNode vslUpdate = AGXFlightNode.GetNode(prtCheck.pVsl.rootPart.flightID.ToString());
                         if (vslUpdate.HasValue("name"))
                         {
                             vslUpdate.RemoveValue("name");
@@ -4247,15 +4253,15 @@ namespace ActionGroupsExtended
                             vslUpdate.RemoveValue("groupVisibilityNames");
                         }
                         vslUpdate.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
-                        AGXFlightNode.RemoveNode(prtCheck.pVsl.id.ToString());
+                        AGXFlightNode.RemoveNode(prtCheck.pVsl.rootPart.flightID.ToString());
                         AGXFlightNode.AddNode(vslUpdate);
                     }
-                    
-                    if(AGXFlightNode.HasNode(prtCheck.prt.vessel.id.ToString()) && AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString()))
+
+                    if (AGXFlightNode.HasNode(prtCheck.prt.vessel.rootPart.flightID.ToString()) && AGXFlightNode.HasNode(prtCheck.pVsl.rootPart.flightID.ToString()))
                     {
                         //both ships exist in node, combine groupnames
-                        ConfigNode mainVsl = AGXFlightNode.GetNode(prtCheck.prt.vessel.id.ToString());
-                        ConfigNode secVsl = AGXFlightNode.GetNode(prtCheck.pVsl.id.ToString());
+                        ConfigNode mainVsl = AGXFlightNode.GetNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
+                        ConfigNode secVsl = AGXFlightNode.GetNode(prtCheck.pVsl.rootPart.flightID.ToString());
                         string LoadNames1 = mainVsl.GetValue("groupNames");
                         string LoadNames2 = secVsl.GetValue("groupNames");
                         Dictionary<int, string> Names1 = new Dictionary<int,string>();
@@ -4343,9 +4349,9 @@ namespace ActionGroupsExtended
                         prtCheck.pVsl = prtCheck.prt.vessel;
                     }
 
-                    else if (AGXFlightNode.HasNode(prtCheck.pVsl.id.ToString()))
+                    else if (AGXFlightNode.HasNode(prtCheck.pVsl.rootPart.flightID.ToString()))
                     {
-                     ConfigNode newVsl = new ConfigNode(prtCheck.prt.vessel.id.ToString());
+                        ConfigNode newVsl = new ConfigNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
                         //if(RootParts.HasNode(prtCheck.prt.vessel.rootPart.flightID.ToString()))
                         //{
                         //    ConfigNode existRoot = RootParts.GetNode(prtCheck.prt.vessel.rootPart.flightID.ToString());
@@ -4357,7 +4363,7 @@ namespace ActionGroupsExtended
 
                         //else
                         //{
-                        ConfigNode oldVsl = AGXFlightNode.GetNode(prtCheck.pVsl.id.ToString());
+                        ConfigNode oldVsl = AGXFlightNode.GetNode(prtCheck.pVsl.rootPart.flightID.ToString());
                         
                         newVsl.AddValue("currentKeyset",oldVsl.GetValue("currentKeyset"));
                         newVsl.AddValue("groupNames", oldVsl.GetValue("groupNames"));

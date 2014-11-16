@@ -577,6 +577,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //print("load action2 " + ActionToLoad.ba.name + " " + ActionToLoad.group);
                 //print("agx check " + actsToCompare.Count + " " + ActionToLoad.group + ActionToLoad.ba.name);
                 //print("actual act " + ActionToLoad + " " + ActionToLoad.ba.name);
+                print("BA load " + ActionToLoad.ba.name + " " + ActionToLoad.ba.listParent.part.ConstructID + " " + ActionToLoad.prt.ConstructID);
                 return ActionToLoad;
 
             }
@@ -680,6 +681,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 actionNode.AddValue("custom1","NA"); //u2021 is sciencemodule
                 errLine = "24";
             }
+                
                 return actionNode;
             }
 
