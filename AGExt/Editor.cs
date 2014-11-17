@@ -16,7 +16,8 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
-        
+
+        bool EditorShowToolbarPopout = false;
         bool defaultShowingNonNumeric = false; //are we in non-numeric (abort/brakes/gear/list) mode?
         List<BaseAction> defaultActionsListThisType; //list of default actions showing in group win when non-numeric
         List<BaseAction> defaultActionsListAll; //list of all default actions on vessel, only used in non-numeric mode when going to other mode
@@ -104,7 +105,7 @@ namespace ActionGroupsExtended
         public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
         private bool AGXShow = false;
         private static GUISkin AGXSkin;
-        private static GUIStyle AGXWinStyle = null;
+        public static GUIStyle AGXWinStyle = null;
         //private static GUIStyle TWR1WinStyle = null; //window style
         private static GUIStyle AGXLblStyle = null; //window style
         private static GUIStyle AGXBtnStyle = null; //window style
@@ -129,8 +130,50 @@ namespace ActionGroupsExtended
         //static Part.HighlightType partHighlightLastType;
         //static Material[] partHighlightLastMaterial;
 
-       
-        
+
+         public class SettingsWindowEditor : MonoBehaviour, IDrawable
+         {
+             public Rect SettingsWinEditor = new Rect(0, 0, 150, 60);
+             public Vector2 Draw(Vector2 position)
+             {
+                 var oldSkin = GUI.skin;
+                 GUI.skin = HighLogic.Skin;
+
+                 SettingsWinEditor.x = position.x;
+                 SettingsWinEditor.y = position.y;
+
+                 GUI.Window(2233452, SettingsWinEditor, DrawSettingsWinEditor, "AGX Settings", AGXEditor.AGXWinStyle);
+                 //RCSlaWin = GUILayout.Window(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
+                 //GUI.skin = oldSkin;
+
+                 return new Vector2(SettingsWinEditor.width, SettingsWinEditor.height);
+             }
+
+             public void DrawSettingsWinEditor(int WindowID)
+             {
+
+                 if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows"))
+                 {
+                     KeySetWin.x = 250;
+                     KeySetWin.y = 250;
+                     GroupsWin.x = 350;
+                     GroupsWin.y = 350;
+                     SelPartsWin.x = 200;
+                     SelPartsWin.y = 200;
+                     KeyCodeWin.x = 300;
+                     KeyCodeWin.y = 300;
+                     CurActsWin.x = 150;
+                     CurActsWin.y = 150;
+
+
+                 }
+
+             }
+             public void Update()
+             {
+
+             }
+         }
        
         public void Start()
         {
@@ -239,28 +282,48 @@ namespace ActionGroupsExtended
                     {
                         //List<UnityEngine.Transform> UIPanelList = new List<UnityEngine.Transform>(); //setup list to find Editor Actions UI transform into a list. Could not figure out how to find just a transform
                         //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
-                        if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                        if (e.MouseButton == 0)
                         {
-                            if (AGXShow)
+                            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
                             {
-                                //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
-                                AGXShow = false;
-                                AGExtNode.SetValue("EditShow", "0");
-                                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+                                if (AGXShow)
+                                {
+                                    //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                                    AGXShow = false;
+                                    AGExtNode.SetValue("EditShow", "0");
+                                    EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
 
+                                }
+                                else
+                                {
+                                    // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                                    AGXShow = true;
+                                    AGExtNode.SetValue("EditShow", "1");
+                                    EditorPanels.Instance.panelManager.Dismiss();
+                                }
+                                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
                             }
                             else
                             {
-                                // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
-                                AGXShow = true;
-                                AGExtNode.SetValue("EditShow", "1");
-                                EditorPanels.Instance.panelManager.Dismiss();
+                                EditorLogic.fetch.SelectPanelActions();
                             }
-                            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
                         }
-                        else
+                        if (e.MouseButton == 1)
                         {
-                            EditorLogic.fetch.SelectPanelActions();
+                            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                            {
+                                if (EditorShowToolbarPopout)
+                                {
+                                    AGXBtn.Drawable = null;
+                                    EditorShowToolbarPopout = false;
+                                }
+                                else
+                                {
+                                    SettingsWindowEditor SettingsEditor = new SettingsWindowEditor();
+                                    AGXBtn.Drawable = SettingsEditor;
+                                    EditorShowToolbarPopout = true;
+                                }
+                            }
                         }
                     };
                 }
@@ -1928,7 +1991,7 @@ namespace ActionGroupsExtended
             AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             //AGXBtnStyle.onHover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
-            if (GUI.Button(new Rect(5, 3, 80, 20), "Auto-Hide", AGXBtnStyle))
+            if (GUI.Button(new Rect(15, 3, 70, 20), "Auto-Hide", AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
                 

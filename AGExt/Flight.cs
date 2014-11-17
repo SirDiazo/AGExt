@@ -402,6 +402,71 @@ namespace ActionGroupsExtended
         }
 
 
+        public class SettingsWindow : MonoBehaviour, IDrawable
+        {
+            public Rect SettingsWin = new Rect(0, 0, 150, 105);
+            public Vector2 Draw(Vector2 position)
+            {
+                var oldSkin = GUI.skin;
+                GUI.skin = HighLogic.Skin;
+
+                SettingsWin.x = position.x;
+                SettingsWin.y = position.y;
+
+                GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                //RCSlaWin = GUILayout.Window(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
+                //GUI.skin = oldSkin;
+
+                return new Vector2(SettingsWin.width, SettingsWin.height);
+            }
+
+            public void DrawSettingsWin(int WindowID)
+            {
+
+                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes"))
+                {
+                    AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
+                    if (AGXFlight.FlightWinShowKeycodes)
+                    {
+                        AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "1");
+                    }
+                    else
+                    {
+                        AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "0");
+                    }
+                    AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                }
+
+                if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
+                {
+                    AGXFlight.ClickEditButton();
+                   
+                }
+                if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows"))
+                {
+                    KeySetWin.x = 250;
+                    KeySetWin.y = 250;
+                    GroupsWin.x = 350;
+                    GroupsWin.y = 350;
+                    SelPartsWin.x = 200;
+                    SelPartsWin.y = 200;
+                    KeyCodeWin.x = 300;
+                    KeyCodeWin.y = 300;
+                    CurActsWin.x = 150;
+                    CurActsWin.y = 150;
+                    FlightWin.x = 400;
+                    FlightWin.y = 400;
+                }
+
+                //GUI.DragWindow();
+
+            }
+            public void Update()
+            {
+
+            }
+        }
+
         public bool IsVesselLoaded(uint flightID) //is vessel loaded, wrapper to convert from flightID to vsl
         {
             try
