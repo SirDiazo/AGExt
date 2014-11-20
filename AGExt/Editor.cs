@@ -96,6 +96,12 @@ namespace ActionGroupsExtended
         static Texture2D BtnTexGrn = new Texture2D(1, 1);
         public static Dictionary<int, string> AGXguiNames;
         public static Dictionary<int, KeyCode> AGXguiKeys;
+        public static Dictionary<int, bool> AGXguiMod1Groups;
+        public static Dictionary<int, bool> AGXguiMod2Groups;
+        public static KeyCode AGXguiMod1Key = KeyCode.None;
+        public static KeyCode AGXguiMod2Key = KeyCode.None;
+        private bool AGXguiMod1KeySelecting = false;
+        private bool AGXguiMod2KeySelecting = false;
         public static int AGXCurActGroup = 1;
         static List<string> KeyCodeNames = new List<string>();
         static List<string> JoyStickCodes = new List<string>();
@@ -177,7 +183,14 @@ namespace ActionGroupsExtended
        
         public void Start()
         {
-            defaultActionsListThisType = new List<BaseAction>(); //initialize list
+            AGXguiMod1Groups = new Dictionary<int, bool>();
+            AGXguiMod2Groups = new Dictionary<int, bool>();
+            for (int i = 1; i <= 250; i++)
+            {
+                AGXguiMod1Groups[i] = false;
+                AGXguiMod2Groups[i] = false;
+            }
+                defaultActionsListThisType = new List<BaseAction>(); //initialize list
             defaultActionsListAll = new List<BaseAction>(); //initialize list
             //foreach (Part p in 
             string errLine = "1";
@@ -833,7 +846,7 @@ namespace ActionGroupsExtended
 
                     if (ShowKeyCodeWin)
                     {
-                        KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
+                        KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, "                Keycodes", AGXWinStyle);
                         TrapMouse |= KeyCodeWin.Contains(RealMousePos);
                     }
 
@@ -1192,119 +1205,119 @@ namespace ActionGroupsExtended
             GUI.DragWindow();
         }
 
-        public static string SaveCurrentKeySet(Part p, String CurKey)
-        {
+        //public static string SaveCurrentKeySet(Part p, String CurKey)
+        //{
 
-            if (LoadFinished)
-                return CurrentKeySet.ToString();
-            else
-            {
-                return CurKey;
-            }
+        //    if (LoadFinished)
+        //        return CurrentKeySet.ToString();
+        //    else
+        //    {
+        //        return CurKey;
+        //    }
                     
           
-                }
+        //        }
      
 
-        public void LoadCurrentKeySet()
-        {
+        //public void LoadCurrentKeySet()
+        //{
            
             
-            string errLine = "1";
-            try
-            {
-                errLine = "2";
-                //ConfigNode AGXBaseNode = AGextScenario.LoadBaseNode();
-                errLine = "3";
-                ConfigNode AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                errLine = "4";
+        //    string errLine = "1";
+        //    try
+        //    {
+        //        errLine = "2";
+        //        //ConfigNode AGXBaseNode = AGextScenario.LoadBaseNode();
+        //        errLine = "3";
+        //        ConfigNode AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //        errLine = "4";
                
-                errLine = "5";
-                string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
-                errLine = "6";
+        //        errLine = "5";
+        //        string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
+        //        errLine = "6";
                 
-                if (AGXEditorNode.CountNodes >= 1)
-                {
-                    errLine = "7";
-                    if(AGXEditorNode.nodes.Contains(hashedShipName))
-                {
-                    errLine = "8";
-                    ConfigNode vslNode = AGXEditorNode.GetNode(hashedShipName);
-                    errLine = "9";
-                    CurrentKeySet = Convert.ToInt32(vslNode.GetValue("AGXKeySet"));
-                    errLine = "10";
-                    if (CurrentKeySet >= 1 && CurrentKeySet <= 5)
-                    {
-                    }
-                    else
-                    {
-                        CurrentKeySet = 1;
-                    }
-                    errLine = "11";
-                }
+        //        if (AGXEditorNode.CountNodes >= 1)
+        //        {
+        //            errLine = "7";
+        //            if(AGXEditorNode.nodes.Contains(hashedShipName))
+        //        {
+        //            errLine = "8";
+        //            ConfigNode vslNode = AGXEditorNode.GetNode(hashedShipName);
+        //            errLine = "9";
+        //            CurrentKeySet = Convert.ToInt32(vslNode.GetValue("AGXKeySet"));
+        //            errLine = "10";
+        //            if (CurrentKeySet >= 1 && CurrentKeySet <= 5)
+        //            {
+        //            }
+        //            else
+        //            {
+        //                CurrentKeySet = 1;
+        //            }
+        //            errLine = "11";
+        //        }
                    
-                //else if (EditorLogic.startPod.Modules.Contains("ModuleAGExtData")) //v2 done
-                //{
-                //    errLine = "12";
-                //    bool ShipListOk3 = new bool();
-                //    ShipListOk3 = false;
-                //    try
-                //    {
+        //        //else if (EditorLogic.startPod.Modules.Contains("ModuleAGExtData")) //v2 done
+        //        //{
+        //        //    errLine = "12";
+        //        //    bool ShipListOk3 = new bool();
+        //        //    ShipListOk3 = false;
+        //        //    try
+        //        //    {
 
 
-                //        if (EditorLogic.SortedShipList.Count >= 1)
-                //        {
-                //            foreach (Part p in EditorLogic.SortedShipList)
-                //            {
-                //            }
-                //            ShipListOk3 = true;
-                //        }
-                //    }
-                //    catch
-                //    {
+        //        //        if (EditorLogic.SortedShipList.Count >= 1)
+        //        //        {
+        //        //            foreach (Part p in EditorLogic.SortedShipList)
+        //        //            {
+        //        //            }
+        //        //            ShipListOk3 = true;
+        //        //        }
+        //        //    }
+        //        //    catch
+        //        //    {
 
-                //        ShipListOk3 = false;
-                //        CurrentKeySet = 1;
-                //    }
+        //        //        ShipListOk3 = false;
+        //        //        CurrentKeySet = 1;
+        //        //    }
 
-                //    if (ShipListOk3)
-                //    {
-                //        foreach (PartModule pm in EditorLogic.startPod.Modules.OfType<ModuleAGExtData>()) //ver2 okay
-                //        {
-                //            CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
+        //        //    if (ShipListOk3)
+        //        //    {
+        //        //        foreach (PartModule pm in EditorLogic.startPod.Modules.OfType<ModuleAGExtData>()) //ver2 okay
+        //        //        {
+        //        //            CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
 
-                //        }
+        //        //        }
 
-                //    }
+        //        //    }
 
-                //    if (CurrentKeySet >= 1 && CurrentKeySet <= 5)
-                //    {
-                //    }
-                //    else
-                //    {
-                //        CurrentKeySet = 1;
-                //    }
+        //        //    if (CurrentKeySet >= 1 && CurrentKeySet <= 5)
+        //        //    {
+        //        //    }
+        //        //    else
+        //        //    {
+        //        //        CurrentKeySet = 1;
+        //        //    }
 
-                //    //if (ShipListOk3)
-                //    //{
-                //    //    foreach (Part p in EditorLogic.SortedShipList)
-                //    //    {
-                //    //        foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>()) //not needed v2
-                //    //        {
-                //    //            agpm.partCurrentKeySet = CurrentKeySet;
-                //    //        }
-                //    //    }
-                //    //}
-                //}
-            }
-                errLine = "13";
-               // CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
-            }
-            catch (Exception e)
-            {
-                print("AGXEd LoadCurrentKeySet Fail " + errLine+ " "+e);
-            }
-        }
+        //        //    //if (ShipListOk3)
+        //        //    //{
+        //        //    //    foreach (Part p in EditorLogic.SortedShipList)
+        //        //    //    {
+        //        //    //        foreach (ModuleAGExtData agpm in p.Modules.OfType<ModuleAGExtData>()) //not needed v2
+        //        //    //        {
+        //        //    //            agpm.partCurrentKeySet = CurrentKeySet;
+        //        //    //        }
+        //        //    //    }
+        //        //    //}
+        //        //}
+        //    }
+        //        errLine = "13";
+        //       // CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        print("AGXEd LoadCurrentKeySet Fail " + errLine+ " "+e);
+        //    }
+        //}
 
         
 
@@ -1361,7 +1374,27 @@ namespace ActionGroupsExtended
 
                 }
             }
-         
+            String GroupKeysMod1ToLoad = AGExtNode.GetValue("KeySetMod1Group" + CurrentKeySet.ToString());
+            String GroupKeysMod2ToLoad = AGExtNode.GetValue("KeySetMod2Group" + CurrentKeySet.ToString());
+            for(int i = 0;i <=249;i++)
+            {
+                if(GroupKeysMod1ToLoad[i] == '1')
+                {
+                    AGXguiMod1Groups[i + 1] = true;
+                }
+                else
+                {
+                    AGXguiMod1Groups[i + 1] = false;
+                }
+                if (GroupKeysMod2ToLoad[i] == '1')
+                {
+                    AGXguiMod2Groups[i + 1] = true;
+                }
+                else
+                {
+                    AGXguiMod2Groups[i + 1] = false;
+                }
+            }
         }
         
         public static void SaveCurrentKeyBindings()
@@ -1383,7 +1416,35 @@ namespace ActionGroupsExtended
                 }
 
                 AGExtNode.SetValue("KeySet" + CurrentKeySet.ToString(), SaveString);
-                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                
+
+                string GroupsMod1ToSave = "";
+                string GroupsMod2ToSave = "";
+            for(int i = 1;i <=250;i++)
+            {
+                if(AGXguiMod1Groups[i])
+                {
+                    GroupsMod1ToSave = GroupsMod1ToSave + "1";
+                }
+                else
+                {
+                    GroupsMod1ToSave = GroupsMod1ToSave + "0";
+                }
+                if (AGXguiMod2Groups[i])
+                {
+                    GroupsMod2ToSave = GroupsMod2ToSave + "1";
+                }
+                else
+                {
+                    GroupsMod2ToSave = GroupsMod2ToSave + "0";
+                }
+            }
+            AGExtNode.SetValue("KeySetMod1Group" + CurrentKeySet.ToString(), GroupsMod1ToSave);
+            AGExtNode.SetValue("KeySetMod2Group" + CurrentKeySet.ToString(), GroupsMod2ToSave);
+
+
+
+            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
                 //if (CurrentKeySet == 1)
                 //{
                 //    SaveDefaultCustomKeys();
@@ -1417,13 +1478,81 @@ namespace ActionGroupsExtended
         //}
         public void KeyCodeWindow(int WindowID)
         {
-            if (GUI.Button(new Rect(5, 3, 100, 25), "None", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 3, 80, 25), "Clear Key", AGXBtnStyle))
             {
-                AGXguiKeys[AGXCurActGroup] = KeyCode.None;
-                ShowKeyCodeWin = false;
-
+                if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = KeyCode.None;
+                            AGXguiMod1KeySelecting = false;
+                        }
+                else if (AGXguiMod2KeySelecting)
+                {
+                    AGXguiMod2Key = KeyCode.None;
+                    AGXguiMod2KeySelecting = false;
+                }
+                else
+                {
+                    AGXguiKeys[AGXCurActGroup] = KeyCode.None;
+                    ShowKeyCodeWin = false;
+                }
             }
-            
+
+            if(AGXguiMod1KeySelecting)
+            {
+                AGXBtnStyle.normal.background = ButtonTextureRed;
+                AGXBtnStyle.hover.background = ButtonTextureRed;
+            }
+            else if(AGXguiMod1Groups[AGXCurActGroup] == true)
+            {
+                AGXBtnStyle.normal.background = ButtonTextureGreen;
+                AGXBtnStyle.hover.background = ButtonTextureGreen;
+            }
+            else
+            {
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
+            }
+            if (GUI.Button(new Rect(80, 3, 60, 25), AGXguiMod1Key.ToString(), AGXBtnStyle))
+            {
+                if(Event.current.button == 0)
+                {
+                    AGXguiMod1Groups[AGXCurActGroup] = !AGXguiMod1Groups[AGXCurActGroup];
+                }
+                if (Event.current.button == 1)
+                {
+                    AGXguiMod1KeySelecting = true;
+                    AGXguiMod2KeySelecting = false;
+                }
+            }
+            if (AGXguiMod2KeySelecting)
+            {
+                AGXBtnStyle.normal.background = ButtonTextureRed;
+                AGXBtnStyle.hover.background = ButtonTextureRed;
+            }
+            else if (AGXguiMod2Groups[AGXCurActGroup] == true)
+            {
+                AGXBtnStyle.normal.background = ButtonTextureGreen;
+                AGXBtnStyle.hover.background = ButtonTextureGreen;
+            }
+            else
+            {
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
+            }
+            if (GUI.Button(new Rect(140, 3, 60, 25), AGXguiMod2Key.ToString(), AGXBtnStyle))
+            {
+                if (Event.current.button == 0)
+                {
+                    AGXguiMod2Groups[AGXCurActGroup] = !AGXguiMod2Groups[AGXCurActGroup];
+                }
+                if (Event.current.button == 1)
+                {
+                    AGXguiMod2KeySelecting = true;
+                    AGXguiMod1KeySelecting = false;
+                }
+            }
+            AGXBtnStyle.normal.background = ButtonTexture;
+            AGXBtnStyle.hover.background = ButtonTexture;
             //if (ShowJoySticks)
             //{
             //    GUI.DrawTexture(new Rect(281, 3, 123, 18), BtnTexGrn);
@@ -1442,8 +1571,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(5, 25 + (KeyListCount * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        { 
                         AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
                         ShowKeyCodeWin = false;
+                        }
 
                     }
                     KeyListCount = KeyListCount + 1;
@@ -1452,8 +1594,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(105, 25 + ((KeyListCount - 35) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     KeyListCount = KeyListCount + 1;
@@ -1462,8 +1617,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(205, 25 + ((KeyListCount - 70) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount)); 
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     KeyListCount = KeyListCount + 1;
@@ -1472,8 +1640,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(305, 25 + ((KeyListCount - 105) * 20), 100, 20), KeyCodeNames.ElementAt(KeyListCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), KeyCodeNames.ElementAt(KeyListCount));
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     KeyListCount = KeyListCount + 1;
@@ -1487,8 +1668,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(5, 25 + (JoyStickCount * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     JoyStickCount = JoyStickCount + 1;
@@ -1497,8 +1691,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(130, 25 + ((JoyStickCount - 35) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     JoyStickCount = JoyStickCount + 1;
@@ -1507,8 +1714,21 @@ namespace ActionGroupsExtended
                 {
                     if (GUI.Button(new Rect(255, 25 + ((JoyStickCount - 70) * 20), 125, 20), JoyStickCodes.ElementAt(JoyStickCount), AGXBtnStyle))
                     {
-                        AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
-                        ShowKeyCodeWin = false;
+                        if(AGXguiMod1KeySelecting)
+                        {
+                            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod1KeySelecting = false;
+                        }
+                        else if (AGXguiMod2KeySelecting)
+                        {
+                            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            AGXguiMod2KeySelecting = false;
+                        }
+                        else
+                        {
+                            AGXguiKeys[AGXCurActGroup] = (KeyCode)Enum.Parse(typeof(KeyCode), JoyStickCodes.ElementAt(JoyStickCount));
+                            ShowKeyCodeWin = false;
+                        }
 
                     }
                     JoyStickCount = JoyStickCount + 1;
@@ -1911,7 +2131,24 @@ namespace ActionGroupsExtended
                 CurGroupDesc = GUI.TextField(new Rect(SelPartsLeft + 245, 135, 120, 22), CurGroupDesc, AGXFldStyle);
                 AGXguiNames[AGXCurActGroup] = CurGroupDesc;
                 GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), "Keybinding:", AGXLblStyle);
-                if (GUI.Button(new Rect(SelPartsLeft + 245, 222, 120, 20), AGXguiKeys[AGXCurActGroup].ToString(), AGXBtnStyle))
+                string btnName = "";
+                if (AGXguiMod1Groups[AGXCurActGroup] && AGXguiMod2Groups[AGXCurActGroup])
+                {
+                    btnName = '\u00bd' + AGXguiKeys[AGXCurActGroup].ToString();
+                }
+                else if (AGXguiMod1Groups[AGXCurActGroup])
+                {
+                    btnName = '\u2474' + AGXguiKeys[AGXCurActGroup].ToString();
+                }
+                else if (AGXguiMod2Groups[AGXCurActGroup])
+                {
+                    btnName = '\u2475' + AGXguiKeys[AGXCurActGroup].ToString();
+                }
+                else
+                {
+                    btnName = AGXguiKeys[AGXCurActGroup].ToString();
+                }
+                if (GUI.Button(new Rect(SelPartsLeft + 245, 222, 120, 20), btnName, AGXBtnStyle)) 
                 {
                     ShowKeyCodeWin = true;
                 }
@@ -2377,7 +2614,26 @@ namespace ActionGroupsExtended
                 {
                     if (ShowKeySetWin)
                     {
-                        if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+                        string btnName = "";
+                        if (AGXguiMod1Groups[ButtonID] && AGXguiMod2Groups[ButtonID])
+                        {
+                            btnName = '\u00bd' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else if (AGXguiMod1Groups[ButtonID])
+                        {
+                            btnName = '\u2474' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else if (AGXguiMod2Groups[ButtonID])
+                        {
+                            btnName = '\u2475' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else
+                        {
+                            btnName = AGXguiKeys[ButtonID].ToString();
+                        }
+
+                        //btnName = btnName + AGXguiKeys[ButtonID].ToString();
+                        if (GUI.Button(new Rect(0, (ButtonPos - 1) * 20, 120, 20), ButtonID + " Key: " + btnName, AGXBtnStyle))
                         {
 
                             AGXCurActGroup = ButtonID;
@@ -2410,7 +2666,25 @@ namespace ActionGroupsExtended
                 {
                     if (ShowKeySetWin)
                     {
-                        if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + AGXguiKeys[ButtonID].ToString(), AGXBtnStyle))
+
+                        string btnName2 = "";
+                        if (AGXguiMod1Groups[ButtonID] && AGXguiMod2Groups[ButtonID])
+                        {
+                            btnName2 = '\u00bd' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else if (AGXguiMod1Groups[ButtonID])
+                        {
+                            btnName2 = '\u2474' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else if (AGXguiMod2Groups[ButtonID])
+                        {
+                            btnName2 = '\u2475' + AGXguiKeys[ButtonID].ToString();
+                        }
+                        else
+                        {
+                            btnName2 = AGXguiKeys[ButtonID].ToString();
+                        }
+                        if (GUI.Button(new Rect(120, (ButtonPos - 26) * 20, 120, 20), ButtonID + " Key: " + btnName2, AGXBtnStyle))
                         {
                             AGXCurActGroup = ButtonID;
                             ShowKeyCodeWin = true;

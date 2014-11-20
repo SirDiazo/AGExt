@@ -4926,6 +4926,25 @@ namespace ActionGroupsExtended
                             agAct.activated = false;
                         }
                     }
+                    if (agAct.ba.listParent.module.moduleName == "ModuleGimbalActions") //other acts not needed, bool check
+                    {
+                        agAct.activated = true;
+                        foreach(ModuleGimbal pm in agAct.ba.listParent.part.Modules.OfType<ModuleGimbal>())
+                        {
+                            if(pm.gimbalLock == true)
+                            {
+                                agAct.activated = false;
+                            }
+                        }
+                    }
+                    if (agAct.ba.listParent.module.moduleName == "ModuleDockingNodeActions" || agAct.ba.listParent.module.moduleName == "ModuleCommandActions" && agAct.ba.name == "ControlFromHere") //other acts not needed, bool check
+                    {
+                        agAct.activated = false;
+                        if(agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
+                        {
+                            agAct.activated = true;
+                        }
+                    }
                     if (agAct.ba.listParent.module.moduleName == "ModuleLandingGear") //all acts
                     {
                         if (agAct.ba.name == "OnAction")

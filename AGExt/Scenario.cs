@@ -536,6 +536,18 @@ namespace ActionGroupsExtended //add scenario module for data storage
                        // actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
                     }
                 }
+                else if (pmName == "SCANsat") //Remotetech
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
@@ -554,10 +566,10 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 if (actsToCompare.Count != 1)
                 {
                     errLine = "4";
-                    print("AGX actsToCompare.count != 1 "+actsToCompare.Count);
+                    print("AGX actsToCompare.count != 1 "+actsToCompare.Count + " Part: " + actPart.ConstructID + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"));
                     if (showAmbiguousMessage)
                     {
-                        ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"), 10F, ScreenMessageStyle.UPPER_CENTER);
+                        ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
                     }
                 }
                 errLine = "5";
@@ -577,7 +589,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //print("load action2 " + ActionToLoad.ba.name + " " + ActionToLoad.group);
                 //print("agx check " + actsToCompare.Count + " " + ActionToLoad.group + ActionToLoad.ba.name);
                 //print("actual act " + ActionToLoad + " " + ActionToLoad.ba.name);
-                print("BA load " + ActionToLoad.ba.name + " " + ActionToLoad.ba.listParent.part.ConstructID + " " + ActionToLoad.prt.ConstructID);
+                //print("BA load " + ActionToLoad.ba.name + " " + ActionToLoad.ba.listParent.part.ConstructID + " " + ActionToLoad.prt.ConstructID);
                 return ActionToLoad;
 
             }
@@ -671,6 +683,14 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
                 errLine = "21";
                 actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("resourceName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "SCANsat") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("scanName")); //u2021 is sciencemodule
                 errLine = "22";
             }
             //BTSMModuleReactionWheel does not need custom save, just load
