@@ -359,7 +359,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 }
                 else if (pmName == "FSanimateGeneric")
                 {
-                    print("load it");
+                    //print("load it");
                     string animName = actNode.GetValue("custom1");
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
                     {
@@ -548,6 +548,18 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
                     }
                 }
+                else if (pmName == "ModuleEnginesFX") 
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.Fields.GetValue("engineID") == (string)actNode.GetValue("engineID"))
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
@@ -691,6 +703,14 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
                 errLine = "21";
                 actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("scanName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "ModuleEnginesFX") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
                 errLine = "22";
             }
             //BTSMModuleReactionWheel does not need custom save, just load
