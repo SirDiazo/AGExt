@@ -2732,10 +2732,10 @@ namespace ActionGroupsExtended
                         if (GUI.Button(new Rect(SelPartsLeft + 30, 190,185, 40), "No actions found.\r\nRefresh?", AGXBtnStyle))
                         {
                             PartActionsList.Clear();
-                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
                             foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
                             {
-                                PartActionsList.AddRange(pm.Actions);
+                                PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                             }
                             print("AGX Actions refresh found actions: " + PartActionsList.Count);
                         }
@@ -3065,10 +3065,10 @@ namespace ActionGroupsExtended
                         }
                         //AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
                         PartActionsList.Clear(); //populate actions list from selected parts
-                        PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                        PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
                         foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
                         {
-                            PartActionsList.AddRange(pm.Actions);
+                            PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                         }
                         //ScrollGroups = Vector2.zero;
                         showAllPartsList = false; //exit show all parts mode
@@ -3364,10 +3364,10 @@ namespace ActionGroupsExtended
             if (AGEEditorSelectedPartsSame)
             {
                 PartActionsList.Clear();
-                PartActionsList.AddRange(p.Actions);
+                PartActionsList.AddRange(p.Actions.Where(ba => ba.active == true));
                 foreach (PartModule pm in p.Modules)
                 {
-                    PartActionsList.AddRange(pm.Actions);
+                    PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                 }
 
             }
@@ -4250,7 +4250,7 @@ namespace ActionGroupsExtended
             //}
             //PrintPartPos();
             //PrintPartActs();
-            //print("parts count " + oldShipParts.Count + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID + " " + CurrentVesselActions.Count);
+            
         }
             catch(Exception e)
             {
@@ -4262,19 +4262,10 @@ namespace ActionGroupsExtended
         {
             try
             {
-                foreach (Part p in EditorLogic.SortedShipList)
+                print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
+                foreach (ProtoCrewMember pc in FlightGlobals.ActiveVessel.GetVesselCrew())
                 {
-                    List<BaseAction> partActs = new List<BaseAction>();
-                    partActs.AddRange(p.Actions);
-                    foreach (PartModule pm in p.Modules)
-                    {
-                        partActs.AddRange(pm.Actions);
-                    }
-                    //print(p.ConstructID);
-                    foreach (BaseAction ba in partActs)
-                    {
-                        print(ba.listParent.module.moduleName + " " + ba.name + " " + ba.guiName);
-                    }
+                    print("Cname " + pc.KerbalRef.name);
                 }
 
 
@@ -5993,6 +5984,83 @@ namespace ActionGroupsExtended
                             if (agAct.ba.name == "ToggleConverter")
                             {
                                 if ((bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled"))
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ModuleControlSurfaceActions") //other acts not needed, bool check
+                        {
+                            agAct.activated = true;
+                            foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
+                            {
+                                if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
+                                {
+                                    if (pm.ignorePitch == true)
+                                    {
+                                        agAct.activated = false;
+                                    }
+                                }
+                                else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
+                                {
+                                    if (pm.ignoreYaw == true)
+                                    {
+                                        agAct.activated = false;
+                                    }
+                                }
+                                else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
+                                {
+                                    if (pm.ignoreRoll == true)
+                                    {
+                                        agAct.activated = false;
+                                    }
+                                }
+                            }
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ModuleFuelCrossfeedActions") 
+                        {
+                            agAct.activated = agAct.ba.listParent.part.fuelCrossFeed;
+                            
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ModuleResourceActions") //scansat mod
+                        {
+
+                            if(agAct.ba.name == "ToggleResource" || agAct.ba.name == "EnableResource" || agAct.ba.name == "DisableResource")
+                            {
+                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockResource") == true)
+                                {
+                                    agAct.activated = false;
+                                }
+                                else
+                                {
+                                    agAct.activated = true;
+                                }
+                            }
+
+                            if (agAct.ba.name == "ToggleElec" || agAct.ba.name == "EnableElec" || agAct.ba.name == "DisableElec")
+                            {
+                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockEC") == true)
+                                {
+                                    agAct.activated = false;
+                                }
+                                else
+                                {
+                                    agAct.activated = true;
+                                }
+                            }
+
+                        }
+                        if (agAct.ba.listParent.module.moduleName == "ModuleWheelActions")
+                        {
+                            agAct.activated = true;
+                            foreach (ModuleWheel mWheel in agAct.ba.listParent.part.Modules.OfType<ModuleWheel>())
+                            {
+                                BaseAction whlBrakes = mWheel.Actions.Find(ba => ba.name == "BrakesAction");
+                                if ((whlBrakes.actionGroup & KSPActionGroup.Brakes) == KSPActionGroup.Brakes)
                                 {
                                     agAct.activated = true;
                                 }

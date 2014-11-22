@@ -1988,10 +1988,10 @@ namespace ActionGroupsExtended
                         if (GUI.Button(new Rect(SelPartsLeft + 30, 190, 185, 40), "No actions found.\r\nRefresh?", AGXBtnStyle))
                         {
                             PartActionsList.Clear();
-                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
                             foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
                             {
-                                PartActionsList.AddRange(pm.Actions);
+                                PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                             }
                             print("AGX Actions refresh found actions: " + PartActionsList.Count);
                         }
@@ -2441,10 +2441,10 @@ namespace ActionGroupsExtended
                         }
                         //AGEditorSelectedParts.RemoveAll(p2 => p2.AGPart.name != AGEditorSelectedParts.First().AGPart.name); //error trap just incase two parts have the same title, they can't have the same name
                         PartActionsList.Clear(); //populate actions list from selected parts
-                        PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions);
+                        PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
                         foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
                         {
-                            PartActionsList.AddRange(pm.Actions);
+                            PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                         }
                         //ScrollGroups = Vector2.zero;
                         showAllPartsList = false; //exit show all parts mode
@@ -2760,10 +2760,10 @@ namespace ActionGroupsExtended
             if (AGEEditorSelectedPartsSame)
             {
                 PartActionsList.Clear();
-                PartActionsList.AddRange(p.Actions);
+                PartActionsList.AddRange(p.Actions.Where(ba => ba.active == true));
                 foreach (PartModule pm in p.Modules)
                 {
-                    PartActionsList.AddRange(pm.Actions);
+                    PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
                 }
  
             }
