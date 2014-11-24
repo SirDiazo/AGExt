@@ -560,6 +560,18 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
                     }
                 }
+                else if (pmName == "RealChuteModule")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
@@ -711,6 +723,14 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
                 errLine = "21";
                 actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "RealChuteModule") //
+            { //RealChute needs no extra data saved, just add this for tracking so I know it is saving as exception.
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                //actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
                 errLine = "22";
             }
             //BTSMModuleReactionWheel does not need custom save, just load

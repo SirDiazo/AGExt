@@ -15,7 +15,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
-            print("AGExt Ver. 1.23 loaded");
+            print("AGExt Ver. 1.23a loaded");
             //below no longer needed with InputLockManager
             //AGXguiKeys = new Dictionary<int, KeyCode>();
             //AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
