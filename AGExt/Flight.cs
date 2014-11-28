@@ -1214,6 +1214,7 @@ namespace ActionGroupsExtended
         {
             if (AGXguiMod1Groups[group] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[group] == Input.GetKey(AGXguiMod2Key))
             {
+                //print("Key act for some reason " + group);
                 ActivateActionGroup(group, false, false);
             }
         }
@@ -4141,7 +4142,7 @@ namespace ActionGroupsExtended
                 {
                     if (AGXguiKeys[i] == KC)
                     {
-                        //print("Key act for some reason");
+                        //print("Key act for some reason " + i);
                         ActivateActionGroupCheckModKeys(i);
                     }
                 }
@@ -4262,10 +4263,13 @@ namespace ActionGroupsExtended
         {
             try
             {
-                print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
-                foreach (ProtoCrewMember pc in FlightGlobals.ActiveVessel.GetVesselCrew())
+                //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
+                foreach (Part p in FlightGlobals.ActiveVessel.parts)
                 {
-                    print("Cname " + pc.KerbalRef.name);
+                    foreach (ModuleEngines eng in p.Modules.OfType<ModuleEngines>())
+                    {
+                        print("state " + eng.isOperational + eng.getIgnitionState);
+                    }
                 }
 
 
@@ -5177,13 +5181,13 @@ namespace ActionGroupsExtended
                     if (agAct.ba.listParent.module.moduleName == "ModuleEngines") //all acts not needed, checks bool directly
                     {
                         ModuleEngines agEng = (ModuleEngines)agAct.ba.listParent.module;
-                        agAct.activated = agEng.isOperational;
+                        agAct.activated = agEng.getIgnitionState;
                     }
 
                     if (agAct.ba.listParent.module.moduleName == "ModuleEnginesFX")//all acts not needed, checks bool directly
                     {
                         ModuleEnginesFX agEng = (ModuleEnginesFX)agAct.ba.listParent.module;
-                        agAct.activated = agEng.isOperational;
+                        agAct.activated = agEng.getIgnitionState;
                     }
                     if (agAct.ba.listParent.module.moduleName == "ModuleEnviroSensor")
                     {
