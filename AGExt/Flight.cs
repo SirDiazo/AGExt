@@ -1307,7 +1307,20 @@ namespace ActionGroupsExtended
                     }
                   
                 }
-                
+                if(agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "ActivateAction" || agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "OnAction")
+                {
+                    //overide to activate part when activating an engine so gimbals come on
+                    agAct.ba.listParent.part.force_activate();
+                    //print("Force act");
+
+                }
+                if (agAct.ba.listParent.module.moduleName == "ModuleEnginesFX" && agAct.ba.name == "ActivateAction" || agAct.ba.listParent.module.moduleName == "ModuleEnginesFX" && agAct.ba.name == "OnAction")
+                {
+                    //overide to activate part when activating an engine so gimbals come on
+                    agAct.ba.listParent.part.force_activate();
+                    //print("Force act");
+
+                }
                 }
                 //ModuleAGExtData pmAgx = agAct.ba.listParent.part.Modules.OfType<ModuleAGExtData>().First<ModuleAGExtData>();
                 //pmAgx.partAGActions.Clear();
@@ -4302,9 +4315,19 @@ namespace ActionGroupsExtended
             try
             {
                 //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
-                foreach (AGXCooldown agCD in groupCooldowns)
+                foreach (Part p in FlightGlobals.ActiveVessel.parts)
                 {
-                    print("action " + agCD.vslFlightID + " " + agCD.actGroup + " " + agCD.delayLeft);
+                    foreach (ModuleEnginesFX eng in p.Modules.OfType<ModuleEnginesFX>())
+                    {
+                        foreach (BaseAction ba in eng.Actions)
+                        {
+                            print(p.ConstructID + " " + ba.name + " " + ba.guiName);
+                        }
+                    }
+                    foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
+                    {
+                        print(p.ConstructID + " " + gim.gimbalLock);
+                    }
                 }
 
 
