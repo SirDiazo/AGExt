@@ -294,6 +294,19 @@ namespace ActionGroupsExtended
         public BaseAction ba;
         public KSPActionGroup agrp;
     }
+    public class AGXCooldown : MonoBehaviour
+    {
+        public uint vslFlightID;
+        public int actGroup;
+        public int delayLeft;
+
+        public AGXCooldown(uint ID, int grp, int delay)
+        {
+            vslFlightID = ID;
+            actGroup = grp;
+            delayLeft = delay;
+        }
+    }
 
 
 

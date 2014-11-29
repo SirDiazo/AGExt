@@ -12,6 +12,8 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        private static int activationCoolDown = 5;
+        private static List<AGXCooldown> groupCooldowns;
         private List<Part> oldShipParts;
         //Selected Parts Window Variables
         private bool AGXLockSet = false; //is inputlock set?
@@ -265,6 +267,16 @@ namespace ActionGroupsExtended
                 InputLockManager.SetControlLock(ControlTypes.CUSTOM_ACTION_GROUPS, "AGExtControlLock");
                 AGXLockSet = true;
                 //print("Catch");
+            }
+
+            groupCooldowns = new List<AGXCooldown>(); //setup values for group cooldowns logic
+            try
+            {
+                activationCoolDown = Convert.ToInt32(AGExtNode.GetValue("ActivationCooldown"));
+            }
+            catch
+            {
+                print("AGX Default cooldown not found, using 5 Update frames");
             }
 
             if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
@@ -1212,9 +1224,11 @@ namespace ActionGroupsExtended
 
         public static void ActivateActionGroupCheckModKeys(int group) //backwards compatibility, toggle group
         {
+
+            print("AGX Key check for some reason " + group);
             if (AGXguiMod1Groups[group] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[group] == Input.GetKey(AGXguiMod2Key))
             {
-                //print("Key act for some reason " + group);
+                print("AGX Key activate for some reason " + group);
                 ActivateActionGroup(group, false, false);
             }
         }
@@ -1241,7 +1255,13 @@ namespace ActionGroupsExtended
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
-
+                if(groupCooldowns.Any(cd => cd.actGroup == agAct.group && cd.vslFlightID == agAct.ba.listParent.part.vessel.rootPart.flightID)) //rather then fight with double negative bools, do noting if both match, run if no match
+                {
+                    //if this triggers, that action/group combo is in cooldown
+                    print("AGX Action not activated, that group still in cooldown");
+                }
+                else //action not in cooldown
+                {
                 if (force) //are we forcing a direction or toggling?
                 {
                     if (forceDir) //we are forcing a direction so set the agAct.activated to trigger the direction below correctly
@@ -1253,7 +1273,7 @@ namespace ActionGroupsExtended
                 if (agAct.activated)
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
-                    
+                    print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
                     foreach (AGXAction agxAct in CurrentVesselActions)
                     {
@@ -1272,6 +1292,7 @@ namespace ActionGroupsExtended
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Activate);
                     //agAct.activated = true;
+                    print("AGX action activate FIRE!" + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
                     foreach (AGXAction agxAct in CurrentVesselActions)
                     {
@@ -1285,13 +1306,16 @@ namespace ActionGroupsExtended
                         FlightGlobals.ActiveVessel.ActionGroups[CustomActions[group]] = true;
                     }
                   
-                    
+                }
+                
                 }
                 //ModuleAGExtData pmAgx = agAct.ba.listParent.part.Modules.OfType<ModuleAGExtData>().First<ModuleAGExtData>();
                 //pmAgx.partAGActions.Clear();
                 //pmAgx.partAGActions.AddRange(CurrentVesselActions.Where(agp => agp.prt == agAct.ba.listParent.part));
                 //pmAgx.AGXData = pmAgx.SaveActionGroups();
+
             }
+            groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
         }
 
@@ -3700,6 +3724,7 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
+            //print("alpha 1 " + Input.GetKeyDown(KeyCode.Alpha1));
             //print("AGXLock state " + AGXLockSet);
             string errLine = "1";
             try
@@ -4217,16 +4242,17 @@ namespace ActionGroupsExtended
             //        }
             //    }
             //}
-            if (actionsCheckFrameCount >= 20)
+            if (actionsCheckFrameCount >= 15) //this increments in the FixedUpdate frame now
             {
                 CheckActionsActive();
                 //PartVesselChangeCheck();
                 actionsCheckFrameCount = 0;
             }
-            else
-            {
-                actionsCheckFrameCount = actionsCheckFrameCount + 1;
-            }
+            //else
+            //{
+            //    actionsCheckFrameCount = actionsCheckFrameCount + (int)(Time.deltaTime * 1000f);
+            //}
+            //print("delta time " + actionsCheckFrameCount);
             errLine = "37";
             //print("vessel " + FlightGlobals.ActiveVessel.id.ToString());
             //print("uid " + FlightGlobals.ActiveVssel.rootPart.uid.ToString());
@@ -4250,6 +4276,14 @@ namespace ActionGroupsExtended
 
             //}
             //PrintPartPos();
+
+                //count down action cool downs
+            groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
+            foreach(AGXCooldown agCD in groupCooldowns)
+            {
+                agCD.delayLeft = agCD.delayLeft + 1;
+                
+            }
             //PrintPartActs();
             
         }
@@ -4258,18 +4292,19 @@ namespace ActionGroupsExtended
                 print("AGX Update error: " + errLine + " " + e);
             }
         }
+        public void FixedUpdate() 
+        {
+            actionsCheckFrameCount = actionsCheckFrameCount + 1; //this affects actions on vessel, limit how often we check toggle states
+        }
 
         public void PrintPartActs()
         {
             try
             {
                 //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
-                foreach (Part p in FlightGlobals.ActiveVessel.parts)
+                foreach (AGXCooldown agCD in groupCooldowns)
                 {
-                    foreach (ModuleEngines eng in p.Modules.OfType<ModuleEngines>())
-                    {
-                        print("state " + eng.isOperational + eng.getIgnitionState);
-                    }
+                    print("action " + agCD.vslFlightID + " " + agCD.actGroup + " " + agCD.delayLeft);
                 }
 
 
@@ -5138,6 +5173,11 @@ namespace ActionGroupsExtended
 
         public void CheckActionsActive() //monitor actions state, have to add them manually
         {
+           
+            
+            
+            
+            //start toggle checking
             foreach (AGXAction agAct in CurrentVesselActions)
             {
                 if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
