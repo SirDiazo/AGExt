@@ -4321,12 +4321,12 @@ namespace ActionGroupsExtended
                     {
                         foreach (BaseAction ba in eng.Actions)
                         {
-                            print(p.ConstructID + " " + ba.name + " " + ba.guiName);
+                            print(p.name + " " + ba.name + " " + ba.guiName);
                         }
                     }
                     foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
                     {
-                        print(p.ConstructID + " " + gim.gimbalLock);
+                        print(p.name + " " + gim.gimbalLock);
                     }
                 }
 
@@ -4345,7 +4345,7 @@ namespace ActionGroupsExtended
             {
                 foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 {
-                    print(p.ConstructID);
+                    print(p.name);
 
                 }
             }
@@ -5187,7 +5187,7 @@ namespace ActionGroupsExtended
 
             foreach (AGXPart p in AGEditorSelectedParts)
             {
-                if (p.AGPart.ConstructID != AGPcompare.AGPart.ConstructID)
+                if (p.AGPart.name != AGPcompare.AGPart.name)
                 {
                     AGEEditorSelectedPartsSame = false;
                 }

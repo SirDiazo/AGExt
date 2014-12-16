@@ -297,7 +297,7 @@ namespace ActionGroupsExtended
                         //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
                         if (e.MouseButton == 0)
                         {
-                            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
                             {
                                 if (AGXShow)
                                 {
@@ -323,7 +323,7 @@ namespace ActionGroupsExtended
                         }
                         if (e.MouseButton == 1)
                         {
-                            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions)
+                            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
                             {
                                 if (EditorShowToolbarPopout)
                                 {
@@ -642,7 +642,7 @@ namespace ActionGroupsExtended
         public void OnUIChanged(IUIObject obj)
         {
          
-            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions) //we in action groups mode?
+            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions) //we in action groups mode?
             {
                 if (AGXShow)
                 {
@@ -1195,8 +1195,8 @@ namespace ActionGroupsExtended
                 //{
                 //    foreach (ModuleAGExtData pm in p.Modules.OfType<ModuleAGExtData>())
                 //    {
-                //        pm.AGXGroupStates = SaveGroupVisibility(EditorLogic.startPod, pm.AGXGroupStates); /ver2 done
-                //        pm.AGXGroupStateNames = SaveGroupVisibilityNames(EditorLogic.startPod, pm.AGXGroupStates); /ver2 done
+                //        pm.AGXGroupStates = SaveGroupVisibility(EditorLogic.RootPart, pm.AGXGroupStates); /ver2 done
+                //        pm.AGXGroupStateNames = SaveGroupVisibilityNames(EditorLogic.RootPart, pm.AGXGroupStates); /ver2 done
                 //    }
                 //}
                 ShowKeySetWin = false;
@@ -1256,7 +1256,7 @@ namespace ActionGroupsExtended
         //            errLine = "11";
         //        }
                    
-        //        //else if (EditorLogic.startPod.Modules.Contains("ModuleAGExtData")) //v2 done
+        //        //else if (EditorLogic.RootPart.Modules.Contains("ModuleAGExtData")) //v2 done
         //        //{
         //        //    errLine = "12";
         //        //    bool ShipListOk3 = new bool();
@@ -1282,7 +1282,7 @@ namespace ActionGroupsExtended
 
         //        //    if (ShipListOk3)
         //        //    {
-        //        //        foreach (PartModule pm in EditorLogic.startPod.Modules.OfType<ModuleAGExtData>()) //ver2 okay
+        //        //        foreach (PartModule pm in EditorLogic.RootPart.Modules.OfType<ModuleAGExtData>()) //ver2 okay
         //        //        {
         //        //            CurrentKeySet = Convert.ToInt32(pm.Fields.GetValue("AGXKeySet"));
 
@@ -2783,7 +2783,7 @@ namespace ActionGroupsExtended
             }
             
                 errLine = "13";
-                    //print("AGX Load Name: " + EditorLogic.startPod.partName+" "+ LoadNames);
+                    //print("AGX Load Name: " + EditorLogic.RootPart.partName+" "+ LoadNames);
                    
                     if(LoadNames.Length > 0)
                     {
@@ -2895,7 +2895,7 @@ namespace ActionGroupsExtended
 
            
             
-            if (AGXDoLock && ELCur.editorScreen != EditorLogic.EditorScreen.Actions)
+            if (AGXDoLock && ELCur.editorScreen != EditorScreen.Actions)
             {
                 ELCur.Unlock("AGXLock");
                 AGXDoLock = false;
@@ -2905,14 +2905,14 @@ namespace ActionGroupsExtended
                 ELCur.Unlock("AGXLock");
                 AGXDoLock = false;
             }
-            else if (!AGXDoLock && TrapMouse && ELCur.editorScreen == EditorLogic.EditorScreen.Actions)
+            else if (!AGXDoLock && TrapMouse && ELCur.editorScreen == EditorScreen.Actions)
             {
                 ELCur.Lock(false,false,false,"AGXLock");
                 AGXDoLock = true;
             }
           
             
-            if (ELCur.editorScreen == EditorLogic.EditorScreen.Actions) //only show mod if on actions editor screen
+            if (ELCur.editorScreen == EditorScreen.Actions) //only show mod if on actions editor screen
             {
               
                 ShowSelectedWin = true;
@@ -2987,12 +2987,12 @@ namespace ActionGroupsExtended
             }
 
 
-            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions && !AGXShow)
+            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions && !AGXShow)
             {
                 MonitorDefaultActions();
             }
 
-            if (AGXRoot != EditorLogic.startPod)
+            if (AGXRoot != EditorLogic.RootPart)
             {
                // print("Root diff");
                 EditorLoadFromNode();
@@ -3075,7 +3075,7 @@ namespace ActionGroupsExtended
             {
                 foreach (Part p in EditorLogic.SortedShipList)
                 {
-                    print(p.partInfo.title + " " + p.orgPos + " " + EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position) + " " + p.orgRot);
+                    print(p.partInfo.title + " " + p.orgPos + " " + EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position) + " " + p.orgRot);
 
                 }
             }
@@ -3484,7 +3484,7 @@ namespace ActionGroupsExtended
                         {
                             foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                             {
-                                float thisPartDist = Vector3.Distance(partLoc, EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position));
+                                float thisPartDist = Vector3.Distance(partLoc, EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position));
                                 if (thisPartDist < partDist)
                                 {
                                     gamePart = p;
@@ -3577,7 +3577,7 @@ namespace ActionGroupsExtended
                     {
                         //silently fail, if we hit this EditorLogic.sortedShipList is not valid
                     }
-                    AGXRoot = EditorLogic.startPod;
+                    AGXRoot = EditorLogic.RootPart;
                 }
 
             
@@ -3697,22 +3697,22 @@ namespace ActionGroupsExtended
             ActionsListDirty = false;
         }
                   
-        public void AGXResetPartsList()
+        public void AGXResetPartsList() //clear selected parts list and populate with newly selected part(s)
                         {
                             AGEEditorSelectedPartsSame = true;
                         AGEditorSelectedParts.Clear();
-                        foreach (Part p in EditorLogic.SortedShipList)
+                        foreach (Part p in EditorLogic.SortedShipList) //add all parts to list
                         {
                              AGEditorSelectedParts.Add(new AGXPart(p));
                         }
                         
 
                         AGXPart AGPcompare = new AGXPart();
-                        AGPcompare = AGEditorSelectedParts.First();
+                        AGPcompare = AGEditorSelectedParts.First(); //set first part in selected parts list to compare
                         
                         foreach (AGXPart p in AGEditorSelectedParts)
                         {
-                            if (p.AGPart.ConstructID != AGPcompare.AGPart.ConstructID)
+                            if (p.AGPart.name != AGPcompare.AGPart.name) //remove all parts that are of a different type
                             {
                                 AGEEditorSelectedPartsSame = false;
                             }
@@ -3863,20 +3863,20 @@ namespace ActionGroupsExtended
                                 errLine = "19";
                                 partTemp.AddValue("name", p.name);
                                 partTemp.AddValue("vesselID", "0");
-                                //partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.startPod.transform.position).x);
+                                //partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.RootPart.transform.position).x);
                                 //if (!inVAB)
                                 //{
-                                //    partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.startPod.transform.position).y) * -1f);
-                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                                //    partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.RootPart.transform.position).y) * -1f);
+                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).z);
                                 //}
                                 //else
                                 //{
-                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.startPod.transform.position).y);
-                                //    partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.startPod.transform.position).z);
+                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).y);
+                                //    partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.RootPart.transform.position).z);
                                 //}
-                                partTemp.AddValue("relLocX", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).x);
-                                partTemp.AddValue("relLocY", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).y);
-                                partTemp.AddValue("relLocZ", (EditorLogic.startPod.transform.InverseTransformPoint(p.transform.position)).z);
+                                partTemp.AddValue("relLocX", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).x);
+                                partTemp.AddValue("relLocY", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).y);
+                                partTemp.AddValue("relLocZ", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).z);
                                 errLine = "20";
                                 foreach (AGXAction agxAct in thisPartsActions)
                                 {

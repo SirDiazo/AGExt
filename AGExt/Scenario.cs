@@ -23,7 +23,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
             ProtoScenarioModule psm2 = game.scenarios.Find(s2 => s2.moduleName == typeof(AGextScenarioEditor).Name);
             if (psm2 == null)
             {
-                psm2 = game.AddProtoScenarioModule(typeof(AGextScenarioEditor), GameScenes.EDITOR, GameScenes.SPH);
+                psm2 = game.AddProtoScenarioModule(typeof(AGextScenarioEditor), GameScenes.EDITOR);
             }
             bool ClearOldSaves = true;
             try
@@ -590,7 +590,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 if (actsToCompare.Count != 1)
                 {
                     errLine = "4";
-                    print("AGX actsToCompare.count != 1 "+actsToCompare.Count + " Part: " + actPart.ConstructID + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"));
+                    print("AGX actsToCompare.count != 1 "+actsToCompare.Count + " Part: " + actPart.name + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"));
                     if (showAmbiguousMessage)
                     {
                         ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
