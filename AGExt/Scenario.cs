@@ -50,7 +50,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
 
         public void DeleteOldSaveGames()
         {
-            print("Deleteing old save games start: " + DateTime.Now);
+            print("AGX Deleteing old save games start: " + DateTime.Now);
 
             string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
             List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
@@ -130,7 +130,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
 
             }
 
-            print("Deleteing old save games end: " + DateTime.Now);
+            print("AGX Deleteing old save games end: " + DateTime.Now);
         }
     }
 

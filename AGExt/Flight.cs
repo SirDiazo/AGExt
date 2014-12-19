@@ -12,6 +12,8 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
+        bool showAGXRightClickMenu = false;
         private static int activationCoolDown = 5;
         private static List<AGXCooldown> groupCooldowns;
         private List<Part> oldShipParts;
@@ -153,7 +155,32 @@ namespace ActionGroupsExtended
         private bool showGroupsIsGroups = true;
        // private bool showGroupsIsKeySet = false;
 
+        public void DummyVoid()
+        {
 
+        }
+        public void onStockToolbarClick()
+        {
+            //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
+            if (Input.GetMouseButtonUp(1))
+            {
+                onRightButtonStockClick();
+            }
+            else
+            {
+                onLeftButtonClick();
+            }
+        }
+
+        public void onRightButtonStockClick()
+        {
+            showAGXRightClickMenu = !showAGXRightClickMenu;
+        }
+
+        public void onLeftButtonClick()
+        {
+            ShowAGXMod = !ShowAGXMod;
+        }
 
         public void RefreshDefaultActionsListType()
         {
@@ -290,7 +317,7 @@ namespace ActionGroupsExtended
                     {
                         if (e.MouseButton == 0)
                         {
-                            ShowAGXMod = !ShowAGXMod;
+                            onLeftButtonClick();
                         }
                         if (e.MouseButton == 1)
                         {
@@ -312,6 +339,10 @@ namespace ActionGroupsExtended
                 //{
                 //    ShowAGXMod = !ShowAGXMod;
                 //};
+            }
+            else
+            {
+                AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
             }
 
             if (AGExtNode.GetValue("FltShow") == "0")
@@ -995,6 +1026,10 @@ namespace ActionGroupsExtended
             {
                 AGXBtn.Destroy();
             }
+            else
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(AGXAppFlightButton);
+            }
             //GameEvents.onPartAttach.Remove(DockingEvent);
             flightNodeIsLoaded = false;
             loadFinished = false;
@@ -1215,8 +1250,55 @@ namespace ActionGroupsExtended
                 GUI.DrawTexture(partCenterWin, PartCenter);
 
             }
+
+            if(showAGXRightClickMenu)
+            {
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 105);
+                GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+            }
         }
 
+        public void DrawSettingsWin(int WindowID)
+        {
+
+            if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes"))
+            {
+                AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
+                if (AGXFlight.FlightWinShowKeycodes)
+                {
+                    AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "1");
+                }
+                else
+                {
+                    AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "0");
+                }
+                AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            }
+
+            if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
+            {
+                AGXFlight.ClickEditButton();
+
+            }
+            if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows"))
+            {
+                KeySetWin.x = 250;
+                KeySetWin.y = 250;
+                GroupsWin.x = 350;
+                GroupsWin.y = 350;
+                SelPartsWin.x = 200;
+                SelPartsWin.y = 200;
+                KeyCodeWin.x = 300;
+                KeyCodeWin.y = 300;
+                CurActsWin.x = 150;
+                CurActsWin.y = 150;
+                FlightWin.x = 400;
+                FlightWin.y = 400;
+            }
+
+            //GUI.DragWindow();
+
+        }
         //public void PartTarget(int WindowID)
         //{
         //    GUI.DrawTexture(new Rect(0, 0, 41, 41), PartCenter);
@@ -3929,12 +4011,16 @@ namespace ActionGroupsExtended
                                     AGXFlightNode.AddNode(oldVsl);
                                     //print("Root part changed, AGX reloadingd " + oldVsl.GetValue("groupNames"));
                                 }
-
+                                errLine = "24a";
 
                                 CurrentVesselActions.Clear();
+                                errLine = "24b";
                             }
+                            errLine = "24c";
                             if (!isDocking)
                             {
+
+                                errLine = "24d"; 
                                 bool checkIsVab = true;
                                 ConfigNode vslNode = new ConfigNode();
                                 try
@@ -3956,7 +4042,7 @@ namespace ActionGroupsExtended
                                     //print("runway iffy");
                                     checkIsVab = true;
                                 }
-
+                                errLine = "24e";
                                 if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
                                 {
                                     print("AGX flight node found");
@@ -3982,6 +4068,7 @@ namespace ActionGroupsExtended
                                 //    vslNode.AddValue("groupVisibilityNames", FoundRootPart.GetValue("groupVisibilityNames"));
                                 //    ShowAmbiguousMessage = false;
                                 //}
+                                    
                                 else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
                                 {
                                     print("AGX VAB1 ");// + FlightGlobals.ActiveVessel.vesselName + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
@@ -4008,7 +4095,7 @@ namespace ActionGroupsExtended
                                     vslNode.AddValue("groupVisibilityNames", "Group 1‣Group 2‣Group 3‣Group 4‣Group 5");
                                     AGXFlightNode.AddNode(vslNode);
                                 }
-
+                                errLine = "24f";
                                 CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
                                 LoadGroupNames(vslNode.GetValue("groupNames"));
                                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
@@ -4298,7 +4385,7 @@ namespace ActionGroupsExtended
                 
             }
             //PrintPartActs();
-            
+            print("Keyset " + CurrentKeySet);
         }
             catch(Exception e)
             {

@@ -16,7 +16,9 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
-
+        bool showAGXRightClickMenu = false; //show stock toolbar right click menu?
+        bool needToAddStockButton = true; //do we need to add stock button?
+        ApplicationLauncherButton AGXAppEditorButton = null; //stock toolbar button instance
         bool EditorShowToolbarPopout = false;
         bool defaultShowingNonNumeric = false; //are we in non-numeric (abort/brakes/gear/list) mode?
         List<BaseAction> defaultActionsListThisType; //list of default actions showing in group win when non-numeric
@@ -180,7 +182,26 @@ namespace ActionGroupsExtended
 
              }
          }
-       
+         public void DrawSettingsWinEditor(int WindowID)
+         {
+
+             if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows"))
+             {
+                 KeySetWin.x = 250;
+                 KeySetWin.y = 250;
+                 GroupsWin.x = 350;
+                 GroupsWin.y = 350;
+                 SelPartsWin.x = 200;
+                 SelPartsWin.y = 200;
+                 KeyCodeWin.x = 300;
+                 KeyCodeWin.y = 300;
+                 CurActsWin.x = 150;
+                 CurActsWin.y = 150;
+
+
+             }
+
+         }
         public void Start()
         {
             AGXguiMod1Groups = new Dictionary<int, bool>();
@@ -287,7 +308,6 @@ namespace ActionGroupsExtended
                 if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
                 {
 
-
                     AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
                     AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
                     AGXBtn.ToolTip = "Action Groups Extended";
@@ -297,29 +317,7 @@ namespace ActionGroupsExtended
                         //UIPanelList.AddRange(FindObjectsOfType<UnityEngine.Transform>().Where(n => n.name == "PanelActionGroups")); //actual find command
                         if (e.MouseButton == 0)
                         {
-                            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
-                            {
-                                if (AGXShow)
-                                {
-                                    //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
-                                    AGXShow = false;
-                                    AGExtNode.SetValue("EditShow", "0");
-                                    EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-
-                                }
-                                else
-                                {
-                                    // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
-                                    AGXShow = true;
-                                    AGExtNode.SetValue("EditShow", "1");
-                                    EditorPanels.Instance.panelManager.Dismiss();
-                                }
-                                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-                            }
-                            else
-                            {
-                                EditorLogic.fetch.SelectPanelActions();
-                            }
+                            onLeftButtonClick();
                         }
                         if (e.MouseButton == 1)
                         {
@@ -342,9 +340,12 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    AGXShow = true; //toolbar not installed, show AGX regardless
+                    //AGXShow = true; //toolbar not installed, show AGX regardless
+
+                    //now using stock toolbar as fallback
+                    AGXAppEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
                 }
-                errLine = "16";
+                    errLine = "16";
 
                 DetachedPartActions = new List<AGXAction>();
 
@@ -464,6 +465,56 @@ namespace ActionGroupsExtended
         //    UIScrollList lst = (UIScrollList)obj;
         //    print(lst.
         //}
+
+        public void DummyVoid()
+        {
+
+        }
+        public void onStockToolbarClick()
+        {
+            //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
+            if(Input.GetMouseButtonUp(1))
+            {
+                onRightButtonStockClick();
+            }
+            else
+            {
+                onLeftButtonClick();
+            }
+        }
+        
+        public void onRightButtonStockClick()
+        {
+            showAGXRightClickMenu = !showAGXRightClickMenu;
+        }
+
+        public void onLeftButtonClick()
+        {
+            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+            {
+                if (AGXShow)
+                {
+                    //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                    AGXShow = false;
+                    AGExtNode.SetValue("EditShow", "0");
+                    EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+
+                }
+                else
+                {
+                    // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                    AGXShow = true;
+                    AGExtNode.SetValue("EditShow", "1");
+                    EditorPanels.Instance.panelManager.Dismiss();
+                }
+                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            }
+            else
+            {
+                EditorLogic.fetch.SelectPanelActions();
+            }
+        }
+         
 
         public void PartAttaching(GameEvents.HostTargetAction<Part,Part> host_target)
         { 
@@ -756,6 +807,10 @@ namespace ActionGroupsExtended
             {
                 AGXBtn.Destroy();
             }
+            else
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(AGXAppEditorButton);
+            }
             //EditorSaveToFile(); //some of my data has already been deleted by this point
             GameEvents.onPartAttach.Remove(PartAttaching);
             GameEvents.onPartRemove.Remove(PartRemove);
@@ -900,6 +955,11 @@ namespace ActionGroupsExtended
                         }
                     }
                     ErrLine = "11";
+                    if(showAGXRightClickMenu)
+                    {
+                        Rect SettingsWinEditor = new Rect(Screen.width - 200, Screen.height - 100, 150, 60);
+                        GUI.Window(2233452, SettingsWinEditor, DrawSettingsWinEditor, "AGX Settings", AGXEditor.AGXWinStyle);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -2997,6 +3057,19 @@ namespace ActionGroupsExtended
                // print("Root diff");
                 EditorLoadFromNode();
             }
+            //if(needToAddStockButton)
+            //{
+            //    if (ApplicationLauncher.Ready)
+            //    {
+            //        print("AppLaunc ready");
+            //        AGXAppEditorButton = ApplicationLauncher.Instance.AddModApplication(onLeftButtonClick, onLeftButtonClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
+            //        needToAddStockButton = false;
+            //    }
+            //    else
+            //    {
+            //        print("Applaunch not ready");
+            //    }
+            //}
 
             //foreach (Part p in EditorLogic.SortedShipList)
             //{
@@ -3005,7 +3078,8 @@ namespace ActionGroupsExtended
             //PrintPartPos();
             //PrintPartActs();
             //PrintSelectedPart();
-            //print(CurrentVesselActions.Count);
+            //print("Keyset " + CurrentKeySet);
+            
             }
 
         public void PrintSelectedPart()
@@ -3406,6 +3480,7 @@ namespace ActionGroupsExtended
                     {
                         errLine = "9c";
                         AGXEditorNode = new ConfigNode("EDITOR");
+                        AGXEditorNode.AddValue("name", "editor");
                     }
                 //}
             }
