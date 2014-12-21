@@ -56,8 +56,8 @@ namespace ActionGroupsExtended
         private bool ShowKeyCodeWin = false;
         private bool ShowJoySticks = false;
         private static bool ShowKeySetWin = false;
-        private static int CurrentKeySet = 1;
-        private static string CurrentKeySetName;
+        private static int CurrentKeySetFlight = 1;
+        private static string CurrentKeySetNameFlight;
         private static Rect KeySetWin;
         public static ConfigNode AGExtNode;
         string[] KeySetNames = new string[5];
@@ -249,8 +249,8 @@ namespace ActionGroupsExtended
             JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
             KeyCodeNames.RemoveAll(JoySticks);
             AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-            CurrentKeySet = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
-            CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
+            CurrentKeySetFlight = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
+            CurrentKeySetNameFlight = AGExtNode.GetValue("KeySetName" + CurrentKeySetFlight);
             CurrentVesselActions = new List<AGXAction>();
             AGXRoot = null;
             GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltGroupsX")), Convert.ToInt32(AGExtNode.GetValue("FltGroupsY")), 250, 530);
@@ -452,7 +452,7 @@ namespace ActionGroupsExtended
             //print("6a");
             KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
             //print("7a");
-            KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
+            KeySetNames[CurrentKeySetFlight - 1] = CurrentKeySetNameFlight;
             
            
         }
@@ -573,7 +573,7 @@ namespace ActionGroupsExtended
                     thisVsl.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
                    // thisRootPart.AddValue("name", thisVsl.GetValue("name")); //get the value from confignode rather then running all the calculations again, i think it's less processing
                     errLine = "13";
-                    thisVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
+                    thisVsl.AddValue("currentKeyset", CurrentKeySetFlight.ToString());
                     //thisRootPart.AddValue("currentKeyset", thisVsl.GetValue("currentKeyset"));
                     errLine = "14";
                     thisVsl.AddValue("groupNames", SaveGroupNames(""));
@@ -1479,35 +1479,35 @@ namespace ActionGroupsExtended
                 if (GUI.Button(new Rect(5, 5, 70, 20), KeySetNames[0], AGXBtnStyle))
                 {
                     SaveCurrentKeyBindings();
-                    CurrentKeySet = 1;
+                    CurrentKeySetFlight = 1;
                     LoadCurrentKeyBindings();
                     ShowGroupsInFlightWindow = false;
                 }
                 if (GUI.Button(new Rect(5, 25, 70, 20), KeySetNames[1], AGXBtnStyle))
                 {
                     SaveCurrentKeyBindings();
-                    CurrentKeySet = 2;
+                    CurrentKeySetFlight = 2;
                     LoadCurrentKeyBindings();
                     ShowGroupsInFlightWindow = false;
                 }
                 if (GUI.Button(new Rect(5, 45, 70, 20), KeySetNames[2], AGXBtnStyle))
                 {
                     SaveCurrentKeyBindings();
-                    CurrentKeySet = 3;
+                    CurrentKeySetFlight = 3;
                     LoadCurrentKeyBindings();
                     ShowGroupsInFlightWindow = false;
                 }
                 if (GUI.Button(new Rect(5, 65, 70, 20), KeySetNames[3], AGXBtnStyle))
                 {
                     SaveCurrentKeyBindings();
-                    CurrentKeySet = 4;
+                    CurrentKeySetFlight = 4;
                     LoadCurrentKeyBindings();
                     ShowGroupsInFlightWindow = false;
                 }
                 if (GUI.Button(new Rect(5, 85, 70, 20), KeySetNames[4], AGXBtnStyle))
                 {
                     SaveCurrentKeyBindings();
-                    CurrentKeySet = 5;
+                    CurrentKeySetFlight = 5;
                     LoadCurrentKeyBindings();
                     ShowGroupsInFlightWindow = false;
                 }
@@ -1547,7 +1547,7 @@ namespace ActionGroupsExtended
                 }
             }
 
-            if (GUI.Button(new Rect(5, 5, 75, 20), KeySetNames[CurrentKeySet -1], AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 5, 75, 20), KeySetNames[CurrentKeySetFlight -1], AGXBtnStyle))
             {
                 if (showGroupsIsGroups)
                 {
@@ -1985,14 +1985,14 @@ namespace ActionGroupsExtended
 
 
 
-            GUI.DrawTexture(new Rect(6, (CurrentKeySet * 25) + 1, 68, 18), BtnTexGrn);
+            GUI.DrawTexture(new Rect(6, (CurrentKeySetFlight * 25) + 1, 68, 18), BtnTexGrn);
 
             if (GUI.Button(new Rect(5, 25, 70, 20), "Select 1:", AGXBtnStyle))
             {
                 
                 SaveCurrentKeyBindings();
                
-                CurrentKeySet = 1;
+                CurrentKeySetFlight = 1;
                
                 //SaveCurrentKeySet();
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
@@ -2014,7 +2014,7 @@ namespace ActionGroupsExtended
             {
 
                 SaveCurrentKeyBindings();
-                CurrentKeySet = 2;
+                CurrentKeySetFlight = 2;
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
@@ -2032,7 +2032,7 @@ namespace ActionGroupsExtended
             {
 
                 SaveCurrentKeyBindings();
-                CurrentKeySet = 3;
+                CurrentKeySetFlight = 3;
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
@@ -2049,7 +2049,7 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:", AGXBtnStyle))
             {
                 SaveCurrentKeyBindings();
-                CurrentKeySet = 4;
+                CurrentKeySetFlight = 4;
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
@@ -2066,7 +2066,7 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:", AGXBtnStyle))
             {
                 SaveCurrentKeyBindings();
-                CurrentKeySet = 5;
+                CurrentKeySetFlight = 5;
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    if (p.missionID == FlightGlobals.ActiveVessel.rootPart.missionID)
@@ -2131,7 +2131,7 @@ namespace ActionGroupsExtended
                 AGExtNode.SetValue("KeySetName3", KeySetNames[2]);
                 AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
                 AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
-                CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+                CurrentKeySetNameFlight = KeySetNames[CurrentKeySetFlight - 1];
                 AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
                 //foreach (ModuleAGExtData pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
                 //     {
@@ -2224,7 +2224,7 @@ namespace ActionGroupsExtended
 
 
             
-            String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySet.ToString());
+            String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySetFlight.ToString());
             //print("Keyset load " + CurrentKeySet + " " + LoadString);
 
             for (int i = 1; i <= 250; i++)
@@ -2272,8 +2272,8 @@ namespace ActionGroupsExtended
 
                 }
             }
-            String GroupKeysMod1ToLoad = AGExtNode.GetValue("KeySetMod1Group" + CurrentKeySet.ToString());
-            String GroupKeysMod2ToLoad = AGExtNode.GetValue("KeySetMod2Group" + CurrentKeySet.ToString());
+            String GroupKeysMod1ToLoad = AGExtNode.GetValue("KeySetMod1Group" + CurrentKeySetFlight.ToString());
+            String GroupKeysMod2ToLoad = AGExtNode.GetValue("KeySetMod2Group" + CurrentKeySetFlight.ToString());
             for (int i = 0; i <= 249; i++)
             {
                 if (GroupKeysMod1ToLoad[i] == '1')
@@ -2293,15 +2293,15 @@ namespace ActionGroupsExtended
                     AGXguiMod2Groups[i + 1] = false;
                 }
             }
-            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), AGExtNode.GetValue("KeySetModKey1" + CurrentKeySet.ToString()));
-            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), AGExtNode.GetValue("KeySetModKey2" + CurrentKeySet.ToString()));
+            AGXguiMod1Key = (KeyCode)Enum.Parse(typeof(KeyCode), AGExtNode.GetValue("KeySetModKey1" + CurrentKeySetFlight.ToString()));
+            AGXguiMod2Key = (KeyCode)Enum.Parse(typeof(KeyCode), AGExtNode.GetValue("KeySetModKey2" + CurrentKeySetFlight.ToString()));
         }
 
         public static void SaveCurrentKeyBindings()
         {
             //print("Saving current keybinds");
        
-            AGExtNode.SetValue("KeySetName" + CurrentKeySet, CurrentKeySetName);
+            AGExtNode.SetValue("KeySetName" + CurrentKeySetFlight, CurrentKeySetNameFlight);
             string SaveString = "";
             int KeyID = new int();
             KeyID = 1;
@@ -2314,7 +2314,7 @@ namespace ActionGroupsExtended
                 KeyID = KeyID + 1;
             }
 
-            AGExtNode.SetValue("KeySet" + CurrentKeySet.ToString(), SaveString);
+            AGExtNode.SetValue("KeySet" + CurrentKeySetFlight.ToString(), SaveString);
 
             string GroupsMod1ToSave = "";
             string GroupsMod2ToSave = "";
@@ -2337,10 +2337,10 @@ namespace ActionGroupsExtended
                     GroupsMod2ToSave = GroupsMod2ToSave + "0";
                 }
             }
-            AGExtNode.SetValue("KeySetMod1Group" + CurrentKeySet.ToString(), GroupsMod1ToSave);
-            AGExtNode.SetValue("KeySetMod2Group" + CurrentKeySet.ToString(), GroupsMod2ToSave);
-            AGExtNode.SetValue("KeySetModKey1" + CurrentKeySet.ToString(), AGXguiMod1Key.ToString());
-            AGExtNode.SetValue("KeySetModKey2" + CurrentKeySet.ToString(), AGXguiMod2Key.ToString());
+            AGExtNode.SetValue("KeySetMod1Group" + CurrentKeySetFlight.ToString(), GroupsMod1ToSave);
+            AGExtNode.SetValue("KeySetMod2Group" + CurrentKeySetFlight.ToString(), GroupsMod2ToSave);
+            AGExtNode.SetValue("KeySetModKey1" + CurrentKeySetFlight.ToString(), AGXguiMod1Key.ToString());
+            AGExtNode.SetValue("KeySetModKey2" + CurrentKeySetFlight.ToString(), AGXguiMod2Key.ToString());
             AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
             //if (CurrentKeySet == 1)
             //{
@@ -3016,7 +3016,7 @@ namespace ActionGroupsExtended
                     ShowKeyCodeWin = true;
                 }
             }
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 244, 120, 20), CurrentKeySetName, AGXBtnStyle))
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 244, 120, 20), CurrentKeySetNameFlight, AGXBtnStyle))
             {
                 //print("1a");
                 SaveCurrentKeyBindings();
@@ -3723,7 +3723,7 @@ namespace ActionGroupsExtended
                 newVsl = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
             }
 
-            CurrentKeySet = Convert.ToInt32(newVsl.GetValue("currentKeyset"));
+            CurrentKeySetFlight = Convert.ToInt32(newVsl.GetValue("currentKeyset"));
             LoadGroupNames(newVsl.GetValue("groupNames"));
             LoadGroupVisibility(newVsl.GetValue("groupVisibility"));
             LoadGroupVisibilityNames(newVsl.GetValue("groupVisibilityNames"));
@@ -3941,7 +3941,7 @@ namespace ActionGroupsExtended
                                     {
                                         oldVsl.RemoveValue("currentKeyset");
                                     }
-                                    oldVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
+                                    oldVsl.AddValue("currentKeyset", CurrentKeySetFlight.ToString());
                                     errLine = "13";
                                     //errLine = "14";
                                     if (oldVsl.HasValue("groupNames")) ;
@@ -4096,7 +4096,7 @@ namespace ActionGroupsExtended
                                     AGXFlightNode.AddNode(vslNode);
                                 }
                                 errLine = "24f";
-                                CurrentKeySet = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
+                                CurrentKeySetFlight = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
                                 LoadGroupNames(vslNode.GetValue("groupNames"));
                                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
                                 LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
@@ -4385,7 +4385,7 @@ namespace ActionGroupsExtended
                 
             }
             //PrintPartActs();
-            print("Keyset " + CurrentKeySet);
+            print("Keyset " + CurrentKeySetFlight);
         }
             catch(Exception e)
             {
@@ -4489,7 +4489,7 @@ namespace ActionGroupsExtended
                     else //new vessel, copy current values
                     {
                         vsl2node.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
-                        vsl2node.AddValue("currentKeyset", CurrentKeySet.ToString());
+                        vsl2node.AddValue("currentKeyset", CurrentKeySetFlight.ToString());
                         //vsl2node.AddValue("groupNames", SaveGroupNames(""));
                         vsl2node.AddValue("groupVisibility", SaveGroupVisibility(""));
                         vsl2node.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
@@ -4744,7 +4744,7 @@ namespace ActionGroupsExtended
                         {
                             vslUpdate.RemoveValue("currentKeyset");
                         }
-                        vslUpdate.AddValue("currentKeyset", CurrentKeySet.ToString());
+                        vslUpdate.AddValue("currentKeyset", CurrentKeySetFlight.ToString());
                         if (vslUpdate.HasValue("groupNames"))
                         {
                             vslUpdate.RemoveValue("groupNames");

@@ -1147,10 +1147,11 @@ namespace ActionGroupsExtended
             AGXBtnStyle.normal.background = CurrentKeySet == 1 ? ButtonTextureGreen : ButtonTexture; 
             if(GUI.Button(new Rect(5,25,70,20),"Select 1:",AGXBtnStyle))
            {
-               SaveCurrentKeyBindings();
+               EditorSaveKeysetStuff();
+                SaveCurrentKeyBindings();
                
                 CurrentKeySet = 1;
-              
+                CurrentKeySetName = KeySetNames[0];
                 LoadCurrentKeyBindings();
            }
             KeySetNames[0] = GUI.TextField(new Rect(80, 25, 100, 20), KeySetNames[0],AGXFldStyle);
@@ -1158,37 +1159,40 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(5, 50, 70, 20), "Select 2:", AGXBtnStyle))
            {
 
-               SaveCurrentKeyBindings(); 
+               EditorSaveKeysetStuff();
+                SaveCurrentKeyBindings(); 
                CurrentKeySet = 2;
-              
+               CurrentKeySetName = KeySetNames[1]; 
                LoadCurrentKeyBindings();
            }
            KeySetNames[1] = GUI.TextField(new Rect(80, 50, 100, 20), KeySetNames[1], AGXFldStyle);
            AGXBtnStyle.normal.background = CurrentKeySet == 3 ? ButtonTextureGreen : ButtonTexture;
            if (GUI.Button(new Rect(5, 75, 70, 20), "Select 3:", AGXBtnStyle))
            {
-
+               EditorSaveKeysetStuff();
                SaveCurrentKeyBindings(); 
                CurrentKeySet = 3;
-               //SaveCurrentKeySet();
+               CurrentKeySetName = KeySetNames[2];
                LoadCurrentKeyBindings();
            }
            KeySetNames[2] = GUI.TextField(new Rect(80, 75, 100, 20), KeySetNames[2], AGXFldStyle);
            AGXBtnStyle.normal.background = CurrentKeySet == 4 ? ButtonTextureGreen : ButtonTexture;
            if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:", AGXBtnStyle))
            {
+               EditorSaveKeysetStuff();
                SaveCurrentKeyBindings(); 
                CurrentKeySet = 4;
-               //SaveCurrentKeySet();
+               CurrentKeySetName = KeySetNames[3];
                LoadCurrentKeyBindings();
            }
            KeySetNames[3] = GUI.TextField(new Rect(80, 100, 100, 20), KeySetNames[3], AGXFldStyle);
            AGXBtnStyle.normal.background = CurrentKeySet == 5 ? ButtonTextureGreen : ButtonTexture; 
            if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:", AGXBtnStyle))
            {
+               EditorSaveKeysetStuff();
                SaveCurrentKeyBindings(); 
                CurrentKeySet = 5;
-              // SaveCurrentKeySet();
+               CurrentKeySetName = KeySetNames[4];
                LoadCurrentKeyBindings();
            }
            KeySetNames[4] = GUI.TextField(new Rect(80, 125, 100, 20), KeySetNames[4], AGXFldStyle);
@@ -1237,19 +1241,14 @@ namespace ActionGroupsExtended
            if (GUI.Button(new Rect(5, 265, 70, 20), "Group 5:", AGXBtnStyle))
            {
                ShowGroupInFlightCurrent = 5;
+
            }
            ShowGroupInFlightNames[5] = GUI.TextField(new Rect(80, 265, 100, 20), ShowGroupInFlightNames[5]);
            AGXBtnStyle.normal.background = ButtonTexture;
             if (GUI.Button(new Rect(5, 300,175,30),"Close Window",AGXBtnStyle))
             {
-                
-                AGExtNode.SetValue("KeySetName1", KeySetNames[0]);
-                AGExtNode.SetValue("KeySetName2", KeySetNames[1]);
-                AGExtNode.SetValue("KeySetName3", KeySetNames[2]);
-                AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
-                AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
-                CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
-                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+
+                EditorSaveKeysetStuff();
                 //superceeded by v2 save
                 //foreach (Part p in EditorLogic.fetch.getSortedShipList())
                 //{
@@ -3078,7 +3077,7 @@ namespace ActionGroupsExtended
             //PrintPartPos();
             //PrintPartActs();
             //PrintSelectedPart();
-            //print("Keyset " + CurrentKeySet);
+            print("Keyset " + CurrentKeySet);
             
             }
 
@@ -3858,8 +3857,26 @@ namespace ActionGroupsExtended
         public static void EditorSaveToFile()
         {
             EditorSaveToNode();
+            EditorSaveGlobalInfo();
             EditorWriteNodeToFile();
 
+        }
+
+        public static void EditorSaveGlobalInfo()
+        {
+            SaveCurrentKeyBindings();
+            EditorSaveKeysetStuff();
+        }
+
+        public static void EditorSaveKeysetStuff()
+        {
+            AGExtNode.SetValue("KeySetName1", KeySetNames[0]);
+            AGExtNode.SetValue("KeySetName2", KeySetNames[1]);
+            AGExtNode.SetValue("KeySetName3", KeySetNames[2]);
+            AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
+            AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
+            CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
         }
 
         public static void EditorWriteNodeToFile()
