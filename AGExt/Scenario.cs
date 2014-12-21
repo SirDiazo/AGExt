@@ -552,7 +552,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
                     {
-                        if (pm.Fields.GetValue("engineID") == (string)actNode.GetValue("engineID"))
+                        if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("engineID"))
                         {
                             actsToCompare.AddRange(pm.Actions);
                         }

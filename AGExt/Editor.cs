@@ -204,6 +204,8 @@ namespace ActionGroupsExtended
          }
         public void Start()
         {
+            ShowKeyCodeWin = false;
+            ShowKeySetWin = false;
             AGXguiMod1Groups = new Dictionary<int, bool>();
             AGXguiMod2Groups = new Dictionary<int, bool>();
             for (int i = 1; i <= 250; i++)
@@ -215,7 +217,7 @@ namespace ActionGroupsExtended
             defaultActionsListAll = new List<BaseAction>(); //initialize list
             //foreach (Part p in 
             string errLine = "1";
-            ThisGroupActions = new List<AGXAction>();
+            ThisGroupActions = new List<AGXAction>(); 
             //var EdPnl = EditorPanels.Instance.actions;
             //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
             try
@@ -280,10 +282,15 @@ namespace ActionGroupsExtended
                     AGXShow = true;
                 }
                 errLine = "5";
-                CurrentKeySet = Convert.ToInt32(AGExtNode.GetValue("ActiveKeySet"));
+                CurrentKeySet = 1;
                 errLine = "6";
                 //LoadCurrentKeySet();
-                CurrentKeySetName = AGExtNode.GetValue("KeySetName" + CurrentKeySet);
+                CurrentKeySetName = (string)AGExtNode.GetValue("KeySetName" + CurrentKeySet);
+                KeySetNames[0] = (string)AGExtNode.GetValue("KeySetName1");
+                KeySetNames[1] = (string)AGExtNode.GetValue("KeySetName2");
+                KeySetNames[2] = (string)AGExtNode.GetValue("KeySetName3");
+                KeySetNames[3] = (string)AGExtNode.GetValue("KeySetName4");
+                KeySetNames[4] = (string)AGExtNode.GetValue("KeySetName5");
                 errLine = "7";
                 CurrentVesselActions = new List<AGXAction>();
                 errLine = "8";
@@ -302,7 +309,7 @@ namespace ActionGroupsExtended
 
 
 
-                LoadCurrentKeyBindings();
+                //LoadCurrentKeyBindings();
 
                 errLine = "15";
                 if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
@@ -1381,7 +1388,7 @@ namespace ActionGroupsExtended
         
 
 
-        public void LoadCurrentKeyBindings()
+        public static void LoadCurrentKeyBindings()
         {
           
            
@@ -2219,17 +2226,17 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(SelPartsLeft + 245, 244, 120, 20),CurrentKeySetName,AGXBtnStyle))
             {
                 //print("1a");
-                SaveCurrentKeyBindings();
+                //SaveCurrentKeyBindings();
                 //print("2a");
-               KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
+              // KeySetNames[0] = AGExtNode.GetValue("KeySetName1");
                //print("3a");
-                KeySetNames[1] = AGExtNode.GetValue("KeySetName2");
-                KeySetNames[2] = AGExtNode.GetValue("KeySetName3");
-                KeySetNames[3] = AGExtNode.GetValue("KeySetName4");
-                KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
+               // KeySetNames[1] = AGExtNode.GetValue("KeySetName2");
+                //KeySetNames[2] = AGExtNode.GetValue("KeySetName3");
+                //KeySetNames[3] = AGExtNode.GetValue("KeySetName4");
+                //KeySetNames[4] = AGExtNode.GetValue("KeySetName5");
                 //print("4a");
                 //print("cure key " + CurrentKeySet);
-                KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
+                //KeySetNames[CurrentKeySet - 1] = CurrentKeySetName;
                 //print("5a");
                 ShowKeySetWin = true;
                 //print("6a");
@@ -3077,7 +3084,7 @@ namespace ActionGroupsExtended
             //PrintPartPos();
             //PrintPartActs();
             //PrintSelectedPart();
-            print("Keyset " + CurrentKeySet);
+            //print("Keyset " + CurrentKeySet);
             
             }
 
@@ -3520,6 +3527,7 @@ namespace ActionGroupsExtended
                     {
                         CurrentKeySet = 1;
                     }
+                    LoadCurrentKeyBindings();
                     errLine = "13";
                     if (thisVsl.HasValue("groupNames"))
                     {
@@ -3859,6 +3867,7 @@ namespace ActionGroupsExtended
             EditorSaveToNode();
             EditorSaveGlobalInfo();
             EditorWriteNodeToFile();
+            print("name check " + KeySetNames[1]);
 
         }
 
@@ -3875,7 +3884,7 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetName3", KeySetNames[2]);
             AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
             AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
-            CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+            //CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
             AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
         }
 

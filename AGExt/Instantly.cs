@@ -15,7 +15,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
-            print("AGExt Ver. 1.25a loaded");
+            print("AGExt Ver. 1.25c loaded");
             //below no longer needed with InputLockManager
             //AGXguiKeys = new Dictionary<int, KeyCode>();
             //AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
@@ -30,22 +30,22 @@ namespace ActionGroupsExtended
         
 
 
-        public static void SaveCurrentKeyBindings()
-        {
-            string SaveString = ""; //initialize empty string
-            int KeyID = new int();
-            KeyID = 1;
-            while (KeyID <= 250) //this should be a for loop, not going to mess with it now though
-            {
-                if (AGXguiKeys[KeyID] != KeyCode.None) //only add to string if there is a keycode
-                {
-                    SaveString = SaveString + '\u2023' + KeyID.ToString("000") + AGXguiKeys[KeyID].ToString();
-                }
-                KeyID = KeyID + 1;
-            }
-            AGExtNode.SetValue("KeySet1", SaveString); //save string to confignode
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg"); //save config node to disk
-        }
+        //public static void SaveCurrentKeyBindings()
+        //{
+        //    string SaveString = ""; //initialize empty string
+        //    int KeyID = new int();
+        //    KeyID = 1;
+        //    while (KeyID <= 250) //this should be a for loop, not going to mess with it now though
+        //    {
+        //        if (AGXguiKeys[KeyID] != KeyCode.None) //only add to string if there is a keycode
+        //        {
+        //            SaveString = SaveString + '\u2023' + KeyID.ToString("000") + AGXguiKeys[KeyID].ToString();
+        //        }
+        //        KeyID = KeyID + 1;
+        //    }
+        //    AGExtNode.SetValue("KeySet" + c, SaveString); //save string to confignode
+        //    AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg"); //save config node to disk
+        //}
 
         //public void KeysWriteKSPtoAGX()
         //{
