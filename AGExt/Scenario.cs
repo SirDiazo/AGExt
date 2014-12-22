@@ -251,7 +251,7 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 else
                 {
                     errLine = "4";
-                    print("AGX ConfigNode not found, creating.....");
+                    //print("AGX ConfigNode not found, creating.....");
                     errLine = "5";
                     AGXBaseNode.AddValue("name", "Action Groups Extended save file");
                     AGXBaseNode.AddNode("FLIGHT");
@@ -591,10 +591,10 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 {
                     errLine = "4";
                     print("AGX actsToCompare.count != 1 "+actsToCompare.Count + " Part: " + actPart.name + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName"));
-                    if (showAmbiguousMessage)
-                    {
-                        ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
-                    }
+                    //if (showAmbiguousMessage)
+                    //{
+                    //    ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
+                    //}
                 }
                 errLine = "5";
                 if (actsToCompare.Count > 0)

@@ -1314,10 +1314,10 @@ namespace ActionGroupsExtended
         public static void ActivateActionGroupCheckModKeys(int group) //backwards compatibility, toggle group
         {
 
-            print("AGX Key check for some reason " + group);
+            //print("AGX Key check for some reason " + group);
             if (AGXguiMod1Groups[group] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[group] == Input.GetKey(AGXguiMod2Key))
             {
-                print("AGX Key activate for some reason " + group);
+                //print("AGX Key activate for some reason " + group);
                 ActivateActionGroup(group, false, false);
             }
         }
@@ -1362,7 +1362,7 @@ namespace ActionGroupsExtended
                 if (agAct.activated)
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
-                    print("AGX action deactivate FIRE! " + agAct.ba.guiName);
+                    //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
                     foreach (AGXAction agxAct in CurrentVesselActions)
                     {
@@ -1381,7 +1381,7 @@ namespace ActionGroupsExtended
                 {
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Activate);
                     //agAct.activated = true;
-                    print("AGX action activate FIRE!" + agAct.ba.guiName);
+                    //print("AGX action activate FIRE!" + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
                     foreach (AGXAction agxAct in CurrentVesselActions)
                     {
@@ -2271,7 +2271,7 @@ namespace ActionGroupsExtended
         public void LoadCurrentKeyBindings()
         {
 
-            print("jeyset load "+ CurrentKeySetFlight);
+            //print("jeyset load "+ CurrentKeySetFlight);
             
             
             String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySetFlight.ToString());
@@ -2349,7 +2349,7 @@ namespace ActionGroupsExtended
 
         public static void SaveCurrentKeyBindings()
         {
-            print("Saving current keybinds " + CurrentKeySetFlight);
+            //print("Saving current keybinds " + CurrentKeySetFlight);
        
             AGExtNode.SetValue("KeySetName" + CurrentKeySetFlight, CurrentKeySetNameFlight);
             string SaveString = "";
@@ -3901,7 +3901,7 @@ namespace ActionGroupsExtended
                     errLine = "8";
                     if (AGXRoot != FlightGlobals.ActiveVessel.rootPart) //root part change, refresh stuff
                     {
-                        print("AGX Root change"); 
+                       // print("AGX Root change"); 
                         bool isDocking = false;
                         bool isUndocking = false;
                         try
@@ -3909,23 +3909,23 @@ namespace ActionGroupsExtended
                             if (FlightGlobals.ActiveVessel.parts.Contains(AGXRoot))
                             {
                                 isDocking = true;
-                                print("AGX: Is a dock ");// + AGXRoot.ConstructID + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
+                               // print("AGX: Is a dock ");// + AGXRoot.ConstructID + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
                             }
                             else if (oldShipParts.Contains(FlightGlobals.ActiveVessel.rootPart))
                             {
                                 isUndocking = true;
-                                print("AGX: is an undock");
+                                //print("AGX: is an undock");
                                 //only clear actions if not a docking event
                             }
                             else
                             {
-                                print("AGX: vessel switch");
+                                //print("AGX: vessel switch");
                                 //CurrentVesselActions.Clear();
                             }
                         }
                         catch
                         {
-                            print("AGX: something was null in docking check");
+                            //print("AGX: something was null in docking check");
                         }
                         errLine = "8a";
                         //print("Root part changed, AGX reloading");
@@ -4095,13 +4095,13 @@ namespace ActionGroupsExtended
                                 errLine = "24e";
                                 if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
                                 {
-                                    print("AGX flight node found");
+                                    //print("AGX flight node found");
                                     vslNode = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
 
                                 }
                                 else if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString()))
                                 {
-                                    print("AGX flightID found");
+                                   // print("AGX flightID found");
                                     vslNode = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
 
                                 }
@@ -4121,7 +4121,7 @@ namespace ActionGroupsExtended
                                     
                                 else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
                                 {
-                                    print("AGX VAB1 ");// + FlightGlobals.ActiveVessel.vesselName + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
+                                   // print("AGX VAB1 ");// + FlightGlobals.ActiveVessel.vesselName + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
                                     vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab));
                                     vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                     AGXFlightNode.AddNode(vslNode);
@@ -4129,14 +4129,14 @@ namespace ActionGroupsExtended
                                 }
                                 else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
                                 {
-                                    print("AGX vab2");
+                                    //print("AGX vab2");
                                     vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab));
                                     vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                     AGXFlightNode.AddNode(vslNode);
                                 }
                                 else
                                 {
-                                    print("AGX notfound");
+                                    //print("AGX notfound");
                                     vslNode = new ConfigNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
                                     vslNode.AddValue("name", FlightGlobals.ActiveVessel.vesselName);
                                     vslNode.AddValue("currentKeyset", "1");
@@ -4146,8 +4146,9 @@ namespace ActionGroupsExtended
                                     AGXFlightNode.AddNode(vslNode);
                                 }
                                 errLine = "24f";
-                                CurrentKeySetFlight = Convert.ToInt32(vslNode.GetValue("currentKeyset"));
+                                CurrentKeySetFlight = Convert.ToInt32((string)vslNode.GetValue("currentKeyset"));
                                 //LoadCurrentKeyBindings();
+                                CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
                                 LoadGroupNames(vslNode.GetValue("groupNames"));
                                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
                                 LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
@@ -4281,7 +4282,8 @@ namespace ActionGroupsExtended
                         RefreshCurrentActions();
                         loadFinished = true;
                         //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
-                        errLine = "23";
+                        errLine = "23"; 
+                        CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
                         LoadCurrentKeyBindings();
                         errLine = "23a";
                         FlightSaveToFile(AGXFlightNode);//add save current vessel here
@@ -4733,7 +4735,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                print("Docking fail. Ignore this error if you did not just dock. " + e);
+                print("AGX Docking fail. Ignore this error if you did not just dock. " + e);
             }
         }
 

@@ -681,7 +681,7 @@ namespace ActionGroupsExtended
             }
             catch(Exception e)
             {
-                print("AGXEd LoadGroupVisibility Fail " + errLine + " " + e);
+                print("AGX LoadGroupVisibility Fail " + errLine + " " + e);
             }
         }
         
@@ -1390,9 +1390,8 @@ namespace ActionGroupsExtended
 
         public static void LoadCurrentKeyBindings()
         {
-          
-           
-          
+
+            //print("loading key set " + CurrentKeySet.ToString());          
             String LoadString = AGExtNode.GetValue("KeySet" + CurrentKeySet.ToString());
           
             for (int i = 1; i <= 250; i++)
@@ -3187,7 +3186,7 @@ namespace ActionGroupsExtended
             }
             catch
             {
-                print("Monitor default list fail");
+                print("AGX Monitor default list fail");
             }
             
             if (EditorActionGroups.Instance.GetSelectedParts() != null) //is a part selected?
@@ -3517,17 +3516,21 @@ namespace ActionGroupsExtended
                     errLine = "12";
                     if (thisVsl.HasValue("currentKeyset"))
                     {
-                        CurrentKeySet = Convert.ToInt32(thisVsl.GetValue("currenKeyset"));
+                        CurrentKeySet = Convert.ToInt32((string)thisVsl.GetValue("currentKeyset"));
+                        //print("curkey a " + CurrentKeySet + " " + thisVsl.GetValue("currentKeyset"));
                     }
                     else
                     {
                         CurrentKeySet = 1;
+                        //print("curkey b " + CurrentKeySet);
                     }
                     if (CurrentKeySet < 1 || CurrentKeySet > 5)
                     {
+                        //print("curkey c " + CurrentKeySet);
                         CurrentKeySet = 1;
                     }
                     LoadCurrentKeyBindings();
+                    CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
                     errLine = "13";
                     if (thisVsl.HasValue("groupNames"))
                     {
@@ -3665,7 +3668,7 @@ namespace ActionGroupsExtended
             
             catch (Exception e)
             {
-                print("AGXEd EditorLoadFromNode Fail " + errLine + " " + e);
+                print("AGX EditorLoadFromNode Fail " + errLine + " " + e);
             }
         }
 
@@ -3867,7 +3870,7 @@ namespace ActionGroupsExtended
             EditorSaveToNode();
             EditorSaveGlobalInfo();
             EditorWriteNodeToFile();
-            print("name check " + KeySetNames[1]);
+           // print("name check " + KeySetNames[1]);
 
         }
 
@@ -3884,7 +3887,7 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetName3", KeySetNames[2]);
             AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
             AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
-            //CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+            CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
             AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
         }
 
@@ -3903,7 +3906,7 @@ namespace ActionGroupsExtended
 
         public static void EditorSaveToNode()
         {
-            print("AGX EditorSaveToFile called"); 
+            //print("AGX EditorSaveToFile called"); 
             string errLine = "1";
             try
             {
