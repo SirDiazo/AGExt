@@ -12,6 +12,8 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        bool showCareerStockAGs = false;
+         bool showCareerCustomAGs = false;
         ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
         bool showAGXRightClickMenu = false;
         private static int activationCoolDown = 5;
@@ -131,7 +133,7 @@ namespace ActionGroupsExtended
         static ConfigNode AGXBaseNode = new ConfigNode();
         public static ConfigNode AGXFlightNode = new ConfigNode();
         //public static ConfigNode RootParts = new ConfigNode();
-        static ConfigNode AGXEditorNode = new ConfigNode();
+        static ConfigNode AGXEditorNodeFlight = new ConfigNode();
         List<AGXPartVesselCheck> partOldVessel = new List<AGXPartVesselCheck>();
         public static bool flightNodeIsLoaded = false;
         static List<Vessel> loadedVessels; //loaded vessels list, add vessels to this on OffRails, remove when OnRails
@@ -162,13 +164,16 @@ namespace ActionGroupsExtended
         public void onStockToolbarClick()
         {
             //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
-            if (Input.GetMouseButtonUp(1))
+            if (showCareerStockAGs)
             {
-                onRightButtonStockClick();
-            }
-            else
-            {
-                onLeftButtonClick();
+                if (Input.GetMouseButtonUp(1))
+                {
+                    onRightButtonStockClick();
+                }
+                else
+                {
+                    onLeftButtonClick();
+                }
             }
         }
 
@@ -197,6 +202,8 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
+            try
+            {
             AGXguiMod1Groups = new Dictionary<int, bool>();
             AGXguiMod2Groups = new Dictionary<int, bool>();
             for (int i = 1; i <= 250; i++)
@@ -354,6 +361,67 @@ namespace ActionGroupsExtended
             {
                 ShowAGXMod = false;
             }
+            float facilityLevel = Mathf.Max(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding));
+                
+            if (AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
+            {
+                //print("b");
+
+                if ((string)AGExtNode.GetValue("OverrideCareer") == "1")
+                {
+                    //print("c");
+                    showCareerCustomAGs = true;
+                    showCareerStockAGs = true;
+                }
+                else
+                {
+                    //print("d");
+                    
+                    if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
+                    {
+                       // print("g");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = true;
+                    }
+                    else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel))
+                    {
+                       // print("h");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = false;
+                    }
+                    else
+                    {
+                        //print("i");
+                        showCareerStockAGs = false;
+                        showCareerCustomAGs = false;
+                    }
+                }
+            }
+            else
+            {
+                //print("j");
+                
+
+                if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
+                {
+                   // print("m");
+                    showCareerStockAGs = true;
+                    showCareerCustomAGs = true;
+                }
+                else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel))
+                {
+                   // print("n");
+                    showCareerStockAGs = true;
+                    showCareerCustomAGs = false;
+                }
+                else
+                {
+                   // print("o");
+                    showCareerStockAGs = false;
+                    showCareerCustomAGs = false;
+                }
+            }
+           // print("startd " + showCareerCustomAGs);
 
             IsGroupToggle = new Dictionary<int, bool>();
             ShowGroupInFlight = new bool[6,251];
@@ -435,12 +503,12 @@ namespace ActionGroupsExtended
             AGXFlightNode = new ConfigNode();
             if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
             {
-                AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                AGXEditorNodeFlight = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
             }
             else
             {
-                AGXEditorNode = new ConfigNode("EDITOR");
-                AGXEditorNode.AddValue("name", "editor");
+                AGXEditorNodeFlight = new ConfigNode("EDITOR");
+                AGXEditorNodeFlight.AddValue("name", "editor");
             }
             //AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"); 
             //AllVesselsActions = new List<AGXAction>();
@@ -459,7 +527,11 @@ namespace ActionGroupsExtended
             //print("7a");
             //KeySetNamesFlight[CurrentKeySetFlight - 1] = CurrentKeySetNameFlight;
             
-           
+        }
+        catch(Exception e)
+    {
+        print("AGX Flight Start FAIL " + e);
+    }
         }
 
 
@@ -1142,9 +1214,18 @@ namespace ActionGroupsExtended
             //{
             //    SettingsWinRect = GUI.Window(673467780, SettingsWinRect, AGXMethods.SettingsWindow, "AGX Settings", AGXWinStyle);
             //}
+            if(!showCareerStockAGs)
+            {
+                ShowAGXMod = false;
+            }
+
 
             if (ShowAGXMod)
             {
+                if(!showCareerCustomAGs)
+                {
+                    defaultShowingNonNumeric = true;
+                }
                 if (ShowAGXFlightWin)
                 {
                     GroupsInFlightWin.x = FlightWin.x + 235;
@@ -3133,7 +3214,9 @@ namespace ActionGroupsExtended
                     PageGrn[4] = true;
                 }
             }
-            if(GUI.Button(new Rect(80,3,40,20),"Other",AGXBtnStyle))
+            if(showCareerCustomAGs)
+            {
+                if(GUI.Button(new Rect(80,3,40,20),"Other",AGXBtnStyle))
             {
                 defaultShowingNonNumeric = !defaultShowingNonNumeric;
                 if (defaultShowingNonNumeric)
@@ -3152,6 +3235,7 @@ namespace ActionGroupsExtended
                     RefreshDefaultActionsListType();
                 }
             }
+        }
            // for (int i = 1; i <= 5; i = i + 1)
          //   {
                // if (PageGrn[i - 1] == true && GroupsPage != i)
@@ -4119,18 +4203,18 @@ namespace ActionGroupsExtended
                                 //    ShowAmbiguousMessage = false;
                                 //}
                                     
-                                else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
+                                else if (AGXEditorNodeFlight.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab)))
                                 {
                                    // print("AGX VAB1 ");// + FlightGlobals.ActiveVessel.vesselName + " " + FlightGlobals.ActiveVessel.rootPart.ConstructID);
-                                    vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab));
+                                    vslNode = AGXEditorNodeFlight.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, checkIsVab));
                                     vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                     AGXFlightNode.AddNode(vslNode);
                                     // print("node check " + vslNode.ToString());
                                 }
-                                else if (AGXEditorNode.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
+                                else if (AGXEditorNodeFlight.HasNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab)))
                                 {
                                     //print("AGX vab2");
-                                    vslNode = AGXEditorNode.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab));
+                                    vslNode = AGXEditorNodeFlight.GetNode(AGextScenario.EditorHashShipName(FlightGlobals.ActiveVessel.vesselName, !checkIsVab));
                                     vslNode.name = FlightGlobals.ActiveVessel.rootPart.flightID.ToString();
                                     AGXFlightNode.AddNode(vslNode);
                                 }

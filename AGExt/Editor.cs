@@ -16,6 +16,9 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
+        bool overrideCareerAGs = false; //always show AGX, even on new career?
+        bool showCareerStockAGs = false; //support locking action groups in early career
+        bool showCareerCustomAGs = false;
         bool showAGXRightClickMenu = false; //show stock toolbar right click menu?
         bool needToAddStockButton = true; //do we need to add stock button?
         ApplicationLauncherButton AGXAppEditorButton = null; //stock toolbar button instance
@@ -306,8 +309,87 @@ namespace ActionGroupsExtended
                 errLine = "13";
                 CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdCurActsX")), Convert.ToInt32(AGExtNode.GetValue("EdCurActsY")), 345, 140);
                 errLine = "14";
+                //print("a");
+                if(AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
+                {
+                    //print("b");
+                    if((string)AGExtNode.GetValue("OverrideCareer")=="1")
+                    {
+                        //print("c");
+                        showCareerCustomAGs = true;
+                        showCareerStockAGs = true;
+                    }
+                    else
+                    {
+                        //print("d");
+                        float facilityLevel = 0f;
+                        if(EditorDriver.editorFacility == EditorFacility.SPH)
+                        {
+                           // print("e");
+                            facilityLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar);
+                        }
+                        else
+                        {
+                            //print("f");
+                            facilityLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding);
+                        }
+                            
+                    if(GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
+                    {
+                       // print("g");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = true;
+                    }
+                    else if(GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel))
+                    {
+                        //print("h");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = false;
+                    }
+                    else
+                    {
+                       //print("i");
+                        showCareerStockAGs = false;
+                        showCareerCustomAGs = false;
+                    }
+                    }
+                }
+                else
+                {
+                   // print("j");
+                    float facilityLevel2 = 0f;
+                    if (EditorDriver.editorFacility == EditorFacility.SPH)
+                    {
+                       // print("k");
+                        facilityLevel2 = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar);
+                    }
+                    else
+                    {
+                        //print("l");
+                        facilityLevel2 = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding);
+                    }
 
-
+                    if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel2))
+                    {
+                        //print("m");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = true;
+                    }
+                    else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel2))
+                    {
+                        //print("n");
+                        showCareerStockAGs = true;
+                        showCareerCustomAGs = false;
+                    }
+                    else
+                    {
+                        //print("o");
+                        showCareerStockAGs = false;
+                        showCareerCustomAGs = false;
+                    }
+                }
+                //print("startd " + showCareerCustomAGs);
+                    
 
                 //LoadCurrentKeyBindings();
 
@@ -479,14 +561,17 @@ namespace ActionGroupsExtended
         }
         public void onStockToolbarClick()
         {
-            //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
-            if(Input.GetMouseButtonUp(1))
+            if (showCareerStockAGs)
             {
-                onRightButtonStockClick();
-            }
-            else
-            {
-                onLeftButtonClick();
+                //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
+                if (Input.GetMouseButtonUp(1))
+                {
+                    onRightButtonStockClick();
+                }
+                else
+                {
+                    onLeftButtonClick();
+                }
             }
         }
         
@@ -497,28 +582,31 @@ namespace ActionGroupsExtended
 
         public void onLeftButtonClick()
         {
-            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+            if (showCareerStockAGs) 
             {
-                if (AGXShow)
+                if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
                 {
-                    //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
-                    AGXShow = false;
-                    AGExtNode.SetValue("EditShow", "0");
-                    EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+                    if (AGXShow)
+                    {
+                        //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                        AGXShow = false;
+                        AGExtNode.SetValue("EditShow", "0");
+                        EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
 
+                    }
+                    else
+                    {
+                        // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                        AGXShow = true;
+                        AGExtNode.SetValue("EditShow", "1");
+                        EditorPanels.Instance.panelManager.Dismiss();
+                    }
+                    AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
                 }
                 else
                 {
-                    // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
-                    AGXShow = true;
-                    AGExtNode.SetValue("EditShow", "1");
-                    EditorPanels.Instance.panelManager.Dismiss();
+                    EditorLogic.fetch.SelectPanelActions();
                 }
-                AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-            }
-            else
-            {
-                EditorLogic.fetch.SelectPanelActions();
             }
         }
          
@@ -869,15 +957,21 @@ namespace ActionGroupsExtended
            
             
 
-            if (!ToolbarManager.ToolbarAvailable)
-            {
-                AGXShow = true; //no toolbar so show AGX with KSP actions editor still up
-            }
+            //if (!ToolbarManager.ToolbarAvailable) //stock toolbar now added
+            //{
+            //    AGXShow = true; //no toolbar so show AGX with KSP actions editor still up
+            //}
 
-
+            
 
             if (AGXShow)
             {
+               // print("Test call 3" + showCareerCustomAGs);
+                if (!showCareerCustomAGs)
+                {
+                    //print("Test call");
+                    defaultShowingNonNumeric = true;
+                }
                 if (ShowKeySetWin)
                 {
                     KeySetWin = GUI.Window(673467792, KeySetWin, KeySetWindow, "Keysets", AGXWinStyle);
@@ -926,6 +1020,7 @@ namespace ActionGroupsExtended
                     ErrLine = "7";
                     if (ShowSelectedWin)
                     {
+                        
                         if (defaultShowingNonNumeric)
                         {
                             foreach (BaseAction Act in defaultActionsListThisType)
@@ -2331,7 +2426,10 @@ namespace ActionGroupsExtended
                 }
             }
             ErrLine = "4";
-            if (GUI.Button(new Rect(80, 3, 40, 20), "Other", AGXBtnStyle))
+            
+                if(showCareerCustomAGs)
+                {
+                    if (GUI.Button(new Rect(80, 3, 40, 20), "Other", AGXBtnStyle))
             {
                 ErrLine = "4a";
                 defaultShowingNonNumeric = !defaultShowingNonNumeric;
@@ -2363,6 +2461,7 @@ namespace ActionGroupsExtended
                     ErrLine = "4l";
                 }
                 ErrLine = "4m";
+            }
             }
             ErrLine = "5";
             //for (int i = 1; i <= 5; i = i + 1)
@@ -3474,18 +3573,28 @@ namespace ActionGroupsExtended
 
                     //print("Load 2");
                     errLine = "9a";
-                    if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+                    try
                     {
-                        //print("Load 3");
-                        errLine = "9b";
-                        AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                        //print("Load 4");
+                        if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+                        {
+                            //print("Load 3");
+                            errLine = "9b";
+                            AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                            //print("Load 4");
+                        }
+                        else
+                        {
+                            errLine = "9c";
+                            AGXEditorNode = new ConfigNode("EDITOR");
+                            AGXEditorNode.AddValue("name", "editor");
+                        }
                     }
-                    else
+                catch
                     {
-                        errLine = "9c";
+                        errLine = "9d";
                         AGXEditorNode = new ConfigNode("EDITOR");
                         AGXEditorNode.AddValue("name", "editor");
+                        print("AGX Load Editor Node FAILED, resetting it");
                     }
                 //}
             }
@@ -3611,7 +3720,7 @@ namespace ActionGroupsExtended
                     CustomActions.Add(KSPActionGroup.Custom08);
                     CustomActions.Add(KSPActionGroup.Custom09);
                     CustomActions.Add(KSPActionGroup.Custom10);
-
+                    
                     errLine = "16";
                     // string AddGroup = "";
                     List<BaseAction> partAllActions = new List<BaseAction>(); //is all vessel actions, copy pasting code
