@@ -280,14 +280,28 @@ namespace ActionGroupsExtended
         }
     }
 
-    public class AGXAction : MonoBehaviour //basic data class for AGX mod, used everywhere
+    public class AGXAction : MonoBehaviour, IEquatable<AGXAction> //basic data class for AGX mod, used everywhere
     {
         public Part prt;
         public BaseAction ba;
         public int group;
         public bool activated = false;
+
+        public bool Equals(AGXAction obj)
+        {
+            if(this.prt == obj.prt && this.ba == obj.ba && this.group == obj.group)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+}
         
-    }
+    
 
     public class AGXDefaultCheck : MonoBehaviour //used in Editor to monitor default action groups
     {

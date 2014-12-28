@@ -525,7 +525,8 @@ namespace ActionGroupsExtended
                 PartPlus.LoadImage(importPartPlus);
                 PartPlus.Apply();
                 //EditorLoadFromFile();
-                if (HighLogic.LoadedScene == GameScenes.EDITOR)
+                //if (HighLogic.LoadedScene == GameScenes.EDITOR)
+                if(EditorDriver.editorFacility == EditorFacility.VAB)
                 {
                     inVAB = true;
                 }
@@ -621,6 +622,19 @@ namespace ActionGroupsExtended
                 AttachAGXPart(p);
             }
             DetachedPartReset.Start();
+
+            ModuleAGX agxMod = host_target.host.Modules.OfType<ModuleAGX>().First();
+            foreach(AGXAction agAct in agxMod.agxActionsThisPart)
+            {
+                if(!CurrentVesselActions.Contains(agAct))
+                {
+                    CurrentVesselActions.Add(agAct);
+                }
+            }
+
+
+
+
         }
 
         public void PartRemove(GameEvents.HostTargetAction<Part, Part> host_target)
@@ -634,6 +648,14 @@ namespace ActionGroupsExtended
             }
             DetachedPartReset.Stop(); //stop timer so it resets
             //        //print("Detach");
+            //start subassembly stuff
+            ModuleAGX agxMod = host_target.target.Modules.OfType<ModuleAGX>().First();
+            agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target));
+            foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+            {
+                agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
+            }
+
         }
 
         public void CheckExistingShips()
@@ -3033,9 +3055,8 @@ namespace ActionGroupsExtended
         //    }
         //}
 
-        
+
         public void Update()
-            
         {
 
             if (checkShipsExist)
@@ -3053,54 +3074,54 @@ namespace ActionGroupsExtended
             }
 
 
-            
+
             EditorLogic ELCur = new EditorLogic();
             ELCur = EditorLogic.fetch;//get current editor logic instance
 
-           
-            
+
+
             if (AGXDoLock && ELCur.editorScreen != EditorScreen.Actions)
             {
                 ELCur.Unlock("AGXLock");
                 AGXDoLock = false;
             }
-            else if(AGXDoLock && !TrapMouse)
+            else if (AGXDoLock && !TrapMouse)
             {
                 ELCur.Unlock("AGXLock");
                 AGXDoLock = false;
             }
             else if (!AGXDoLock && TrapMouse && ELCur.editorScreen == EditorScreen.Actions)
             {
-                ELCur.Lock(false,false,false,"AGXLock");
+                ELCur.Lock(false, false, false, "AGXLock");
                 AGXDoLock = true;
             }
-          
-            
+
+
             if (ELCur.editorScreen == EditorScreen.Actions) //only show mod if on actions editor screen
             {
-              
+
                 ShowSelectedWin = true;
             }
             else
             {
-                
+
                 ShowSelectedWin = false;
-                
-               
-                  
-                
+
+
+
+
                 AGEditorSelectedParts.Clear();//mod is hidden, clear list so parts don't get orphaned in it
-              
+
                 PartActionsList.Clear();
-              
+
                 ActionsListDirty = true;
             }
 
-          
-            if (ShowSelectedWin) 
+
+            if (ShowSelectedWin)
             {
 
-               
+
 
                 if (EditorActionGroups.Instance.GetSelectedParts() != null) //on first run, list is null
                 {
@@ -3108,46 +3129,46 @@ namespace ActionGroupsExtended
                     if (ActionsListDirty)
                     {
                         UpdateActionsListCheck();
-                       
+
                     }
                     if (EditorActionGroups.Instance.GetSelectedParts().Count > 0) //are there parts selected?
                     {
 
-                        
+
                         if (PreviousSelectedPart != EditorActionGroups.Instance.GetSelectedParts().First()) //has selected part changed?
                         {
-                            
-                            if(!AGEditorSelectedParts.Any(p => p.AGPart==EditorActionGroups.Instance.GetSelectedParts().First())) //make sure selected part is not already in AGEdSelParts
+
+                            if (!AGEditorSelectedParts.Any(p => p.AGPart == EditorActionGroups.Instance.GetSelectedParts().First())) //make sure selected part is not already in AGEdSelParts
                             {
 
                                 if (AGEditorSelectedParts.Count == 0) //no items in Selected Parts list, so just add selection
                                 {
-                                   AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(),SelPartsIncSym));
-                                   
+                                    AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
+
 
                                 }
                                 else if (AGEditorSelectedParts.First().AGPart.name == EditorActionGroups.Instance.GetSelectedParts().First().name) //selected part matches first part already in selected parts list, so just add selected part
                                 {
-                                    AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(),SelPartsIncSym));
-                                   
+                                    AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
+
 
                                 }
                                 else //part does not match first part in list, clear list before adding part
                                 {
-                                   
+
                                     AGEditorSelectedParts.Clear();
-                                    AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(),SelPartsIncSym));
-                                  
+                                    AGEditorSelectedParts.AddRange(AGXAddSelectedPart(EditorActionGroups.Instance.GetSelectedParts().First(), SelPartsIncSym));
+
 
 
                                 }
                             }
                             PreviousSelectedPart = EditorActionGroups.Instance.GetSelectedParts().First(); //remember selected part so logic does not run unitl another part selected
                         }
-                        
+
                     }
                 }
-                
+
             }
 
 
@@ -3158,9 +3179,12 @@ namespace ActionGroupsExtended
 
             if (AGXRoot != EditorLogic.RootPart)
             {
-               // print("Root diff");
+                // print("Root diff");
                 EditorLoadFromNode();
             }
+
+           // print("test " + FindObjectsOfType<EditorSubassemblyItem>().Count());
+        } //close Update()
             //if(needToAddStockButton)
             //{
             //    if (ApplicationLauncher.Ready)
@@ -3184,7 +3208,7 @@ namespace ActionGroupsExtended
             //PrintSelectedPart();
             //print("Keyset " + CurrentKeySet);
             
-            }
+            
 
         public void PrintSelectedPart()
         {

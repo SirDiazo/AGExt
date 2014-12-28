@@ -4525,7 +4525,7 @@ namespace ActionGroupsExtended
                 
             }
             //PrintPartActs();
-            //print("Keyset " + CurrentKeySetFlight);
+            //print("landed " + FlightGlobals.ActiveVessel.landedAt);
         }
             catch(Exception e)
             {
