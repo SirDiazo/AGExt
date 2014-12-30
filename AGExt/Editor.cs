@@ -613,32 +613,97 @@ namespace ActionGroupsExtended
          
 
         public void PartAttaching(GameEvents.HostTargetAction<Part,Part> host_target)
-        { 
-           // print("Part attached! " + host_target.host.ConstructID + " " + host_target.target.ConstructID);
-            AttachAGXPart(host_target.host);//this.part, partAllActions, partAGActions);
+        {
+            string ErrLine = "1";
+            try
+            {
+                ErrLine = "2";
+           //// print("Part attached! " + host_target.host.ConstructID + " " + host_target.target.ConstructID);
+           // //this.part, partAllActions, partAGActions);
+           // ErrLine = "3";
+           // foreach (Part p in host_target.host.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+           // {
+           //     ErrLine = "4";
+           //    // print("Part atached2! " + p.ConstructID);
+                
+           //     ErrLine = "5";
+           // }
+            ErrLine = "6";
+            
+            ErrLine = "7";
+            ModuleAGX agxMod = host_target.host.Modules.OfType<ModuleAGX>().First();
+            ErrLine = "8";
+            foreach(AGXAction agAct in agxMod.agxActionsThisPart)
+            {
+                
+                ErrLine = "9";
+                
+                if(!CurrentVesselActions.Contains(agAct))
+                {
+                    //print("part attached detect");
+                    //Debug.Log("part attached detect"); 
+                    ErrLine = "10";
+                    CurrentVesselActions.Add(agAct);
+                    DetachedPartActions.Add(agAct);
+                    ErrLine = "11";
+                    
+                        ErrLine = "11b";
+                        if (AGXguiNames[agAct.group].Length == 0)
+                        {
+                            ErrLine = "12";
+                            AGXguiNames[agAct.group] = agAct.grpName;
+                            ErrLine = "13";
+                        }
+                    
+                    ErrLine = "14";
+                }
+                else
+                {
+                    //print("part attached not detect");
+                   //Debug.Log("part attached not detect"); 
+                }
+                ErrLine = "15";
+            }
+            ErrLine = "16";
+            AttachAGXPart(host_target.host);
             foreach (Part p in host_target.host.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
             {
-               // print("Part atached2! " + p.ConstructID);
+                ErrLine = "17";
+                agxMod = p.Modules.OfType<ModuleAGX>().First();
+                ErrLine = "18";
+                foreach (AGXAction agAct in agxMod.agxActionsThisPart)
+                {
+                    ErrLine = "19";
+                    DetachedPartActions.Add(agAct);
+                    if (!CurrentVesselActions.Contains(agAct))
+                    {
+                        //print("adding action " + agAct.ba.guiName + agAct.group);
+                        ErrLine = "20";
+                        CurrentVesselActions.Add(agAct);
+                        
+                        ErrLine = "21";
+                        if (AGXguiNames[agAct.group].Length == 0)
+                        {
+                            ErrLine = "22";
+                            AGXguiNames[agAct.group] = agAct.grpName;
+                            ErrLine = "23";
+                        }
+                    }
+                }
                 AttachAGXPart(p);
             }
             DetachedPartReset.Start();
 
-            ModuleAGX agxMod = host_target.host.Modules.OfType<ModuleAGX>().First();
-            foreach(AGXAction agAct in agxMod.agxActionsThisPart)
+        }
+            catch(Exception e)
             {
-                if(!CurrentVesselActions.Contains(agAct))
-                {
-                    CurrentVesselActions.Add(agAct);
-                }
+                print("AGX Part Attaching Fail: " + ErrLine + " " + e);
             }
-
-
-
-
         }
 
         public void PartRemove(GameEvents.HostTargetAction<Part, Part> host_target)
         {
+            UpdateAGXActionGroupNames();
             //print("Part detached! " + host_target.target.ConstructID);
             DetachedPartActions.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target)); //add actiongroups on this part to List
             foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
@@ -653,9 +718,18 @@ namespace ActionGroupsExtended
             agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target));
             foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
             {
+                agxMod = p.Modules.OfType<ModuleAGX>().First();
                 agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
             }
 
+        }
+
+        public static void UpdateAGXActionGroupNames()
+        {
+            foreach(AGXAction agAct in CurrentVesselActions)
+            {
+                agAct.grpName = AGXguiNames[agAct.group];
+            }
         }
 
         public void CheckExistingShips()
@@ -841,16 +915,49 @@ namespace ActionGroupsExtended
             ba.actionGroup = ba.actionGroup | KSPActs[group];
         }
 
+        public static void SetDefaultActionStatic(BaseAction ba, int group)
+        {
+            Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+            KSPActs[1] = KSPActionGroup.Custom01; //setup list to delete action from 
+            KSPActs[2] = KSPActionGroup.Custom02;
+            KSPActs[3] = KSPActionGroup.Custom03;
+            KSPActs[4] = KSPActionGroup.Custom04;
+            KSPActs[5] = KSPActionGroup.Custom05;
+            KSPActs[6] = KSPActionGroup.Custom06;
+            KSPActs[7] = KSPActionGroup.Custom07;
+            KSPActs[8] = KSPActionGroup.Custom08;
+            KSPActs[9] = KSPActionGroup.Custom09;
+            KSPActs[10] = KSPActionGroup.Custom10;
+
+            ba.actionGroup = ba.actionGroup | KSPActs[group];
+        }
+
         public static void ResetDetachedParts(object source, ElapsedEventArgs e)
         {
             
             DetachedPartReset.Stop();
+           foreach(AGXAction agAct in DetachedPartActions)
+           {
+               foreach(Part p in agAct.prt.symmetryCounterparts)
+               {
+                   AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p, false);
+                   if(!CurrentVesselActions.Contains(actToAdd))
+                   {
+                       CurrentVesselActions.Add(actToAdd);
+                       print("add act");
+                   }
+                   else
+                   {
+                       print("part not added");
+                   }
+               }
+           }
             DetachedPartActions.Clear();
             EditorSaveToNode();
 
         }
 
-        public void AttachAGXPart(Part p) 
+        public static void AttachAGXPart(Part p) 
         {
             //print("d1");
             if (DetachedPartActions.Count(a => a.ba.listParent.part == p) == 0) //part has no actions in list, may be a clone
@@ -878,8 +985,12 @@ namespace ActionGroupsExtended
                                     //print("d6");
                                     if (actToAdd.group < 11)
                                     {
-                                        SetDefaultAction(actToAdd.ba, actToAdd.group);
+                                        SetDefaultActionStatic(actToAdd.ba, actToAdd.group);
                                     }
+                                }
+                                else
+                                {
+                                    //print("d6 fail");
                                 }
                             }
                         }
@@ -3182,6 +3293,11 @@ namespace ActionGroupsExtended
                 // print("Root diff");
                 EditorLoadFromNode();
             }
+            //print("detach " + DetachedPartActions.Count);
+            //foreach (Part p in EditorLogic.SortedShipList)
+            //{
+            //    print(p.name + " " + p.symmetryCounterparts.Count + " " + p.GetHashCode());
+            //}
 
            // print("test " + FindObjectsOfType<EditorSubassemblyItem>().Count());
         } //close Update()
@@ -4045,31 +4161,8 @@ namespace ActionGroupsExtended
             {
                 if (EditorLogic.SortedShipList.Count > 0)
                 {
-                    //ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
-                    //AGXEditorNode.AddValue("name", "editor");
                     errLine = "2";
-                    //if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
-                    //{
-                    //    errLine = "3";
-                    //    AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                    //    //print("AGX ConfigNode Load Okay! (Saving)");
-                    //}
-                    // else
-                    //{
-                    //errLine = "4";
-                    //print("AGX ConfigNode not found, creating..... (Saving)");
-                    //errLine = "5";
-                    //AGXEditorNode.AddValue("name", "Action Groups Extended save file");
-                    //AGXEditorNode.AddNode("FLIGHT");
-                    //errLine = "6";
-                    //AGXEditorNode.AddNode("EDITOR");
-                    //errLine = "7";
-                    //AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                    //errLine = "8";
-                    //}
 
-                    errLine = "9";
-                    //ConfigNode AGXEditorNode = AGXBaseNode.GetNode("EDITOR");
                     errLine = "10";
                     string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
                     errLine = "11";
@@ -4085,6 +4178,7 @@ namespace ActionGroupsExtended
                     errLine = "16";
                     thisVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                     errLine = "17";
+                    UpdateAGXActionGroupNames();
                     try
                     {
                         errLine = "17c";

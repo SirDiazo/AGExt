@@ -300,8 +300,15 @@ namespace ActionGroupsExtended //add scenario module for data storage
             {
                 errLine = "2";
                 AGXAction ActionToLoad = new AGXAction(); //create action we are loading
+                errLine = "2aa";
                 ActionToLoad.prt = actPart; //assign part
+                errLine = "2bb";
                 ActionToLoad.group = Convert.ToInt32(actNode.GetValue("group")); //assign group
+                errLine = "2cc";
+                if (actNode.HasValue("groupName"))
+                {
+                    ActionToLoad.grpName = actNode.GetValue("groupName"); //assign group
+                }
                 errLine = "2a";
                 if (actNode.GetValue("activated") == "1") //assign activated
                 {
@@ -628,12 +635,15 @@ namespace ActionGroupsExtended //add scenario module for data storage
 
         public static ConfigNode SaveAGXActionVer2(AGXAction agxAct)
         {
+            //print("Save called");
             string errLine ="1";
             try
             {
             ConfigNode actionNode = new ConfigNode("ACTION");
                 errLine ="2";
             actionNode.AddValue("group", agxAct.group);
+            errLine = "2a";
+            actionNode.AddValue("groupName", agxAct.grpName);
                 errLine ="3";
             actionNode.AddValue("activated",(agxAct.activated) ? "1":"0");
                 errLine ="4";

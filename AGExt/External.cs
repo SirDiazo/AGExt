@@ -280,25 +280,91 @@ namespace ActionGroupsExtended
         }
     }
 
-    public class AGXAction : MonoBehaviour, IEquatable<AGXAction> //basic data class for AGX mod, used everywhere
+    public class AGXAction : IEquatable<AGXAction>, IEqualityComparer<AGXAction> //basic data class for AGX mod, used everywhere
     {
         public Part prt;
         public BaseAction ba;
         public int group;
         public bool activated = false;
+        public string grpName = "";
 
-        public bool Equals(AGXAction obj)
+        public override bool Equals(object o)
         {
-            if(this.prt == obj.prt && this.ba == obj.ba && this.group == obj.group)
+            //Debug.Log("Obj compare");
+            if(o == null)
             {
-                return true;
+                //Debug.Log("Obj compare null");
+                return false;
             }
-            else
+            AGXAction agxCheck = o as AGXAction;
+            //Debug.Log("compare1a" + this.prt.partInfo.name + " " + this.ba.guiName + " " + this.group);
+           // Debug.Log("compare2a" + agxCheck.prt.partInfo.name + " " + agxCheck.ba.guiName + " " + agxCheck.group);
+            if((object) agxCheck == null)
             {
                 return false;
             }
+            if (this.prt == agxCheck.prt && this.ba == agxCheck.ba && this.group == agxCheck.group)
+            {
+                return true;
+            }
+            return false;
         }
-
+        public bool Equals(AGXAction obj)
+        {
+            //print("AGX Compare");
+            //Debug.Log("compare1" + this.prt.partInfo.name + this.prt.GetHashCode() + " " + this.ba.guiName + this.ba.GetHashCode() + " " + this.group);
+            //Debug.Log("compare2" + obj.prt.partInfo.name +  obj.prt.GetHashCode() + " " + obj.ba.guiName +  obj.ba.GetHashCode() + " " + obj.group);
+            if (obj == null)
+            {
+                return false;
+            }
+            else
+            {
+                if (this.prt.Equals(obj.prt) && this.ba.Equals(obj.ba) && this.group.Equals(obj.group))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        public bool Equals(AGXAction obj1, AGXAction obj2)
+        {
+            //print("AGX Compare");
+            //Debug.Log("compare1c" + obj1.prt.partInfo.name + " " + obj1.ba.guiName + " " + obj1.group);
+            //Debug.Log("compare2c" + obj2.prt.partInfo.name + " " + obj2.ba.guiName + " " + obj2.group);
+            if (obj1 == null)
+            {
+                return false;
+            }
+            if (obj2 == null)
+            {
+                return false;
+            }
+            else
+            {
+                if (obj1.prt == obj2.prt && obj1.ba == obj2.ba && obj1.group == obj2.group)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        public override int GetHashCode()
+        {
+            //Debug.Log("get hash local");
+            return ((int)ba.GetHashCode() + (int)prt.GetHashCode())^group;
+        }
+        public int GetHashCode(AGXAction obj)
+        {
+            //Debug.Log("get has remote");
+            return ((int)obj.ba.GetHashCode() + (int)obj.prt.GetHashCode()) ^ obj.group;
+        }
 }
         
     

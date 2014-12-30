@@ -30,24 +30,44 @@ namespace ActionGroupsExtended
         
         public override void OnSave(ConfigNode node)
         {
-            if(agxActionsThisPart.Count > 0)
+            string ErrLine = "1";
+            try
             {
+                ErrLine = "2";
+                if(agxActionsThisPart.Count > 0)
+                {
+                    ErrLine = "3";
                 foreach (AGXAction agAct in agxActionsThisPart)
                 {
+                    ErrLine = "4";
                     ConfigNode actionNode = new ConfigNode("ACTION");
-                    actionNode = AGextScenario.SaveAGXActionVer2(agAct);
+                    ErrLine = "5";
+                    if (agAct != null)
+                    {
+                        ErrLine = "5a";
+                        actionNode = AGextScenario.SaveAGXActionVer2(agAct);
+                    }
+                    ErrLine = "6";
                     node.AddNode(actionNode);
+                    ErrLine = "7";
+                }
                 }
             }
+        catch(Exception e)
+        {
+            print("AGX partModule OnSave fail: " + ErrLine + " " + e);
+        }
         }
 
             public override void OnLoad(ConfigNode node)
             {
+                
                 ConfigNode[] actionsNodes = node.GetNodes("ACTION");
                 foreach(ConfigNode actionNode in actionsNodes)
                 {
                     agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode,this.part,false));
                 }
+                print("Load called " + agxActionsThisPart.Count);
             }
        
     }//ModuleAGX
