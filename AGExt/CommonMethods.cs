@@ -33,6 +33,7 @@ namespace ActionGroupsExtended
             string ErrLine = "1";
             try
             {
+                node.RemoveNodes("ACTION"); 
                 ErrLine = "2";
                 if(agxActionsThisPart.Count > 0)
                 {

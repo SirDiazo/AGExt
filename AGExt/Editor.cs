@@ -1271,33 +1271,35 @@ namespace ActionGroupsExtended
                     {
                         RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
                     }
-
+                    ModuleAGX agxMod = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
+                    agxMod.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
 
                     }
 
                     if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title, AGXBtnStyle))
+                    {
+                        int ToDel = 0;
+                        foreach (AGXAction AGXToRemove in CurrentVesselActions)
                         {
-                            int ToDel = 0;
-                            foreach (AGXAction AGXToRemove in CurrentVesselActions)
+
+                            if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
                             {
 
-                                if (AGXToRemove.group == AGXCurActGroup && AGXToRemove.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba)
-                                {
-                                    
-                                    CurrentVesselActions.RemoveAt(ToDel);
-                                    goto BreakOutB;
-                                }
-                                ToDel = ToDel + 1;
+                                CurrentVesselActions.RemoveAt(ToDel);
+                                goto BreakOutB;
                             }
-                        BreakOutB:
-                            //SaveCurrentVesselActions();
+                            ToDel = ToDel + 1;
+                        }
+                    BreakOutB:
+                        //SaveCurrentVesselActions();
                         if (ThisGroupActions.ElementAt(RowCnt - 1).group < 11)
                         {
                             RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
                         }
-                        }
 
-
+                        ModuleAGX agxMod2 = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
+                        agxMod2.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
+                    }
                         try
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName, AGXBtnStyle))
@@ -1320,6 +1322,8 @@ namespace ActionGroupsExtended
                             {
                                 RemoveDefaultAction(ThisGroupActions.ElementAt(RowCnt - 1).ba, ThisGroupActions.ElementAt(RowCnt - 1).group);
                             }
+                                ModuleAGX agxMod3 = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
+                                agxMod3.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
                             }
                         }
                         catch
