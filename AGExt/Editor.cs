@@ -536,6 +536,7 @@ namespace ActionGroupsExtended
                 }
                 GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
                 GameEvents.onPartRemove.Add(PartRemove);
+                CurrentVesselActions.Clear();
                 EditorLoadFromFile();
                 EditorLoadFromNode();
                 errLine = "21";
@@ -944,12 +945,12 @@ namespace ActionGroupsExtended
                    if(!CurrentVesselActions.Contains(actToAdd))
                    {
                        CurrentVesselActions.Add(actToAdd);
-                       print("add act");
+                       //print("add act");
                    }
-                   else
-                   {
-                       print("part not added");
-                   }
+                   //else
+                   //{
+                   //    print("part not added");
+                   //}
                }
            }
             DetachedPartActions.Clear();
@@ -2220,6 +2221,7 @@ namespace ActionGroupsExtended
                                         if (ba.name == baname)
                                         {
                                             ba.actionGroup = ba.actionGroup | defaultGroupToShow;
+                                            //Debug.Log("adding act");
 
                                         }
                                     }
@@ -3703,7 +3705,7 @@ namespace ActionGroupsExtended
         {
             //print("EDITORLoadFromFile called");
             string errLine = "1";
-            CurrentVesselActions.Clear();
+            //CurrentVesselActions.Clear();
             try
             {
                 //if (EditorLogic.SortedShipList.Count > 0)
@@ -3724,6 +3726,10 @@ namespace ActionGroupsExtended
                             //print("Load 3");
                             errLine = "9b";
                             AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                            if(!AGXEditorNode.HasValue("name"))
+                            {
+                                AGXEditorNode.AddValue("name", "editor");
+                            }
                             //print("Load 4");
                         }
                         else
@@ -3761,6 +3767,12 @@ namespace ActionGroupsExtended
                     ConfigNode thisVsl = new ConfigNode();
                     errLine = "10b";
                    // print(AGXEditorNode);
+                    if(AGXEditorNode == null)
+                    {
+                        EditorLoadFromFile();
+                        print("AGX EditorNode is Null, recovering....");
+                    }
+                    errLine = "10bc";
                     if (AGXEditorNode.HasNode(hashedShipName))
                     {
                         errLine = "11";

@@ -1425,6 +1425,7 @@ namespace ActionGroupsExtended
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
+                print("ActactA");
                 if(groupCooldowns.Any(cd => cd.actGroup == agAct.group && cd.vslFlightID == agAct.ba.listParent.part.vessel.rootPart.flightID)) //rather then fight with double negative bools, do noting if both match, run if no match
                 {
                     //if this triggers, that action/group combo is in cooldown
@@ -1437,6 +1438,10 @@ namespace ActionGroupsExtended
                     if (forceDir) //we are forcing a direction so set the agAct.activated to trigger the direction below correctly
                     {
                         agAct.activated = false; //we are forcing activation so activated is false
+                    }
+                    else
+                    {
+                        agAct.activated = true;
                     }
                 }
                 

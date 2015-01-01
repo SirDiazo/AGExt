@@ -87,11 +87,12 @@ namespace ActionGroupsExtended
                 {
                     AGXFlight.ActivateActionGroup(group);
                     return true;
-                }
+                } 
                 else
                 {
-                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    return false;
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    otherVsl.ActivateActionGroup(group, false, false);
+                    return true;
                 }
             }
             else
@@ -136,8 +137,11 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    return false;
+                    //ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    //return false;
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    otherVsl.ActivateActionGroup(group, true, forceDir);
+                    return true;
                 }
             }
             else
