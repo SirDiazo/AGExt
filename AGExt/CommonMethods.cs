@@ -204,9 +204,12 @@ namespace ActionGroupsExtended
                             ErrLine = "16";
                         }
 
-                        foreach(AGXAction agActCheck in actionsList.Where(ag => ag.ba == agAct.ba))
+                        if (agAct.ba.name != "kOSVoidAction")
                         {
-                            agActCheck.activated = agAct.activated;
+                            foreach (AGXAction agActCheck in actionsList.Where(ag => ag.ba == agAct.ba))
+                            {
+                                agActCheck.activated = agAct.activated;
+                            }
                         }
 
                         if (agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "ActivateAction" || agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "OnAction")

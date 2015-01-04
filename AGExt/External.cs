@@ -132,11 +132,13 @@ namespace ActionGroupsExtended
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
                 {
+                    //print("this vsl");
                     AGXFlight.ActivateActionGroup(group, true, forceDir);
                     return true;
                 }
                 else
                 {
+                    //print("other vsl");
                     //ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
                     //return false;
                     AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);

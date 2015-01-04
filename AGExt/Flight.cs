@@ -1425,7 +1425,7 @@ namespace ActionGroupsExtended
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
-                //print("ActactA");
+                //print("ActactA" + forceDir + " " + agAct.ba.name);
                 if(groupCooldowns.Any(cd => cd.actGroup == agAct.group && cd.vslFlightID == agAct.ba.listParent.part.vessel.rootPart.flightID)) //rather then fight with double negative bools, do noting if both match, run if no match
                 {
                     //if this triggers, that action/group combo is in cooldown
@@ -1450,11 +1450,15 @@ namespace ActionGroupsExtended
                     KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                     //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
-                    foreach (AGXAction agxAct in CurrentVesselActions)
+                    agAct.activated = false;
+                    if (agAct.ba.name != "kOSVoidAction")
                     {
-                        if(agxAct.ba == agAct.ba)
+                        foreach (AGXAction agxAct in CurrentVesselActions)
                         {
-                            agxAct.activated = false;
+                            if (agxAct.ba == agAct.ba)
+                            {
+                                agxAct.activated = false;
+                            }
                         }
                     }
                     if (group <= 10)
@@ -1469,11 +1473,15 @@ namespace ActionGroupsExtended
                     //agAct.activated = true;
                     //print("AGX action activate FIRE!" + agAct.ba.guiName);
                     agAct.ba.Invoke(actParam);
-                    foreach (AGXAction agxAct in CurrentVesselActions)
+                    agAct.activated = true;
+                    if (agAct.ba.name != "kOSVoidAction")
                     {
-                        if (agxAct.ba == agAct.ba)
+                        foreach (AGXAction agxAct in CurrentVesselActions)
                         {
-                            agxAct.activated = true;
+                            if (agxAct.ba == agAct.ba)
+                            {
+                                agxAct.activated = true;
+                            }
                         }
                     }
                     if (group <= 10)
@@ -4436,16 +4444,16 @@ namespace ActionGroupsExtended
                 
             //}
             if(Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
-        {
+            {
             errLine = "29";
                 Part selPart = new Part();
             selPart = SelectPartUnderMouse();
             if(selPart != null)
             {
                 AddSelectedPart(selPart);
-        }
+            }
             errLine = "30";
-        }
+            }
             errLine = "31";
             if (RightClickDelay < 3)
             {
@@ -5152,11 +5160,13 @@ namespace ActionGroupsExtended
                     if (agxAct.activated)
                     {
                         errLine = "6";
+                        //print(agxAct.activated + agxAct.ba.name); 
                         ActiveActionsState.Find(p => p.group == agxAct.group).actionOn = true;
                     }
                     else if (!agxAct.activated)
                     {
                         errLine = "7";
+                        //print(agxAct.activated + agxAct.ba.name);
                         ActiveActionsState.Find(p => p.group == agxAct.group).actionOff = true;
                     }
                     errLine = "8";
@@ -5455,6 +5465,23 @@ namespace ActionGroupsExtended
             //start toggle checking
             foreach (AGXAction agAct in actsListToCheck)
             {
+
+                Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+                CustomActions.Add(1,KSPActionGroup.Custom01); //how do you add a range from enum?
+                CustomActions.Add(2, KSPActionGroup.Custom02);
+                CustomActions.Add(3,KSPActionGroup.Custom03);
+                CustomActions.Add(4,KSPActionGroup.Custom04);
+                CustomActions.Add(5,KSPActionGroup.Custom05);
+                CustomActions.Add(6,KSPActionGroup.Custom06);
+                CustomActions.Add(7,KSPActionGroup.Custom07);
+                CustomActions.Add(8,KSPActionGroup.Custom08);
+                CustomActions.Add(9,KSPActionGroup.Custom09);
+                CustomActions.Add(10,KSPActionGroup.Custom10);
+                if(agAct.group <= 10 && agAct.ba.listParent.part.vessel == FlightGlobals.ActiveVessel) 
+                {
+                    agAct.activated = agAct.ba.listParent.part.vessel.ActionGroups[CustomActions[agAct.group]];
+                }
+
                 if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
                 {
                     if ((string)agAct.ba.listParent.module.Fields.GetValue("stateString") == "EXTENDED")
