@@ -114,13 +114,13 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    return false;
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    return otherVsl.StateCheckGroup(group);
                 }
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage("AGX Action not checked, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
                 return false;
             }
         }

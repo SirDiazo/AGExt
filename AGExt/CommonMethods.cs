@@ -177,6 +177,7 @@ namespace ActionGroupsExtended
                             //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                             ErrLine = "8";
                             agAct.ba.Invoke(actParam);
+                            agAct.activated = false;
                             ErrLine = "9";
                             if (group <= 10)
                             {
@@ -193,6 +194,7 @@ namespace ActionGroupsExtended
                             //print("AGX action activate FIRE!" + agAct.ba.guiName);
                             ErrLine = "13";
                             agAct.ba.Invoke(actParam);
+                            agAct.activated = true;
                             ErrLine = "14";
                             if (group <= 10)
                             {
@@ -201,6 +203,12 @@ namespace ActionGroupsExtended
                             }
                             ErrLine = "16";
                         }
+
+                        foreach(AGXAction agActCheck in actionsList.Where(ag => ag.ba == agAct.ba))
+                        {
+                            agActCheck.activated = agAct.activated;
+                        }
+
                         if (agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "ActivateAction" || agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "OnAction")
                         {
                             ErrLine = "17";
@@ -222,6 +230,7 @@ namespace ActionGroupsExtended
                     }
                     ErrLine = "22";
                 }
+                    SaveThisVessel();
         }
         catch(Exception e)
                         {
@@ -230,6 +239,108 @@ namespace ActionGroupsExtended
     }
 
             }
+
+        public bool StateCheckGroup(int group)
+        {
+            if (vesselInstanceOK)
+            {
+                actionsList = AGXFlight.CheckActionsActiveActualCode(actionsList);
+                bool groupState = true;
+                if (actionsList.Where(ag => ag.group == group).Count() >= 1)
+                {
+                foreach (AGXAction agAct in actionsList.Where(ag => ag.group == group))
+                {
+                    if (!agAct.activated)
+                    {
+                        groupState = false;
+                    }
+                }
+                }
+                else
+                {
+                    groupState = false;
+                }
+                return groupState;
+            }
+            else
+            {
+                Debug.Log("AGX Group State FALSE due to vessel not loaded.");
+                    return false;
+            }
+        }
+
+        public void SaveThisVessel()
+        {
+            string errLine = "1";
+            try
+            {
+                ConfigNode thisVslNode = new ConfigNode(flightID.ToString());
+                errLine = "2";
+                if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
+                {
+                    errLine = "3";
+                    thisVslNode = AGXFlight.AGXFlightNode.GetNode(thisVsl.rootPart.flightID.ToString());
+                    errLine = "4";
+                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
+                }
+                errLine = "5";
+                thisVslNode.RemoveNodes("PART");
+                errLine = "6";
+                foreach (Part p in thisVsl.Parts)
+                {
+                    errLine = "7";
+                    List<AGXAction> thisPartsActions = new List<AGXAction>();
+                    errLine = "8";
+                    thisPartsActions.AddRange(actionsList.FindAll(p2 => p2.ba.listParent.part == p));
+                    errLine = "18";
+                    if (thisPartsActions.Count > 0)
+                    {
+                        //print("acts count " + thisPartsActions.Count);
+                        ConfigNode partTemp = new ConfigNode("PART");
+                        errLine = "19";
+                        partTemp.AddValue("name", p.partInfo.name);
+                        partTemp.AddValue("vesselName", p.vessel.vesselName);
+                        //partTemp.AddValue("relLocX", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).x);
+                        //partTemp.AddValue("relLocY", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).y);
+                        //partTemp.AddValue("relLocZ", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).z);
+                        partTemp.AddValue("flightID", p.flightID.ToString());
+                        errLine = "20";
+                        foreach (AGXAction agxAct in thisPartsActions)
+                        {
+                            //print("acts countb " + thisPartsActions.Count);
+                            errLine = "21";
+                            partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                        }
+                        errLine = "22";
+
+                        thisVslNode.AddNode(partTemp);
+                        errLine = "23";
+                    }
+                    errLine = "24";
+                }
+                errLine = "25";
+                if (AGXFlight.AGXFlightNode.HasNode(thisVsl.id.ToString()))
+                {
+                    errLine = "26";
+                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.id.ToString());
+                }
+                errLine = "27";
+                if (AGXFlight.AGXFlightNode.HasNode(thisVsl.rootPart.flightID.ToString()))
+                {
+                    errLine = "28";
+                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
+                }
+                errLine = "29";
+                //print("save node " + thisVsl);
+                AGXFlight.AGXFlightNode.AddNode(thisVslNode);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX OtherVslSaveNode Fail " + errLine + " " + e);
+            }
+
+        }
+
         }
    
 

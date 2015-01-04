@@ -536,6 +536,7 @@ namespace ActionGroupsExtended
                 }
                 GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
                 GameEvents.onPartRemove.Add(PartRemove);
+                GameEvents.onEditorShipModified.Add(VesselChanged);
                 CurrentVesselActions.Clear();
                 EditorLoadFromFile();
                 EditorLoadFromNode();
@@ -694,6 +695,7 @@ namespace ActionGroupsExtended
                 AttachAGXPart(p);
             }
             DetachedPartReset.Start();
+            //RefreshDefaultActionsList();
 
         }
             catch(Exception e)
@@ -955,7 +957,13 @@ namespace ActionGroupsExtended
            }
             DetachedPartActions.Clear();
             EditorSaveToNode();
+            
+        }
 
+        public void VesselChanged(ShipConstruct sc)
+        {
+            print("vessel change fire");
+            RefreshDefaultActionsList();
         }
 
         public static void AttachAGXPart(Part p) 
@@ -1043,6 +1051,7 @@ namespace ActionGroupsExtended
             //EditorSaveToFile(); //some of my data has already been deleted by this point
             GameEvents.onPartAttach.Remove(PartAttaching);
             GameEvents.onPartRemove.Remove(PartRemove);
+            GameEvents.onEditorShipModified.Remove(VesselChanged);
             //GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
 
 
@@ -2221,7 +2230,7 @@ namespace ActionGroupsExtended
                                         if (ba.name == baname)
                                         {
                                             ba.actionGroup = ba.actionGroup | defaultGroupToShow;
-                                            //Debug.Log("adding act");
+                                            Debug.Log("adding act");
 
                                         }
                                     }
@@ -2504,6 +2513,21 @@ namespace ActionGroupsExtended
         //    }
         //}
 
+        public void RefreshDefaultActionsList()
+        {
+            defaultActionsListAll.Clear();
+            
+                foreach (Part p in EditorLogic.SortedShipList)
+                {
+                    defaultActionsListAll.AddRange(p.Actions);
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        defaultActionsListAll.AddRange(pm.Actions);
+                    }
+                }
+            
+        }
+
         public void RefreshDefaultActionsListType()
         {
             defaultActionsListThisType.Clear();
@@ -2576,25 +2600,27 @@ namespace ActionGroupsExtended
                 if (defaultShowingNonNumeric)
                 {
                     ErrLine = "4c";
-                    defaultActionsListAll.Clear();
-                    ErrLine = "4d";
-                    {
-                        ErrLine = "4e";
-                        foreach (Part p in EditorLogic.SortedShipList)
-                        {
-                            ErrLine = "4f";
-                            defaultActionsListAll.AddRange(p.Actions);
-                            ErrLine = "4g";
-                            foreach (PartModule pm in p.Modules)
-                            {
-                                ErrLine = "4h";
-                                defaultActionsListAll.AddRange(pm.Actions);
+                    //defaultActionsListAll.Clear();
+                    //ErrLine = "4d";
+                    //{
+                    //    ErrLine = "4e";
+                    //    foreach (Part p in EditorLogic.SortedShipList)
+                    //    {
+                    //        ErrLine = "4f";
+                    //        defaultActionsListAll.AddRange(p.Actions);
+                    //        ErrLine = "4g";
+                    //        foreach (PartModule pm in p.Modules)
+                    //        {
+                    //            ErrLine = "4h";
+                    //            defaultActionsListAll.AddRange(pm.Actions);
                                
-                            }
-                            ErrLine = "4i";
-                        }
-                        ErrLine = "4j";
-                    }
+                    //        }
+                    //        ErrLine = "4i";
+                    //    }
+                    //    ErrLine = "4j";
+                    //}
+                    
+                    RefreshDefaultActionsList();
                     ErrLine = "4k";
                     RefreshDefaultActionsListType();
                     ErrLine = "4l";

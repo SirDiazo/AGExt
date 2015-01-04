@@ -1425,7 +1425,7 @@ namespace ActionGroupsExtended
         
             foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
             {
-                print("ActactA");
+                //print("ActactA");
                 if(groupCooldowns.Any(cd => cd.actGroup == agAct.group && cd.vslFlightID == agAct.ba.listParent.part.vessel.rootPart.flightID)) //rather then fight with double negative bools, do noting if both match, run if no match
                 {
                     //if this triggers, that action/group combo is in cooldown
@@ -5437,14 +5437,20 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void CheckActionsActive() //monitor actions state, have to add them manually
+        public static void CheckActionsActive()
+        {
+            CurrentVesselActions = CheckActionsActiveActualCode(CurrentVesselActions);
+            CalculateActionsState();
+        }
+
+        public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
         {
            
             
             
             
             //start toggle checking
-            foreach (AGXAction agAct in CurrentVesselActions)
+            foreach (AGXAction agAct in actsListToCheck)
             {
                 if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
                 {
@@ -6388,8 +6394,8 @@ namespace ActionGroupsExtended
                 //    agAct.activated = agAct.ba.listParent.module.isEnabled;
                 //}
             }
+            return actsListToCheck;
             
-            CalculateActionsState();
         }
     }
     
