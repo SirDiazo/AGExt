@@ -4410,20 +4410,23 @@ namespace ActionGroupsExtended
                 }
             }
             errLine = "26";
-            foreach (KeyCode KC in ActiveKeys)
+            if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None)
             {
-                errLine = "27";
-                if(Input.GetKeyDown(KC))
+                foreach (KeyCode KC in ActiveKeys)
                 {
-                   // print("keydown " + KC);
-                for (int i = 1; i <= 250; i = i + 1)
-                {
-                    if (AGXguiKeys[i] == KC)
+                    errLine = "27";
+                    if (Input.GetKeyDown(KC))
                     {
-                        //print("Key act for some reason " + i);
-                        ActivateActionGroupCheckModKeys(i);
+                        // print("keydown " + KC);
+                        for (int i = 1; i <= 250; i = i + 1)
+                        {
+                            if (AGXguiKeys[i] == KC)
+                            {
+                                //print("Key act for some reason " + i);
+                                ActivateActionGroupCheckModKeys(i);
+                            }
+                        }
                     }
-                }
                 }
             }
             errLine = "28";
