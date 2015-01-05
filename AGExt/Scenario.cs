@@ -555,15 +555,19 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
                     }
                 }
-                else if (pmName == "ModuleEnginesFX") 
+                else if (pmName == "ModuleEnginesFX")  
                 {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    
+                    foreach (ModuleEnginesFX pm in actPart.Modules.OfType<ModuleEnginesFX>()) //add actions to compare
                     {
-                        if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("engineID"))
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        //print("Fields " + (string)pm.Fields.GetValue("engineID") + "||" + (string)actNode.GetValue("custom1"));
+                        if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("custom1"))
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                                //print("Acts to compare " + actsToCompare.Count + " " + pm.Actions.Count + pm.name + pm.moduleName);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        
                         //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
                     }
                 }

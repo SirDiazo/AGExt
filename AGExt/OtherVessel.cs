@@ -26,6 +26,8 @@ namespace ActionGroupsExtended
 
         private void InitializeThis(Vessel vsl, uint flightID) //actual constructor to initizliaze, do not call directly
         {
+            actsList = new List<AGXAction>();
+            grpNames = new Dictionary<int, string>();
             if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString())) //get confignode
             {
                 vslNode = AGXFlight.AGXFlightNode.GetNode(flightID.ToString());

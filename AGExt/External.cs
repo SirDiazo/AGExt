@@ -20,62 +20,64 @@ namespace ActionGroupsExtended
         }
 
 
-        public static List<BaseAction> AGX2VslAllActions(uint FlightID) //works //all actions on specific vessel
+        public static List<AGXAction> AGX2VslAllAssignedActions(uint FlightID) //works //all actions on specific vessel
         {
-            print("AGX Call: List all actions for vessel " + FlightID);
+            print("AGX Call: List all assigned actions for vessel " + FlightID);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
                 {
-                    return AGXFlight.GetActionsList();
+                    return AGXFlight.CurrentVesselActions;
 
                 }
                 else
                 {
-                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    return new List<BaseAction>();
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    return otherVsl.GetAssignedActions();
                 }
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
-                return new List<BaseAction>();
+                ScreenMessages.PostScreenMessage("AGX Actions Not Loaded not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return new List<AGXAction>();
             }
         } 
 
-        public static List<BaseAction> AGX2VslGroupActions(uint FlightID, int group) //works //all actions in group on specific vessel
+        public static List<AGXAction> AGX2VslGroupActions(uint FlightID, int group) //works //all actions in group on specific vessel
         {
             print("AGX Call: List actions in group for vessel " + FlightID + " " + group);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
                 {
-                    return AGXFlight.GetActionsList(group);
+                    return AGXFlight.CurrentVesselActions.FindAll(ag => ag.group == group);
                     
                 }
                 else
                 {
-                    ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    return new List<BaseAction>();
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    return otherVsl.GetAssignedActionsGroup(group);
                 }
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
-                return new List<BaseAction>();
+                ScreenMessages.PostScreenMessage("AGX Actions not loaded, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return new List<AGXAction>();
             }
         }
 
-        public static List<BaseAction> AGXGroupActions(int group) //works //all actions on ActiveVessel in group
+        
+
+        public static List<AGXAction> AGXGroupActions(int group) //works //all actions on ActiveVessel in group
         {
             print("AGX Call: List actions in active vessel in group " + group); //works
-            return AGXFlight.GetActionsList(group);
+            return AGXFlight.CurrentVesselActions.FindAll(ag => ag.group == group);
         }
 
-        public static List<BaseAction> AGXAllActions()//works //all actions on activevessel
+        public static List<AGXAction> AGXAllActions()//works //all actions on activevessel
         {
             print("AGX Call: List all actions for active vessel");
-            return AGXFlight.GetActionsList();
+            return AGXFlight.CurrentVesselActions;
         } 
 
         public static bool AGX2VslToggleGroup(uint FlightID, int group) //7 on test, works
@@ -201,6 +203,64 @@ namespace ActionGroupsExtended
             catch
             {
                 print("AGX Call FAIL! Catch block hit");
+                return false;
+            }
+        }
+
+        public static bool AGX2VslToggleGroupName(uint flightID, string grpName, bool forceDir)
+        {
+            try
+            {
+                print("AGX Call: toggle group by name for " + grpName + " for " + flightID + " in dir " + forceDir);
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
+                    {
+                        return AGXToggleGroupName(grpName);
+                    }
+                    else
+                    {
+                        AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                        otherVsl.ActivateActionString(grpName, false, false);
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool AGX2VslActivateGroupName(uint flightID, string grpName, bool forceDir)
+        {
+            try
+            {
+            print("AGX Call: activate group by name for " + grpName + " for "+flightID+ " in dir " + forceDir);
+            if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
+                {
+                    return AGXActivateGroupName(grpName, forceDir);
+                }
+                else
+                {
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                    otherVsl.ActivateActionString(grpName, true, forceDir);
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+            }
+            catch
+            {
                 return false;
             }
         }
@@ -398,9 +458,5 @@ namespace ActionGroupsExtended
 
 }
 
-//TO DO LIST
-
-
-//-add staging
 
 

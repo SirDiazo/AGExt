@@ -16,11 +16,9 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
-        bool overrideCareerAGs = false; //always show AGX, even on new career?
         bool showCareerStockAGs = false; //support locking action groups in early career
         bool showCareerCustomAGs = false;
         bool showAGXRightClickMenu = false; //show stock toolbar right click menu?
-        bool needToAddStockButton = true; //do we need to add stock button?
         ApplicationLauncherButton AGXAppEditorButton = null; //stock toolbar button instance
         bool EditorShowToolbarPopout = false;
         bool defaultShowingNonNumeric = false; //are we in non-numeric (abort/brakes/gear/list) mode?
@@ -38,8 +36,7 @@ namespace ActionGroupsExtended
         
         private List<Part> SelectedWithSym; //selected parts from last frame for Default actions monitoring
         private List<AGXDefaultCheck> SelectedWithSymActions; //monitor baseaction.actiongroups of selected parts
-        private KSPActionGroup actionGroupLastFrame; //used when monitoring KSP default editor for actions, remember selected group last frame.
-        public static bool NeedToLoadActions = true;
+       public static bool NeedToLoadActions = true;
         public static bool LoadFinished = false;
         //Selected Parts Window Variables
         public static Rect SelPartsWin;
@@ -96,7 +93,6 @@ namespace ActionGroupsExtended
         public static ConfigNode AGXEditorNode;
         Vector2 groupWinScroll = new Vector2();
         bool highlightPartThisFrameGroupWin = false;
-        private static bool ShipListOk = false;
         static Texture2D BtnTexRed = new Texture2D(1, 1);
         static Texture2D BtnTexGrn = new Texture2D(1, 1);
         public static Dictionary<int, string> AGXguiNames;
@@ -111,8 +107,7 @@ namespace ActionGroupsExtended
         static List<string> KeyCodeNames = new List<string>();
         static List<string> JoyStickCodes = new List<string>();
         private static bool ActionsListDirty = true; //is our actions requiring update?
-        private static bool LoadGroupsOnceCheck = false;
-        private static bool ShowCurActsWin = true;
+       private static bool ShowCurActsWin = true;
         public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
         private bool AGXShow = false;
         private static GUISkin AGXSkin;
@@ -706,23 +701,44 @@ namespace ActionGroupsExtended
 
         public void PartRemove(GameEvents.HostTargetAction<Part, Part> host_target)
         {
-            UpdateAGXActionGroupNames();
-            //print("Part detached! " + host_target.target.ConstructID);
-            DetachedPartActions.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target)); //add actiongroups on this part to List
-            foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+            string errLine = "1";
+            try
             {
-               // print("Part detached2! " + p.ConstructID);
-                DetachedPartActions.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
+                errLine = "2";
+                UpdateAGXActionGroupNames();
+                errLine = "3";
+                //print("Part detached! " + host_target.target.ConstructID);
+                DetachedPartActions.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target)); //add actiongroups on this part to List
+                errLine = "4";
+                foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+                {
+                    errLine = "5";
+                    // print("Part detached2! " + p.ConstructID);
+                    DetachedPartActions.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
+                    errLine = "6";
+                }
+                errLine = "7";
+                DetachedPartReset.Stop(); //stop timer so it resets
+                //        //print("Detach");
+                //start subassembly stuff
+                errLine = "8";
+                ModuleAGX agxMod = host_target.target.Modules.OfType<ModuleAGX>().First();
+                errLine = "9";
+                agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target));
+                errLine = "10";
+                foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+                {
+                    errLine = "11";
+                    agxMod = p.Modules.OfType<ModuleAGX>().First();
+                    errLine = "12";
+                    agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
+                    errLine = "13";
+                }
+                errLine = "14";
             }
-            DetachedPartReset.Stop(); //stop timer so it resets
-            //        //print("Detach");
-            //start subassembly stuff
-            ModuleAGX agxMod = host_target.target.Modules.OfType<ModuleAGX>().First();
-            agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == host_target.target));
-            foreach (Part p in host_target.target.FindChildParts<Part>(true)) //action only fires for part clicked on, have to parse all child parts this way
+            catch(Exception e)
             {
-                agxMod = p.Modules.OfType<ModuleAGX>().First();
-                agxMod.agxActionsThisPart.AddRange(CurrentVesselActions.Where(p3 => p3.ba.listParent.part == p)); //add parts to list
+                print("AGX PartRemove FAIL " + errLine + " " + e);
             }
 
         }
@@ -731,7 +747,14 @@ namespace ActionGroupsExtended
         {
             foreach(AGXAction agAct in CurrentVesselActions)
             {
-                agAct.grpName = AGXguiNames[agAct.group];
+                try
+                {
+                    agAct.grpName = AGXguiNames[agAct.group];
+                }
+                catch
+                {
+                    //empty, silently fail
+                }
             }
         }
 
@@ -962,7 +985,7 @@ namespace ActionGroupsExtended
 
         public void VesselChanged(ShipConstruct sc)
         {
-            print("vessel change fire");
+            //print("vessel change fire");
             RefreshDefaultActionsList();
         }
 

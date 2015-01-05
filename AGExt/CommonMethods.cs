@@ -88,10 +88,10 @@ namespace ActionGroupsExtended
             thisVsl = loadedVessels.Find(ves => ves.rootPart.flightID == flightID);
             //Debug.Log("After");
             actionsList = new List<AGXAction>();
-            if(!thisVsl.loaded || thisVsl == null) //check vessel is loaded
+            if(thisVsl == null) //check vessel is loaded
             {
                 vesselInstanceOK = false;
-                ScreenMessages.PostScreenMessage("AGX cannot activate actions on unloaded vessels.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                //ScreenMessages.PostScreenMessage("AGX cannot activate actions on unloaded vessels.", 10F, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
             ConfigNode nodeLoad = new ConfigNode();
@@ -115,6 +115,30 @@ namespace ActionGroupsExtended
             }
         }
 
+        public List<AGXAction> GetAssignedActions()
+        {
+            if (vesselInstanceOK)
+            {
+                return actionsList;
+            }
+            else
+            {
+                return new List<AGXAction>();
+            }
+        }
+
+        public List<AGXAction> GetAssignedActionsGroup(int group)
+        {
+            if (vesselInstanceOK)
+            {
+                return (List<AGXAction>)actionsList.Where(act => act.group == group);
+            }
+            else
+            {
+                return new List<AGXAction>();
+            }
+        }
+        
         public void ActivateActionString(string groupStr, bool force, bool forceDir) //main activation method
         {
             if(thisVsl.HoldPhysics)
@@ -277,65 +301,68 @@ namespace ActionGroupsExtended
             string errLine = "1";
             try
             {
-                ConfigNode thisVslNode = new ConfigNode(flightID.ToString());
-                errLine = "2";
-                if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
+                if (vesselInstanceOK)
                 {
-                    errLine = "3";
-                    thisVslNode = AGXFlight.AGXFlightNode.GetNode(thisVsl.rootPart.flightID.ToString());
-                    errLine = "4";
-                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
-                }
-                errLine = "5";
-                thisVslNode.RemoveNodes("PART");
-                errLine = "6";
-                foreach (Part p in thisVsl.Parts)
-                {
-                    errLine = "7";
-                    List<AGXAction> thisPartsActions = new List<AGXAction>();
-                    errLine = "8";
-                    thisPartsActions.AddRange(actionsList.FindAll(p2 => p2.ba.listParent.part == p));
-                    errLine = "18";
-                    if (thisPartsActions.Count > 0)
+                    ConfigNode thisVslNode = new ConfigNode(flightID.ToString());
+                    errLine = "2";
+                    if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
                     {
-                        //print("acts count " + thisPartsActions.Count);
-                        ConfigNode partTemp = new ConfigNode("PART");
-                        errLine = "19";
-                        partTemp.AddValue("name", p.partInfo.name);
-                        partTemp.AddValue("vesselName", p.vessel.vesselName);
-                        //partTemp.AddValue("relLocX", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).x);
-                        //partTemp.AddValue("relLocY", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).y);
-                        //partTemp.AddValue("relLocZ", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).z);
-                        partTemp.AddValue("flightID", p.flightID.ToString());
-                        errLine = "20";
-                        foreach (AGXAction agxAct in thisPartsActions)
-                        {
-                            //print("acts countb " + thisPartsActions.Count);
-                            errLine = "21";
-                            partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
-                        }
-                        errLine = "22";
-
-                        thisVslNode.AddNode(partTemp);
-                        errLine = "23";
+                        errLine = "3";
+                        thisVslNode = AGXFlight.AGXFlightNode.GetNode(thisVsl.rootPart.flightID.ToString());
+                        errLine = "4";
+                        AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
                     }
-                    errLine = "24";
+                    errLine = "5";
+                    thisVslNode.RemoveNodes("PART");
+                    errLine = "6";
+                    foreach (Part p in thisVsl.Parts)
+                    {
+                        errLine = "7";
+                        List<AGXAction> thisPartsActions = new List<AGXAction>();
+                        errLine = "8";
+                        thisPartsActions.AddRange(actionsList.FindAll(p2 => p2.ba.listParent.part == p));
+                        errLine = "18";
+                        if (thisPartsActions.Count > 0)
+                        {
+                            //print("acts count " + thisPartsActions.Count);
+                            ConfigNode partTemp = new ConfigNode("PART");
+                            errLine = "19";
+                            partTemp.AddValue("name", p.partInfo.name);
+                            partTemp.AddValue("vesselName", p.vessel.vesselName);
+                            //partTemp.AddValue("relLocX", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).x);
+                            //partTemp.AddValue("relLocY", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).y);
+                            //partTemp.AddValue("relLocZ", FlightGlobals.ActiveVessel.rootPart.transform.InverseTransformPoint(p.transform.position).z);
+                            partTemp.AddValue("flightID", p.flightID.ToString());
+                            errLine = "20";
+                            foreach (AGXAction agxAct in thisPartsActions)
+                            {
+                                //print("acts countb " + thisPartsActions.Count);
+                                errLine = "21";
+                                partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                            }
+                            errLine = "22";
+
+                            thisVslNode.AddNode(partTemp);
+                            errLine = "23";
+                        }
+                        errLine = "24";
+                    }
+                    errLine = "25";
+                    if (AGXFlight.AGXFlightNode.HasNode(thisVsl.id.ToString()))
+                    {
+                        errLine = "26";
+                        AGXFlight.AGXFlightNode.RemoveNode(thisVsl.id.ToString());
+                    }
+                    errLine = "27";
+                    if (AGXFlight.AGXFlightNode.HasNode(thisVsl.rootPart.flightID.ToString()))
+                    {
+                        errLine = "28";
+                        AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
+                    }
+                    errLine = "29";
+                    //print("save node " + thisVsl);
+                    AGXFlight.AGXFlightNode.AddNode(thisVslNode);
                 }
-                errLine = "25";
-                if (AGXFlight.AGXFlightNode.HasNode(thisVsl.id.ToString()))
-                {
-                    errLine = "26";
-                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.id.ToString());
-                }
-                errLine = "27";
-                if (AGXFlight.AGXFlightNode.HasNode(thisVsl.rootPart.flightID.ToString()))
-                {
-                    errLine = "28";
-                    AGXFlight.AGXFlightNode.RemoveNode(thisVsl.rootPart.flightID.ToString());
-                }
-                errLine = "29";
-                //print("save node " + thisVsl);
-                AGXFlight.AGXFlightNode.AddNode(thisVslNode);
             }
             catch(Exception e)
             {
