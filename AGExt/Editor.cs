@@ -116,9 +116,9 @@ namespace ActionGroupsExtended
         private static GUIStyle AGXLblStyle = null; //window style
         private static GUIStyle AGXBtnStyle = null; //window style
         private static GUIStyle AGXFldStyle = null; //window style
-        Texture2D ButtonTexture = new Texture2D(64, 64);
-        Texture2D ButtonTextureRed = new Texture2D(64, 64);
-        Texture2D ButtonTextureGreen = new Texture2D(64, 64);
+        static Texture2D ButtonTexture = new Texture2D(64, 64);
+        static Texture2D ButtonTextureRed = new Texture2D(64, 64);
+        static Texture2D ButtonTextureGreen = new Texture2D(64, 64);
         bool checkShipsExist = false; //flag to check existing ships on load window open
         int checkShipsExistDelay = 0;//delay timer to wait after opening load ship window
         static bool inVAB = true; //true if in VAB, flase in SPH
@@ -139,7 +139,7 @@ namespace ActionGroupsExtended
 
          public class SettingsWindowEditor : MonoBehaviour, IDrawable
          {
-             public Rect SettingsWinEditor = new Rect(0, 0, 150, 60);
+             public Rect SettingsWinEditor = new Rect(0, 0, 150, 85);
              public Vector2 Draw(Vector2 position)
              {
                  var oldSkin = GUI.skin;
@@ -173,7 +173,14 @@ namespace ActionGroupsExtended
 
 
                  }
-
+                 AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+                 AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+                 if (GUI.Button(new Rect(10, 50, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+                 {
+                     AutoHideGroupsWin = !AutoHideGroupsWin;
+                 }
+                 AGXBtnStyle.normal.background = ButtonTexture;
+                 AGXBtnStyle.hover.background = ButtonTexture;
              }
              public void Update()
              {
@@ -198,6 +205,14 @@ namespace ActionGroupsExtended
 
 
              }
+             AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+             AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+             if (GUI.Button(new Rect(10, 50, 130, 25), "Auto-Hide Groups",AGXBtnStyle))
+             {
+                 AutoHideGroupsWin = !AutoHideGroupsWin;
+             }
+             AGXBtnStyle.normal.background = ButtonTexture;
+             AGXBtnStyle.hover.background = ButtonTexture;
 
          }
         public void Start()
@@ -1225,7 +1240,7 @@ namespace ActionGroupsExtended
                     ErrLine = "11";
                     if(showAGXRightClickMenu)
                     {
-                        Rect SettingsWinEditor = new Rect(Screen.width - 200, Screen.height - 100, 150, 60);
+                        Rect SettingsWinEditor = new Rect(Screen.width - 200, Screen.height - 125, 150, 85);
                         GUI.Window(2233452, SettingsWinEditor, DrawSettingsWinEditor, "AGX Settings", AGXEditor.AGXWinStyle);
                     }
                 }
@@ -2575,14 +2590,14 @@ namespace ActionGroupsExtended
             //{
             //    GUI.DrawTexture(new Rect(6, 4, 78, 18), BtnTexRed);
             //}
-            AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+            //AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             //AGXBtnStyle.onHover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
-            AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
-            if (GUI.Button(new Rect(15, 3, 70, 20), "Auto-Hide", AGXBtnStyle))
-            {
-                AutoHideGroupsWin = !AutoHideGroupsWin;
+            //AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+            //if (GUI.Button(new Rect(15, 3, 70, 20), "Auto-Hide", AGXBtnStyle))
+            //{
+            //    AutoHideGroupsWin = !AutoHideGroupsWin;
                 
-            }
+            //}
             ErrLine = "2";
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
@@ -2615,7 +2630,7 @@ namespace ActionGroupsExtended
             
                 if(showCareerCustomAGs)
                 {
-                    if (GUI.Button(new Rect(80, 3, 40, 20), "Other", AGXBtnStyle))
+                    if (GUI.Button(new Rect(20, 3, 80, 20), "Other", AGXBtnStyle))
             {
                 ErrLine = "4a";
                 defaultShowingNonNumeric = !defaultShowingNonNumeric;

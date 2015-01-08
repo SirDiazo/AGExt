@@ -51,7 +51,7 @@ namespace ActionGroupsExtended
         //private bool NeedToSave = false;
         private int GroupsPage = 1;
         private string CurGroupDesc;
-        private bool AutoHideGroupsWin = false;
+        static private bool AutoHideGroupsWin = false;
         private bool TempShowGroupsWin = false;
         private static Rect KeyCodeWin;
         private static Rect CurActsWin;
@@ -90,9 +90,9 @@ namespace ActionGroupsExtended
         //private bool ShipListOk = false;
         Texture2D BtnTexRed = new Texture2D(1, 1);
         Texture2D BtnTexGrn = new Texture2D(1, 1);
-        Texture2D ButtonTexture = new Texture2D(64, 64);
-        Texture2D ButtonTextureRed = new Texture2D(64, 64);
-        Texture2D ButtonTextureGreen = new Texture2D(64, 64);
+        static Texture2D ButtonTexture = new Texture2D(64, 64);
+        static Texture2D ButtonTextureRed = new Texture2D(64, 64);
+        static Texture2D ButtonTextureGreen = new Texture2D(64, 64);
         public static Dictionary<int, string> AGXguiNames;
         public static Dictionary<int, KeyCode> AGXguiKeys;
         public static Dictionary<int, bool> AGXguiMod1Groups;
@@ -537,7 +537,7 @@ namespace ActionGroupsExtended
 
         public class SettingsWindow : MonoBehaviour, IDrawable
         {
-            public Rect SettingsWin = new Rect(0, 0, 150, 105);
+            public Rect SettingsWin = new Rect(0, 0, 150, 130);
             public Vector2 Draw(Vector2 position)
             {
                 var oldSkin = GUI.skin;
@@ -590,6 +590,14 @@ namespace ActionGroupsExtended
                     FlightWin.x = 400;
                     FlightWin.y = 400;
                 }
+                AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+                AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+                if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+                {
+                    AutoHideGroupsWin = !AutoHideGroupsWin;
+                }
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
 
                 //GUI.DragWindow();
 
@@ -979,7 +987,7 @@ namespace ActionGroupsExtended
 
             if(showAGXRightClickMenu)
             {
-                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 105);
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 130);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
             }
         }
@@ -1021,7 +1029,14 @@ namespace ActionGroupsExtended
                 FlightWin.x = 400;
                 FlightWin.y = 400;
             }
-
+            AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+            AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
+            if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+            {
+                AutoHideGroupsWin = !AutoHideGroupsWin;
+            }
+            AGXBtnStyle.normal.background = ButtonTexture;
+            AGXBtnStyle.hover.background = ButtonTexture;
             //GUI.DragWindow();
 
         }
@@ -4879,6 +4894,8 @@ namespace ActionGroupsExtended
                 {
                     agAct.activated = agAct.ba.listParent.part.vessel.ActionGroups[CustomActions[agAct.group]];
                 }
+                try
+                {
 
                 if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
                 {
@@ -5416,20 +5433,20 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
-                        if (agAct.ba.listParent.module.moduleName == "FScopterThrottle")
-                        {
-                            if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseHeightAction" || agAct.ba.name == "decreaseHeightAction")
-                            {
-                                if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
-                                {
-                                    agAct.activated = true;
-                                }
-                                else
-                                {
-                                    agAct.activated = false;
-                                }
-                            }
-                        }
+                        //if (agAct.ba.listParent.module.moduleName == "FScopterThrottle")
+                        //{
+                        //    if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseHeightAction" || agAct.ba.name == "decreaseHeightAction")
+                        //    {
+                        //        if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
+                        //        {
+                        //            agAct.activated = true;
+                        //        }
+                        //        else
+                        //        {
+                        //            agAct.activated = false;
+                        //        }
+                        //    }
+                        //}
                         if (agAct.ba.listParent.module.moduleName == "FSengineHover")
                         {
                             if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseVerticalSpeed" || agAct.ba.name == "decreaseVerticalSpeed")
@@ -5814,6 +5831,23 @@ namespace ActionGroupsExtended
                                 }
                             }
                         }
+                        if (agAct.ba.listParent.module.moduleName == "USI_ModuleAsteroidDrill")
+                        {
+                            agAct.activated = false;
+                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsActivated") == true)
+                            {
+                                agAct.activated = true;
+                            }
+                            else
+                            {
+                                agAct.activated = false;
+                            }
+                        }
+            }
+            catch
+            {
+                print("AGX Action State Check Fail " + agAct.ba.name + " " + agAct.ba.listParent.module.moduleName);
+            }
                        
 
 
