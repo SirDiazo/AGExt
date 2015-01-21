@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Reflection;
 
 using UnityEngine;
 
@@ -36,6 +37,7 @@ namespace ActionGroupsExtended
         public Vector2 ScrollGroups;
         public Vector2 CurGroupsWin;
         public Vector2 FlightWinScroll;
+        public Vector2 RTWinScroll;
         private List<AGXPart> AGEditorSelectedParts;
         private bool AGEEditorSelectedPartsSame = false;
         
@@ -55,6 +57,7 @@ namespace ActionGroupsExtended
         private bool TempShowGroupsWin = false;
         private static Rect KeyCodeWin;
         private static Rect CurActsWin;
+        private static Rect RemoteTechQueueWin;
         private bool ShowKeyCodeWin = false;
         private bool ShowJoySticks = false;
         private static bool ShowKeySetWin = false;
@@ -72,6 +75,8 @@ namespace ActionGroupsExtended
         private List<KeyCode> ActiveKeys;
         private IButton AGXBtn;
         //public Dictionary<string, ConfigNode> loadedVessels;
+        public static List<AGXRemoteTechQueueItem> AGXRemoteTechQueue;
+        public static bool RTFound = false;
 
 
 
@@ -272,6 +277,7 @@ namespace ActionGroupsExtended
             CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltCurActsX")), Convert.ToInt32(AGExtNode.GetValue("FltCurActsY")), 345, 140);
             FlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 235, 100);
             GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
+            RemoteTechQueueWin = new Rect(100, 100, 383, 135);
             ActiveGroups = new Dictionary<int, bool>();
             if(AGExtNode.GetValue("FlightWinShowKeys") == "1")
             {
@@ -526,7 +532,16 @@ namespace ActionGroupsExtended
             //KeySetNamesFlight[4] = AGExtNode.GetValue("KeySetName5");
             //print("7a");
             //KeySetNamesFlight[CurrentKeySetFlight - 1] = CurrentKeySetNameFlight;
-            
+            AGXRemoteTechQueue = new List<AGXRemoteTechQueueItem>();
+            foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies) //auto detect KAS for Skycrane
+            {
+                if (Asm.dllName == "RemoteTech")
+                {
+                    //Debug.Log("RemoteTech found");
+                    //AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, FlightGlobals.ActiveVessel.rootPart.flightID, Planetarium.GetUniversalTime() + 10, force, forceDir));
+                    RTFound = true;
+                }
+            }
         }
         catch(Exception e)
     {
@@ -877,6 +892,10 @@ namespace ActionGroupsExtended
                     GroupsInFlightWin.x = FlightWin.x + 235;
                     GroupsInFlightWin.y = FlightWin.y;
                     FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
+                    if (RTFound)
+                    {
+                        RemoteTechQueueWin = GUI.Window(673467798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
+                    }
                     //TrapMouse |= FlightWin.Contains(RealMousePos);
                    
                 }
@@ -968,6 +987,7 @@ namespace ActionGroupsExtended
                     {
                         CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
                        // TrapMouse |= CurActsWin.Contains(RealMousePos);
+                        
                     }
                     
             }
@@ -1062,6 +1082,30 @@ namespace ActionGroupsExtended
         }
 
         public static void ActivateActionGroup(int group, bool force, bool forceDir)
+        {
+
+            if (RTFound)
+            {
+                Debug.Log("RemoteTech found");
+                Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
+                if (double.IsInfinity(curDelay))
+                {
+                    AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
+                }
+                else
+                {
+                    AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                }
+
+            }
+            else
+            {
+                ActivateActionGroupActivation(group, force, forceDir);
+            }
+        }
+
+        public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
 
             Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
@@ -1461,6 +1505,81 @@ namespace ActionGroupsExtended
 
             ba.actionGroup = ba.actionGroup & ~KSPActs[group];
             
+        }
+
+        public void RTQueueWindow(int WindowID)
+        {
+            RTWinScroll = GUI.BeginScrollView(new Rect(5, 20, 263, Math.Min(100, 20 + (20 * (AGXRemoteTechQueue.Count - 1)))), RTWinScroll, new Rect(0, 0, 250, (20 * (AGXRemoteTechQueue.Count))));
+            for (int i2 = 1; i2 <= AGXRemoteTechQueue.Count; i2 = i2 + 1)
+            {
+                AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
+                GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl.vesselName, AGXBtnStyle) ;
+                GUI.Button(new Rect(101, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).group + ": " + AGXRemoteTechQueue.ElementAt((i2 - 1)).grpName, AGXBtnStyle);
+                AGXBtnStyle.alignment = TextAnchor.MiddleRight;
+                Color textDefault = AGXBtnStyle.normal.textColor;
+                string timeString = "";
+                if(AGXRemoteTechQueue.ElementAt((i2 - 1)).state == AGXRemoteTechItemState.GOOD)
+                {
+                    timeString = "GOOD";
+                    AGXBtnStyle.normal.textColor = Color.green;
+                }
+                else if (AGXRemoteTechQueue.ElementAt((i2 - 1)).state == AGXRemoteTechItemState.FAILED)
+                {
+                    timeString = "FAIL";
+                    AGXBtnStyle.normal.textColor = Color.red;
+                }
+                else if (AGXRemoteTechQueue.ElementAt((i2 - 1)).state == AGXRemoteTechItemState.NOCOMMS)
+                {
+                    timeString = "NO GO";
+                    AGXBtnStyle.normal.textColor = Color.red;
+                }
+                else if (AGXRemoteTechQueue.ElementAt((i2 - 1)).state == AGXRemoteTechItemState.COUNTDOWN)
+                {
+                    if (AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime() > 3600)
+                    {
+                        timeString = ((AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime()) / 3600).ToString("######0.00") + "hr";
+                    }
+                    else if (AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime() > 60)
+                    {
+                        timeString = ((AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime()) / 60).ToString("######0.00") + "m";
+                    }
+                    else
+                    {
+                        timeString = ((AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime())).ToString("######0.00") + "s";
+                    }
+                }
+                GUI.Button(new Rect(201, 0 + (20 * (i2 - 1)), 50, 20), timeString, AGXBtnStyle);
+                AGXBtnStyle.normal.textColor = textDefault;
+                
+            }
+            GUI.EndScrollView();
+            if(GUI.Button(new Rect(270,20,100,20),"RTTest",AGXBtnStyle))
+            {
+                ConfigNode passAction = new ConfigNode("AGXAction");
+                passAction.AddValue("Description", "This is our description");
+                passAction.AddValue("ShortName", "ACTION 15");
+                passAction.AddValue("ReflectionGetType", "ActionGroupsExtended.AGXRemoteTechLinks, AGExt");
+                passAction.AddValue("ReflectionInvokeMember", "RTDataReceive");
+                passAction.AddValue("GUIDString", FlightGlobals.ActiveVessel.id.ToString());
+                passAction.AddValue("FlightID", FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
+                passAction.AddValue("Group", "10");
+                passAction.AddValue("Force", "FALSE");
+                passAction.AddValue("ForceDir", "FALSE");
+
+                try
+                {
+                    Type calledType = Type.GetType("RemoteTech.API.API, RemoteTech");
+                    calledType.InvokeMember("ReceiveData", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { passAction });
+
+                }
+
+                catch (Exception e)
+                {
+                    Debug.Log("Reflection to RT fail " + e);
+                }
+
+            }
+            GUI.DragWindow();
         }
 
 
@@ -2736,11 +2855,11 @@ namespace ActionGroupsExtended
                 AGXBtnStyle.normal.background = ButtonTextureRed;
                 AGXBtnStyle.hover.background = ButtonTextureRed;
             }
-            if (GUI.Button(new Rect(15, 3, 65, 20), "Auto-Hide", AGXBtnStyle))
-            {
-                AutoHideGroupsWin = !AutoHideGroupsWin;
+            //if (GUI.Button(new Rect(15, 3, 65, 20), "Auto-Hide", AGXBtnStyle))
+            //{
+            //    AutoHideGroupsWin = !AutoHideGroupsWin;
 
-            }
+            //}
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             bool[] PageGrn = new bool[5];
@@ -4050,29 +4169,7 @@ namespace ActionGroupsExtended
             //}
             //print("delta time " + actionsCheckFrameCount);
             errLine = "37";
-            //print("vessel " + FlightGlobals.ActiveVessel.id.ToString());
-            //print("uid " + FlightGlobals.ActiveVssel.rootPart.uid.ToString());
-            //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-            //{
-            //    print("PartLoc " + p.ConstructID + " " + p.orgPos);
-            //}
-        //    print("Vessel Id " +FlightGlobals.ActiveVessel.id);
-        //    print("Part Flight Id " + FlightGlobals.ActiveVessel.rootPart.flightID);
-        //    print("Part UID " + FlightGlobals.ActiveVessel.rootPart.uid);
-        //    print("Part mission id " + FlightGlobals.ActiveVessel.rootPart.missionID);
-            //if (TimeWarp.CurrentRate != 1)
-            //{
-            //    if (ShowSelectedWin || ShowKeySetWin)
-            //    {
-
-            //        SaveEverything();
-            //        ShowSelectedWin = false;
-            //        ShowKeySetWin = false;
-            //    }
-
-            //}
-            //PrintPartPos();
-
+            
                 //count down action cool downs
             groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
             foreach(AGXCooldown agCD in groupCooldowns)
@@ -4080,6 +4177,12 @@ namespace ActionGroupsExtended
                 agCD.delayLeft = agCD.delayLeft + 1;
                 
             }
+            errLine = "38";
+                if(RTFound)
+                {
+                    CheckRTQueue();
+                }
+                errLine = "39";
             //PrintPartActs();
             //print("landed " + FlightGlobals.ActiveVessel.landedAt);
         }
@@ -4089,6 +4192,34 @@ namespace ActionGroupsExtended
             }
         }
 
+        public void CheckRTQueue()
+        {
+            string errLine = "1";
+            try
+            {
+                foreach(AGXRemoteTechQueueItem rtItem in AGXRemoteTechQueue)
+                {
+                    if(rtItem.state == AGXRemoteTechItemState.COUNTDOWN && rtItem.timeToActivate<Planetarium.GetUniversalTime())
+                    {
+                        if(rtItem.vsl == FlightGlobals.ActiveVessel)
+                        {
+                            ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
+                            rtItem.state = AGXRemoteTechItemState.GOOD;
+                        }
+                        else
+                        {
+                            //other vessel placeholder
+                            rtItem.state = AGXRemoteTechItemState.FAILED;
+                        }
+                    }
+                }
+                AGXRemoteTechQueue.RemoveAll(itm => itm.timeToActivate + 3 < Planetarium.GetUniversalTime());
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX RTQueue Fail " + errLine + " " + e);
+            }
+        }
         
 
         public void FixedUpdate() 

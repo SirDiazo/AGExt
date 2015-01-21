@@ -42,9 +42,10 @@ namespace ActionGroupsExtended //add scenario module for data storage
             {
                 ClearOldSaves = true;
             }
-            if (ClearOldSaves)
+            if (ClearOldSaves && !AGXStaticData.cleanupAlreadyRun)
             {
                 DeleteOldSaveGames(); //delete old AGext000000.cfg files
+                AGXStaticData.cleanupAlreadyRun = true;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using KSP.IO;
+using System.Reflection;
 
 using UnityEngine;
 
@@ -344,6 +345,116 @@ namespace ActionGroupsExtended
                 return false;
             }
         }
+
+        public static List<PartModule> AGX2VslListOfPartModulesInGroup(uint flightID, int i)
+        {
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if(flightID == FlightGlobals.ActiveVessel.rootPart.flightID)
+                {
+                    return AGXListOfPartModulesInGroup(i);
+                }
+                else
+                {
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                    return otherVsl.pmListInGroup(i);
+                }
+            }
+            else if(HighLogic.LoadedSceneIsEditor)
+            {
+                return AGXListOfPartModulesInGroup(i);
+            }
+            return new List<PartModule>();
+        }
+
+        public static List<Part> AGX2VslListOfPartsInGroup(uint flightID, int i)
+        {
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (flightID == FlightGlobals.ActiveVessel.rootPart.flightID)
+                {
+                    return AGXListOfPartsInGroup(i);
+                }
+                else
+                {
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                    return otherVsl.prtListInGroup(i);
+                }
+            }
+            else if (HighLogic.LoadedSceneIsEditor)
+            {
+                return AGXListOfPartsInGroup(i);
+            }
+            return new List<Part>();
+        }
+
+        public static List<PartModule> AGXListOfPartModulesInGroup(int i)
+        {
+            print("AGX Call: list of partModules in " + i + " for active vessel");
+            if(HighLogic.LoadedSceneIsFlight)
+            {
+                List<PartModule> prtList = new List<PartModule>();
+                foreach(AGXAction agAct in AGXFlight.CurrentVesselActions.Where(agx => agx.group == i))
+                {
+                    if(!prtList.Contains(agAct.ba.listParent.module))
+                    {
+                        prtList.Add(agAct.ba.listParent.module);
+                    }
+                }
+                return prtList;
+            }
+            else if(HighLogic.LoadedSceneIsEditor)
+            {
+                List<PartModule> prtList = new List<PartModule>();
+                foreach (AGXAction agAct in AGXEditor.CurrentVesselActions.Where(agx => agx.group == i))
+                {
+                    if (!prtList.Contains(agAct.ba.listParent.module))
+                    {
+                        prtList.Add(agAct.ba.listParent.module);
+                    }
+                }
+                return prtList;
+            }
+            else
+            {
+                return new List<PartModule>();
+            }
+        }
+        
+        
+        public static List<Part> AGXListOfPartsInGroup(int i)
+        {
+            print("AGX Call: list of parts in " + i + " for active vessel");
+            if(HighLogic.LoadedSceneIsFlight)
+            {
+                List<Part> prtList = new List<Part>();
+                foreach(AGXAction agAct in AGXFlight.CurrentVesselActions.Where(agx => agx.group == i))
+                {
+                    if(!prtList.Contains(agAct.ba.listParent.part))
+                    {
+                        prtList.Add(agAct.ba.listParent.part);
+                    }
+                }
+                return prtList;
+            }
+            else if(HighLogic.LoadedSceneIsEditor)
+            {
+                List<Part> prtList = new List<Part>();
+                foreach (AGXAction agAct in AGXEditor.CurrentVesselActions.Where(agx => agx.group == i))
+                {
+                    if (!prtList.Contains(agAct.ba.listParent.part))
+                    {
+                        prtList.Add(agAct.ba.listParent.part);
+                    }
+                }
+                return prtList;
+            }
+            else
+            {
+                return new List<Part>();
+            }
+        }
+
     }
 
     public class AGXAction : IEquatable<AGXAction>, IEqualityComparer<AGXAction> //basic data class for AGX mod, used everywhere
@@ -454,7 +565,46 @@ namespace ActionGroupsExtended
         }
     }
 
+    public static class AGXRemoteTechLinks
+    {
+        public static double RTTimeDelay(Vessel vsl) //gets delay for directly activated actions
+        {
+            try
+            {
+                Type calledType = Type.GetType("RemoteTech.API.API, RemoteTech");
+                return (double)calledType.InvokeMember("GetShortestSignalDelay", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { vsl.id });
+                
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
+        public static void RTDataReceive(ConfigNode node) //receive data back from RT
+        {
+            Debug.Log("AGX Call: RemoteTechCallback");
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == Convert.ToUInt32(node.GetValue("FlightID")))
+                {
+
+                    AGXFlight.ActivateActionGroupActivation(Convert.ToInt32(node.GetValue("Group")), Convert.ToBoolean(node.GetValue("Force")), Convert.ToBoolean(node.GetValue("ForceDir")));
+                    
+                }
+                else
+                {
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(Convert.ToUInt32(node.GetValue("FlightID")));
+                    otherVsl.ActivateActionGroupActivation(Convert.ToInt32(node.GetValue("Group")), Convert.ToBoolean(node.GetValue("Force")), Convert.ToBoolean(node.GetValue("ForceDir")));
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER);
+                
+            }
+        }
+    }
 
 }
 

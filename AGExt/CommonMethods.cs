@@ -10,8 +10,41 @@ using UnityEngine;
 namespace ActionGroupsExtended
 {
 
-    
+  public enum AGXRemoteTechItemState
+  {
+      COUNTDOWN,
+      GOOD,
+      FAILED,
+      NOCOMMS,
+  }
+    public class AGXRemoteTechQueueItem //queue for remotetech action groups
+  {
+      public AGXRemoteTechItemState state;
+      public int group;
+      public string grpName;
+      public Vessel vsl;
+      public double timeToActivate;
+      public bool forcing;
+      public bool forceDir;
 
+      public AGXRemoteTechQueueItem(int Group, string GroupName, Vessel vessel, double actTime, bool force, bool ForceDir, AGXRemoteTechItemState State)
+      {
+          state = State;
+          group = Group;
+          grpName = GroupName;
+          vsl = vessel;
+          timeToActivate = actTime;
+          forcing = force;
+          forceDir = ForceDir;
+      }
+
+  }
+  
+
+    public static class AGXStaticData
+    {
+        public static bool cleanupAlreadyRun = false;
+    }
    
     public class ModuleAGX : PartModule
     {
@@ -127,6 +160,32 @@ namespace ActionGroupsExtended
             }
         }
 
+        public List<Part> prtListInGroup(int i)
+        {
+            List<Part> prtListInGroup = new List<Part>();
+            foreach (AGXAction agAct in actionsList.Where(agx => agx.group == i))
+            {
+                if (!prtListInGroup.Contains(agAct.ba.listParent.part))
+                {
+                    prtListInGroup.Add(agAct.ba.listParent.part);
+                }
+            }
+            return prtListInGroup;
+        }
+
+        public List<PartModule> pmListInGroup(int i)
+        {
+            List<PartModule> prtListInGroup = new List<PartModule>();
+            foreach (AGXAction agAct in actionsList.Where(agx => agx.group == i))
+            {
+                if (!prtListInGroup.Contains(agAct.ba.listParent.module))
+                {
+                    prtListInGroup.Add(agAct.ba.listParent.module);
+                }
+            }
+            return prtListInGroup;
+        }
+
         public List<AGXAction> GetAssignedActionsGroup(int group)
         {
             if (vesselInstanceOK)
@@ -152,8 +211,32 @@ namespace ActionGroupsExtended
 
             }
         }
-            
-        public void ActivateActionGroup(int group, bool force, bool forceDir) //main activation method
+
+        public void ActivateActionGroup(int group, bool force, bool forceDir)
+        {
+
+            if (AGXFlight.RTFound)
+            {
+                Debug.Log("RemoteTech found");
+                Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
+                if (double.IsInfinity(curDelay))
+                {
+                    AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(ag => ag.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
+                }
+                else
+                {
+                    AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(ag => ag.group == group).grpName, thisVsl, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(thisVsl), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                }
+
+            }
+            else
+            {
+                AGXFlight.ActivateActionGroupActivation(group, force, forceDir);
+            }
+        }
+
+        public void ActivateActionGroupActivation(int group, bool force, bool forceDir) //main activation method
             {
                 string ErrLine = "1";    
             try
@@ -200,6 +283,7 @@ namespace ActionGroupsExtended
                             KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                             //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                             ErrLine = "8";
+                           // Debug.Log("act it " + agAct.ba.active);
                             agAct.ba.Invoke(actParam);
                             agAct.activated = false;
                             ErrLine = "9";
@@ -217,6 +301,7 @@ namespace ActionGroupsExtended
                             //agAct.activated = true;
                             //print("AGX action activate FIRE!" + agAct.ba.guiName);
                             ErrLine = "13";
+                            //Debug.Log("act it2 " + agAct.ba.active);
                             agAct.ba.Invoke(actParam);
                             agAct.activated = true;
                             ErrLine = "14";
