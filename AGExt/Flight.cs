@@ -77,7 +77,8 @@ namespace ActionGroupsExtended
         //public Dictionary<string, ConfigNode> loadedVessels;
         public static List<AGXRemoteTechQueueItem> AGXRemoteTechQueue;
         public static bool RTFound = false;
-
+        private string RTGroup = "1";
+        private static bool RTWinShow = false;
 
 
 
@@ -276,8 +277,8 @@ namespace ActionGroupsExtended
             KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeySetX")), Convert.ToInt32(AGExtNode.GetValue("FltKeySetY")), 185, 335);
             CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltCurActsX")), Convert.ToInt32(AGExtNode.GetValue("FltCurActsY")), 345, 140);
             FlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 235, 100);
-            GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
-            RemoteTechQueueWin = new Rect(100, 100, 383, 135);
+            GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX"))+235, Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
+            RemoteTechQueueWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("RTWinX")), Convert.ToInt32(AGExtNode.GetValue("RTWinY")), 350, 125);
             ActiveGroups = new Dictionary<int, bool>();
             if(AGExtNode.GetValue("FlightWinShowKeys") == "1")
             {
@@ -288,6 +289,8 @@ namespace ActionGroupsExtended
                 FlightWinShowKeycodes = false;
             }
             
+
+
            // UnbindDefaultKeys();  //obsolete with INputLockManager
             //print("input lock");
             try
@@ -533,15 +536,26 @@ namespace ActionGroupsExtended
             //print("7a");
             //KeySetNamesFlight[CurrentKeySetFlight - 1] = CurrentKeySetNameFlight;
             AGXRemoteTechQueue = new List<AGXRemoteTechQueueItem>();
+            RTFound = false;
             foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies) //auto detect KAS for Skycrane
             {
                 if (Asm.dllName == "RemoteTech")
                 {
-                    //Debug.Log("RemoteTech found");
+                    Debug.Log("RemoteTech found");
                     //AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, FlightGlobals.ActiveVessel.rootPart.flightID, Planetarium.GetUniversalTime() + 10, force, forceDir));
                     RTFound = true;
                 }
             }
+
+                if(RTFound && bool.Parse(AGExtNode.GetValue("RTWinShow")))
+                {
+                    RTWinShow = true;
+                }
+                else
+                {
+                    RTWinShow = false;
+                }
+                Debug.Log("RemoteTech " + RTWinShow);
         }
         catch(Exception e)
     {
@@ -552,7 +566,7 @@ namespace ActionGroupsExtended
 
         public class SettingsWindow : MonoBehaviour, IDrawable
         {
-            public Rect SettingsWin = new Rect(0, 0, 150, 130);
+            public Rect SettingsWin = new Rect(0, 0, 150, 155);
             public Vector2 Draw(Vector2 position)
             {
                 var oldSkin = GUI.skin;
@@ -610,6 +624,13 @@ namespace ActionGroupsExtended
                 if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
                 {
                     AutoHideGroupsWin = !AutoHideGroupsWin;
+                }
+                if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech"))
+                {
+                    if(RTFound)
+                    {
+                        RTWinShow = !RTWinShow;
+                    }
                 }
                 AGXBtnStyle.normal.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
@@ -791,9 +812,12 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("FltKeySetX", KeySetWin.x.ToString());
             AGExtNode.SetValue("FltKeySetY", KeySetWin.y.ToString());
             AGExtNode.SetValue("FltCurActsX", CurActsWin.x.ToString());
-            AGExtNode.SetValue("FltCurActsY", FlightWin.y.ToString());
+            AGExtNode.SetValue("FltCurActsY", CurActsWin.y.ToString());
             AGExtNode.SetValue("FltMainX", FlightWin.x.ToString());
-            AGExtNode.SetValue("FltMainY", CurActsWin.y.ToString());
+            AGExtNode.SetValue("FltMainY", FlightWin.y.ToString());
+            AGExtNode.SetValue("RTWinX",  RemoteTechQueueWin.x.ToString());
+            AGExtNode.SetValue("RTWinY", RemoteTechQueueWin.y.ToString());
+            AGExtNode.SetValue("RTWinShow", RTWinShow.ToString());
             if (!ShowAGXMod)
             {
                //rint("No show");
@@ -892,7 +916,7 @@ namespace ActionGroupsExtended
                     GroupsInFlightWin.x = FlightWin.x + 235;
                     GroupsInFlightWin.y = FlightWin.y;
                     FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
-                    if (RTFound)
+                    if (RTWinShow)
                     {
                         RemoteTechQueueWin = GUI.Window(673467798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
                     }
@@ -1007,7 +1031,7 @@ namespace ActionGroupsExtended
 
             if(showAGXRightClickMenu)
             {
-                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 130);
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 155);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
             }
         }
@@ -1048,12 +1072,21 @@ namespace ActionGroupsExtended
                 CurActsWin.y = 150;
                 FlightWin.x = 400;
                 FlightWin.y = 400;
+                RemoteTechQueueWin.x = 450;
+                RemoteTechQueueWin.y = 450;
             }
             AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
+            }
+            if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech"))
+            {
+                if (RTFound)
+                {
+                    RTWinShow = !RTWinShow;
+                }
             }
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
@@ -1086,15 +1119,24 @@ namespace ActionGroupsExtended
 
             if (RTFound)
             {
-                Debug.Log("RemoteTech found");
-                Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
-                if (double.IsInfinity(curDelay))
+               // Debug.Log("RemoteTech found");
+                //Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                //Debug.Log("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
+                //double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
+                //print("cur delay" + curDelay);
+                if (FlightGlobals.ActiveVessel.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                 {
+                    Debug.Log("RemoteTech local");
+                    AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                }
+                else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
+                {
+                    Debug.Log("RemoteTech infinity");
                     AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                 }
                 else
                 {
+                    Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
                     AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                 }
 
@@ -1105,7 +1147,7 @@ namespace ActionGroupsExtended
             }
         }
 
-        public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
+        public static void ActivateActionGroupActivation(int group, bool force, bool forceDir) 
         {
 
             Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
@@ -1513,8 +1555,14 @@ namespace ActionGroupsExtended
             for (int i2 = 1; i2 <= AGXRemoteTechQueue.Count; i2 = i2 + 1)
             {
                 AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
-                GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl.vesselName, AGXBtnStyle) ;
-                GUI.Button(new Rect(101, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).group + ": " + AGXRemoteTechQueue.ElementAt((i2 - 1)).grpName, AGXBtnStyle);
+                if(GUI.Button(new Rect(0, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl.vesselName, AGXBtnStyle)) 
+                {
+                    FlightGlobals.SetActiveVessel(AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl);
+                }
+                if(GUI.Button(new Rect(101, 0 + (20 * (i2 - 1)), 100, 20), AGXRemoteTechQueue.ElementAt((i2 - 1)).group + ": " + AGXRemoteTechQueue.ElementAt((i2 - 1)).grpName, AGXBtnStyle))
+                {
+                    FlightGlobals.SetActiveVessel(AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl);
+                }
                 AGXBtnStyle.alignment = TextAnchor.MiddleRight;
                 Color textDefault = AGXBtnStyle.normal.textColor;
                 string timeString = "";
@@ -1548,23 +1596,60 @@ namespace ActionGroupsExtended
                         timeString = ((AGXRemoteTechQueue.ElementAt((i2 - 1)).timeToActivate - Planetarium.GetUniversalTime())).ToString("######0.00") + "s";
                     }
                 }
-                GUI.Button(new Rect(201, 0 + (20 * (i2 - 1)), 50, 20), timeString, AGXBtnStyle);
+                if(GUI.Button(new Rect(201, 0 + (20 * (i2 - 1)), 50, 20), timeString, AGXBtnStyle))
+                {
+                    FlightGlobals.SetActiveVessel(AGXRemoteTechQueue.ElementAt((i2 - 1)).vsl);
+                }
                 AGXBtnStyle.normal.textColor = textDefault;
                 
             }
-            GUI.EndScrollView();
-            if(GUI.Button(new Rect(270,20,100,20),"RTTest",AGXBtnStyle))
+            GUI.EndScrollView(); 
+            AGXBtnStyle.alignment = TextAnchor.MiddleRight;
+            RTGroup = GUI.TextField(new Rect(270, 20, 75, 20), RTGroup, AGXFldStyle);
+            AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
+            if(GUI.Button(new Rect(270,40,75,20),"Toggle",AGXBtnStyle))
+            {
+                RemoteTechExernalCall("TOGGLE"); 
+            }
+            if (GUI.Button(new Rect(270, 60, 75, 20), "Activate", AGXBtnStyle))
+            {
+                RemoteTechExernalCall("ACTIVATE");
+            }
+            if (GUI.Button(new Rect(270, 80, 75, 20), "Deactivate", AGXBtnStyle))
+            {
+                RemoteTechExernalCall("DEACTIVATE"); 
+            }
+            GUI.DragWindow();
+        }
+
+        public void RemoteTechExernalCall(string direction)
+        {
+            int groupToCall = int.Parse(RTGroup);
+            if (groupToCall >= 1 && groupToCall <= 250)
             {
                 ConfigNode passAction = new ConfigNode("AGXAction");
-                passAction.AddValue("Description", "This is our description");
-                passAction.AddValue("ShortName", "ACTION 15");
+                passAction.AddValue("Description", "Action Group: " + groupToCall.ToString());
+                passAction.AddValue("ShortName", "AGX "+groupToCall.ToString());
                 passAction.AddValue("ReflectionGetType", "ActionGroupsExtended.AGXRemoteTechLinks, AGExt");
                 passAction.AddValue("ReflectionInvokeMember", "RTDataReceive");
                 passAction.AddValue("GUIDString", FlightGlobals.ActiveVessel.id.ToString());
                 passAction.AddValue("FlightID", FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
-                passAction.AddValue("Group", "10");
-                passAction.AddValue("Force", "FALSE");
-                passAction.AddValue("ForceDir", "FALSE");
+                passAction.AddValue("Group", groupToCall.ToString());
+                if (direction == "TOGGLE")
+                {
+                    passAction.AddValue("Force", "FALSE");
+                    passAction.AddValue("ForceDir", "FALSE");
+                }
+                else if (direction == "ACTIVATE")
+                {
+                    passAction.AddValue("Force", "TRUE");
+                    passAction.AddValue("ForceDir", "TRUE");
+                }
+                else
+                {
+                    passAction.AddValue("Force", "TRUE");
+                    passAction.AddValue("ForceDir", "FALSE");
+                }
 
                 try
                 {
@@ -1577,11 +1662,8 @@ namespace ActionGroupsExtended
                 {
                     Debug.Log("Reflection to RT fail " + e);
                 }
-
             }
-            GUI.DragWindow();
         }
-
 
         public void CurrentActionsWindow(int WindowID)
         {
@@ -3512,64 +3594,73 @@ namespace ActionGroupsExtended
 
         public void DockingEvent()
         {
+            string errLine = "1";
+            try
+            {
+                errLine = "2";
             //print("call dockingevent");
-            CurrentVesselActions.Clear();  
+            CurrentVesselActions.Clear();
+            errLine = "3";
             bool ShowAmbiguousMessage = true;
+            errLine = "4";
             ConfigNode newVsl = new ConfigNode(); //get new vessel root for vessel info
-
+            errLine = "5";
             if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString())) //find root node here, docking so we can not be coming from editor
             {
+                errLine = "6";
                 //print("AGX flightID found");
                 newVsl = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
 
             }
             else if (AGXFlightNode.HasNode(FlightGlobals.ActiveVessel.id.ToString()))
             {
+                errLine = "7";
                 //print("AGX flight node found");
                 newVsl = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
             }
-
+            errLine = "8";
             CurrentKeySetFlight = Convert.ToInt32(newVsl.GetValue("currentKeyset"));
+            errLine = "9";
             LoadGroupNames(newVsl.GetValue("groupNames"));
+            errLine = "10";
             LoadGroupVisibility(newVsl.GetValue("groupVisibility"));
+            errLine = "11";
             LoadGroupVisibilityNames(newVsl.GetValue("groupVisibilityNames"));
-
+            errLine = "12";
             List<ConfigNode> NodesToAdd = new List<ConfigNode>();
-            //NodesToAdd.Add(newVsl); //add new vslnode to list so actions get added
-
+            errLine = "13";
             List<string> partIDs = new List<string>();
             foreach (Part p5 in FlightGlobals.ActiveVessel.parts) //make list of all flightIDs on parts on vessel
             {
-                // if (p5 != FlightGlobals.ActiveVessel.rootPart) //do not add rootpart to list, already added from above
-                // {
+                errLine = "14";
                 partIDs.Add(p5.flightID.ToString());
-                //}
             }
-
+            errLine = "15";
             foreach (ConfigNode ID in AGXFlightNode.nodes) //check all nodes in AGXFlightNode to see if they belong to our combined vessel
             {
+                errLine = "16";
                 if (partIDs.Contains(ID.name))
                 {
+                    errLine = "17";
                     NodesToAdd.Add(AGXFlightNode.GetNode(ID.name)); //add node if its on our vessel
                 }
             }
-            //NodesToAdd should have two entires now representing ships that just docked but could have more, go ahead and load actions
-            //print("Nodes start!");
-            //foreach (ConfigNode vslNodeA in NodesToAdd)
-            //{
-            //    print(vslNodeA);
-            //}
-            //print("Nodes end!");
+            errLine = "18";
             foreach (ConfigNode vslNode in NodesToAdd) //cycle through all nodes to add, 
             {
+                errLine = "19";
                 LoadGroupNames(vslNode.GetValue("groupNames"), false);
+                errLine = "20";
                 foreach (ConfigNode prtNode in vslNode.nodes) //cycle through each part
                 {
+                    errLine = "21";
 
                     float partDist = 100f;
                     Part gamePart = new Part();
+                    errLine = "22";
                     if (prtNode.HasValue("flightID"))
                     {
+                        errLine = "23";
                         uint flightIDFromFile = Convert.ToUInt32(prtNode.GetValue("flightID"));
                         gamePart = FlightGlobals.ActiveVessel.parts.First(prt => prt.flightID == flightIDFromFile);
                         partDist = 0f;
@@ -3577,6 +3668,7 @@ namespace ActionGroupsExtended
 
                     else
                     {
+                        errLine = "24";
                         foreach (Part p in FlightGlobals.ActiveVessel.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                         {
                             Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
@@ -3588,6 +3680,7 @@ namespace ActionGroupsExtended
                             }
                         }
                     }
+                    errLine = "25";
                     bool ShowAmbiguousMessage2 = true; //show actions ambiguous message?
 
                     if (ShowAmbiguousMessage && partDist < 0.3f) //do not show it if part found is more then 0.3meters off
@@ -3598,6 +3691,7 @@ namespace ActionGroupsExtended
                     {
                         ShowAmbiguousMessage2 = false;
                     }
+                    errLine = "26";
                     foreach (ConfigNode actNode in prtNode.nodes)
                     {
                         //print("node " + actNode + " " + gamePart.ConstructID);
@@ -3608,18 +3702,26 @@ namespace ActionGroupsExtended
                             CurrentVesselActions.Add(actToAdd);
                         }
                     }
+                    errLine = "27";
                 }
                 //actions are added to current actions, if not rootnode, pull actions off
                 if (vslNode.name != FlightGlobals.ActiveVessel.rootPart.flightID.ToString())
                 {
+                    errLine = "28";
                     vslNode.RemoveNodes("PART");
                     if (AGXFlightNode.HasNode(vslNode.name))
                     {
                         AGXFlightNode.RemoveNode(vslNode.name);
                     }
+                    errLine = "29";
                     AGXFlightNode.AddNode(vslNode);
                 }
             }
+        }
+        catch(Exception e)
+    {
+        print("AGX Docking Fail " + errLine + e);
+    }
         }
 
 
@@ -4069,14 +4171,17 @@ namespace ActionGroupsExtended
                 }
             }
             errLine = "26";
-            if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None)
+               
+            if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)// && InputLockManager.IsLocked(ControlTypes.All))//&& !InputLockManager.IsLocked(ControlTypes.All))
             {
+                
                 foreach (KeyCode KC in ActiveKeys)
                 {
+                    
                     errLine = "27";
                     if (Input.GetKeyDown(KC))
                     {
-                        // print("keydown " + KC);
+                         //print("keydown " + KC);
                         for (int i = 1; i <= 250; i = i + 1)
                         {
                             if (AGXguiKeys[i] == KC)
@@ -4208,8 +4313,16 @@ namespace ActionGroupsExtended
                         }
                         else
                         {
-                            //other vessel placeholder
-                            rtItem.state = AGXRemoteTechItemState.FAILED;
+                            if (rtItem.vsl.loaded)
+                            {
+                                AGXOtherVessel otherVsl = new AGXOtherVessel(rtItem.vsl.rootPart.flightID);
+                                otherVsl.ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
+                                rtItem.state = AGXRemoteTechItemState.GOOD;
+                            }
+                            else
+                            {
+                                rtItem.state = AGXRemoteTechItemState.FAILED;
+                            }
                         }
                     }
                 }

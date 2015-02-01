@@ -581,6 +581,34 @@ namespace ActionGroupsExtended
             }
         }
 
+        public static bool RTConnection(Vessel vsl) //is this vessel connected?
+        {
+            try
+            {
+                Type calledType = Type.GetType("RemoteTech.API.API, RemoteTech");
+                return (bool)calledType.InvokeMember("HasAnyConnection", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { vsl.id });
+
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool InLocal(Vessel vsl) //is this vessel in local control?
+        {
+            try
+            {
+                Type calledType = Type.GetType("RemoteTech.API.API, RemoteTech");
+                return (bool)calledType.InvokeMember("InLocalControl", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { vsl.id });
+
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static void RTDataReceive(ConfigNode node) //receive data back from RT
         {
             Debug.Log("AGX Call: RemoteTechCallback");
