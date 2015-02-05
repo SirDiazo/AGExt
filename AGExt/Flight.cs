@@ -161,6 +161,7 @@ namespace ActionGroupsExtended
         private bool overrideRootChange = false; //if docking event, do NOT run root change code
         List<AGXAction> ThisGroupActions;
         private bool showGroupsIsGroups = true;
+        public static bool useRT = true;
        // private bool showGroupsIsKeySet = false;
 
         public void DummyVoid()
@@ -210,6 +211,7 @@ namespace ActionGroupsExtended
         {
             try
             {
+                useRT = true;
             AGXguiMod1Groups = new Dictionary<int, bool>();
             AGXguiMod2Groups = new Dictionary<int, bool>();
             for (int i = 1; i <= 250; i++)
@@ -1031,7 +1033,7 @@ namespace ActionGroupsExtended
 
             if(showAGXRightClickMenu)
             {
-                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 155);
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
             }
         }
@@ -1088,6 +1090,10 @@ namespace ActionGroupsExtended
                     RTWinShow = !RTWinShow;
                 }
             }
+            if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech"))
+            {
+                useRT = !useRT;
+            }
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             //GUI.DragWindow();
@@ -1137,7 +1143,14 @@ namespace ActionGroupsExtended
                 else
                 {
                     Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                    AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    if (useRT)
+                    {
+                        AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    }
+                    else
+                    {
+                        AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    }
                 }
 
             }
@@ -1619,6 +1632,15 @@ namespace ActionGroupsExtended
             {
                 RemoteTechExernalCall("DEACTIVATE"); 
             }
+            if (!useRT)
+            {
+                Color txtClr = AGXBtnStyle.normal.textColor;
+                AGXBtnStyle.normal.textColor = Color.yellow;
+                GUI.Label(new Rect(110, 110, 100, 15), "REMOTETECH BYPASSED", AGXBtnStyle);
+                AGXBtnStyle.normal.textColor = txtClr;
+
+            }
+
             GUI.DragWindow();
         }
 
@@ -5316,13 +5338,15 @@ namespace ActionGroupsExtended
                             if (agAct.ba.name == "ToggleAction")
                             {
                                 ModuleRCS rcsMdl = (ModuleRCS)agAct.ba.listParent.module;
-                                if (rcsMdl.isEnabled)
+                                if (rcsMdl.rcsEnabled)
                                 {
                                     agAct.activated = true;
+                                    print("rcs found true");
                                 }
                                 else
                                 {
                                     agAct.activated = false;
+                                    print("rcs found false");
                                 }
                             }
                         }

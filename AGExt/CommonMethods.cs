@@ -235,7 +235,14 @@ namespace ActionGroupsExtended
                 else
                 {
                     Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(thisVsl));
-                    AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(thisVsl), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    if (AGXFlight.useRT)
+                    {
+                        AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(thisVsl), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    }
+                    else
+                    {
+                        AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    }
                 }
 
             }
