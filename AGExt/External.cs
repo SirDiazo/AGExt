@@ -81,7 +81,31 @@ namespace ActionGroupsExtended
             return AGXFlight.CurrentVesselActions;
         } 
 
-        public static bool AGX2VslToggleGroup(uint FlightID, int group) //7 on test, works
+        public static bool AGX2VslToggleGroup(uint FlightID, int group) //other vessel direct toggle activate
+        {
+            print("AGX Call: toggle action " + group + " for vessel " + FlightID);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    AGXFlight.ActivateActionGroupActivation(group,false,false);
+                    return true;
+                } 
+                else
+                {
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    otherVsl.ActivateActionGroupActivation(group, false, false);
+                    return true;
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return false;
+            }
+        }
+
+        public static bool AGX2VslToggleGroupDelayCheck(uint FlightID, int group) //other vessel toggle, delay check
         {
             print("AGX Call: toggle action " + group + " for vessel " + FlightID);
             if (HighLogic.LoadedSceneIsFlight)
@@ -90,7 +114,7 @@ namespace ActionGroupsExtended
                 {
                     AGXFlight.ActivateActionGroup(group);
                     return true;
-                } 
+                }
                 else
                 {
                     AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
@@ -128,7 +152,35 @@ namespace ActionGroupsExtended
             }
         }
         
-        public static bool AGX2VslActivateGroup(uint FlightID, int group, bool forceDir) //9 on test, works
+        public static bool AGX2VslActivateGroup(uint FlightID, int group, bool forceDir) //other vessel, direct activate group
+        {
+            print("AGX Call: Activate group for " + group + " for vessel " + FlightID + " in dir " + forceDir);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
+                {
+                    //print("this vsl");
+                    AGXFlight.ActivateActionGroupActivation(group, true, forceDir);
+                    return true;
+                }
+                else
+                {
+                    //print("other vsl");
+                    //ScreenMessages.PostScreenMessage("AGX Action Fail, other vessels not implemented yet", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    //return false;
+                    AGXOtherVessel otherVsl = new AGXOtherVessel(FlightID);
+                    otherVsl.ActivateActionGroupActivation(group, true, forceDir);
+                    return true;
+                }
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                return false;
+            }
+        }
+
+        public static bool AGX2VslActivateGroupDelayCheck(uint FlightID, int group, bool forceDir) //other vessel, with delay check
         {
             print("AGX Call: Activate group for " + group + " for vessel " + FlightID + " in dir " + forceDir);
             if (HighLogic.LoadedSceneIsFlight)
@@ -156,7 +208,21 @@ namespace ActionGroupsExtended
             }
         }
         
-        public static bool AGXActivateGroup(int i, bool forceDir) //works //activate action group it forceDir direction, true = force activate
+        public static bool AGXActivateGroup(int i, bool forceDir) //activate action group it forceDir direction, true = force activate
+        {
+            print("AGX Call: activate group for " + i + " for active vessel in dir " + forceDir);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                AGXFlight.ActivateActionGroupActivation(i, true, forceDir);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool AGXActivateGroupDelayCheck(int i, bool forceDir) //activate action group it forceDir direction, true = force activate with delay check
         {
             print("AGX Call: activate group for " + i + " for active vessel in dir " + forceDir);
             if (HighLogic.LoadedSceneIsFlight)
@@ -171,6 +237,44 @@ namespace ActionGroupsExtended
         }
 
         public static bool AGXToggleGroupName(string grpName) //untested
+        {
+            try
+            {
+                print("AGX Call: toggle group by name for " + grpName + " for active vessel");
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    int grp = 0;
+                    try
+                    {
+                        grp = AGXFlight.AGXguiNames.First(pair => pair.Value.ToLower() == grpName.ToLower()).Key; //compare strings, case does not matter
+                    }
+                    catch//poor man's error trap, name was not found. what is the correct way to do this?
+                    {
+                        return false;
+                    }
+                    if (grp >= 1 && grp <= 250) //check grp is valid
+                    {
+                        AGXFlight.ActivateActionGroupActivation(grp, false, false);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else //not in flight
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                print("AGX Call FAIL! Catch block hit");
+                return false;
+            }
+        }
+
+        public static bool AGXToggleGroupNameDelayCheck(string grpName) //untested
         {
             try
             {
@@ -222,6 +326,35 @@ namespace ActionGroupsExtended
                     else
                     {
                         AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                        otherVsl.ActivateActionStringActivation(grpName, false, false);
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool AGX2VslToggleGroupNameDelayCheck(uint flightID, string grpName, bool forceDir)
+        {
+            try
+            {
+                print("AGX Call: toggle group by name for " + grpName + " for " + flightID + " in dir " + forceDir);
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
+                    {
+                        return AGXToggleGroupNameDelayCheck(grpName);
+                    }
+                    else
+                    {
+                        AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
                         otherVsl.ActivateActionString(grpName, false, false);
                         return true;
                     }
@@ -237,7 +370,7 @@ namespace ActionGroupsExtended
             }
         }
 
-        public static bool AGX2VslActivateGroupName(uint flightID, string grpName, bool forceDir)
+        public static bool AGX2VslActivateGroupNameDelayCheck(uint flightID, string grpName, bool forceDir)
         {
             try
             {
@@ -246,7 +379,7 @@ namespace ActionGroupsExtended
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
                 {
-                    return AGXActivateGroupName(grpName, forceDir);
+                    return AGXActivateGroupNameDelayCheck(grpName, forceDir);
                 }
                 else
                 {
@@ -266,7 +399,74 @@ namespace ActionGroupsExtended
             }
         }
 
+        public static bool AGX2VslActivateGroupName(uint flightID, string grpName, bool forceDir)
+        {
+            try
+            {
+                print("AGX Call: activate group by name for " + grpName + " for " + flightID + " in dir " + forceDir);
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
+                    {
+                        return AGXActivateGroupName(grpName, forceDir);
+                    }
+                    else
+                    {
+                        AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                        otherVsl.ActivateActionStringActivation(grpName, true, forceDir);
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static bool AGXActivateGroupName(string grpName, bool forceDir) //untested
+        {
+            try
+            {
+                print("AGX Call: activate group by name for " + grpName + " for active vessel in dir " + forceDir);
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    int grp = 0;
+                    try
+                    {
+                        grp = AGXFlight.AGXguiNames.First(pair => pair.Value.ToLower() == grpName.ToLower()).Key; //compare strings, case does not matter
+                    }
+                    catch//poor man's error trap, name was not found. what is the correct way to do this?
+                    {
+                        return false;
+                    }
+                    if (grp >= 1 && grp <= 250) //check grp is valid
+                    {
+                        AGXFlight.ActivateActionGroupActivation(grp, true, forceDir);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else //not in flight
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                print("AGX Call FAIL! Catch block hit");
+                return false;
+            }
+        }
+
+        public static bool AGXActivateGroupNameDelayCheck(string grpName, bool forceDir) //untested
         {
             try
             {
@@ -309,12 +509,26 @@ namespace ActionGroupsExtended
             print("AGX Call: toggle group " + i + " for active vessel");
             if (HighLogic.LoadedSceneIsFlight)
             {
-                AGXFlight.ActivateActionGroup(i);
+                AGXFlight.ActivateActionGroupActivation(i,false,false);
                 return true;
             }
             else
             {
             return false;
+            }
+        }
+
+        public static bool AGXToggleGroupDelayCheck(int i) //2 on test, works //toggle action group on activevessel
+        {
+            print("AGX Call: toggle group " + i + " for active vessel");
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                AGXFlight.ActivateActionGroup(i);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -628,7 +842,7 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER); 
                 
             }
         }

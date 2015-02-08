@@ -568,7 +568,7 @@ namespace ActionGroupsExtended
 
         public class SettingsWindow : MonoBehaviour, IDrawable
         {
-            public Rect SettingsWin = new Rect(0, 0, 150, 155);
+            public Rect SettingsWin = new Rect(0, 0, 150, 180);
             public Vector2 Draw(Vector2 position)
             {
                 var oldSkin = GUI.skin;
@@ -633,6 +633,10 @@ namespace ActionGroupsExtended
                     {
                         RTWinShow = !RTWinShow;
                     }
+                }
+                if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech"))
+                {
+                    useRT = !useRT;
                 }
                 AGXBtnStyle.normal.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
@@ -1130,6 +1134,8 @@ namespace ActionGroupsExtended
                 //Debug.Log("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
                 //double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
                 //print("cur delay" + curDelay);
+                if (useRT)
+                    {
                 if (FlightGlobals.ActiveVessel.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                 {
                     Debug.Log("RemoteTech local");
@@ -1143,14 +1149,15 @@ namespace ActionGroupsExtended
                 else
                 {
                     Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                    if (useRT)
-                    {
+                    
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
+                    
+                }
                     }
-                    else
-                    {
-                        AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
-                    }
+                else
+                {
+                    ActivateActionGroupActivation(group, force, forceDir);
+                    AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.GOOD));
                 }
 
             }
@@ -2715,10 +2722,10 @@ namespace ActionGroupsExtended
                                 foreach (AGXPart agPrt in AGEditorSelectedParts)
                                 {
                                     List<BaseAction> ThisPartActionsList = new List<BaseAction>();
-                                    ThisPartActionsList.AddRange(agPrt.AGPart.Actions);
+                                    ThisPartActionsList.AddRange(agPrt.AGPart.Actions.Where(a => a.active == true));
                                     foreach (PartModule pm3 in agPrt.AGPart.Modules)
                                     {
-                                        ThisPartActionsList.AddRange(pm3.Actions);
+                                        ThisPartActionsList.AddRange(pm3.Actions.Where(a => a.active == true));
                                     }
                                     AGXAction ToAdd = new AGXAction();
                                     if (ThisPartActionsList.ElementAt(ActionsCount - 1).guiName == PartActionsList.ElementAt(ActionsCount - 1).guiName)
@@ -4326,26 +4333,34 @@ namespace ActionGroupsExtended
             {
                 foreach(AGXRemoteTechQueueItem rtItem in AGXRemoteTechQueue)
                 {
-                    if(rtItem.state == AGXRemoteTechItemState.COUNTDOWN && rtItem.timeToActivate<Planetarium.GetUniversalTime())
+                    try
                     {
-                        if(rtItem.vsl == FlightGlobals.ActiveVessel)
+                        if (rtItem.state == AGXRemoteTechItemState.COUNTDOWN && rtItem.timeToActivate < Planetarium.GetUniversalTime())
                         {
-                            ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
-                            rtItem.state = AGXRemoteTechItemState.GOOD;
-                        }
-                        else
-                        {
-                            if (rtItem.vsl.loaded)
+                            if (rtItem.vsl == FlightGlobals.ActiveVessel)
                             {
-                                AGXOtherVessel otherVsl = new AGXOtherVessel(rtItem.vsl.rootPart.flightID);
-                                otherVsl.ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
+                                ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
                                 rtItem.state = AGXRemoteTechItemState.GOOD;
                             }
                             else
                             {
-                                rtItem.state = AGXRemoteTechItemState.FAILED;
+                                if (rtItem.vsl.loaded)
+                                {
+                                    AGXOtherVessel otherVsl = new AGXOtherVessel(rtItem.vsl.rootPart.flightID);
+                                    otherVsl.ActivateActionGroupActivation(rtItem.group, rtItem.forcing, rtItem.forceDir);
+                                    rtItem.state = AGXRemoteTechItemState.GOOD;
+                                }
+                                else
+                                {
+                                    rtItem.state = AGXRemoteTechItemState.FAILED;
+                                }
                             }
                         }
+                    }
+                    catch(Exception e)
+                    {
+                        Debug.Log("AGX RTQueue Fail&Recover " + errLine + " " + e);
+                        rtItem.state = AGXRemoteTechItemState.FAILED;
                     }
                 }
                 AGXRemoteTechQueue.RemoveAll(itm => itm.timeToActivate + 3 < Planetarium.GetUniversalTime());
@@ -5341,12 +5356,10 @@ namespace ActionGroupsExtended
                                 if (rcsMdl.rcsEnabled)
                                 {
                                     agAct.activated = true;
-                                    print("rcs found true");
                                 }
                                 else
                                 {
                                     agAct.activated = false;
-                                    print("rcs found false");
                                 }
                             }
                         }

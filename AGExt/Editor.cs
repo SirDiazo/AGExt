@@ -2247,8 +2247,8 @@ namespace ActionGroupsExtended
                                 string baname = PartActionsList.ElementAt(ActionsCount - 1).name;
                                 string moduleName = PartActionsList.ElementAt(ActionsCount - 1).listParent.module.name;
                                 foreach (AGXPart agP in AGEditorSelectedParts)
-                                {
-                                    List<BaseAction> actsToCheck = new List<BaseAction>();
+                                { 
+                                    List<BaseAction> actsToCheck = new List<BaseAction>(); 
                                     if (moduleName.Length > 0)
                                     {
                                         foreach (PartModule pm in agP.AGPart.Modules)
@@ -2283,10 +2283,10 @@ namespace ActionGroupsExtended
                                 foreach (AGXPart agPrt in AGEditorSelectedParts)
                                 {
                                     List<BaseAction> ThisPartActionsList = new List<BaseAction>();
-                                    ThisPartActionsList.AddRange(agPrt.AGPart.Actions);
+                                    ThisPartActionsList.AddRange(agPrt.AGPart.Actions.Where(a => a.active == true));
                                     foreach (PartModule pm3 in agPrt.AGPart.Modules)
                                     {
-                                        ThisPartActionsList.AddRange(pm3.Actions);
+                                        ThisPartActionsList.AddRange(pm3.Actions.Where(a => a.active == true));
                                     }
                                     AGXAction ToAdd = new AGXAction();
                                     if (ThisPartActionsList.ElementAt(ActionsCount - 1).guiName == PartActionsList.ElementAt(ActionsCount - 1).guiName)

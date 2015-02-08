@@ -212,6 +212,20 @@ namespace ActionGroupsExtended
             }
         }
 
+        public void ActivateActionStringActivation(string groupStr, bool force, bool forceDir) //main activation method
+        {
+            if (thisVsl.HoldPhysics)
+            {
+                ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+            }
+            else if (vesselInstanceOK)
+            {
+                int group = actionsList.Find(agx => agx.grpName == groupStr).group;
+                ActivateActionGroupActivation(group, force, forceDir);
+
+            }
+        }
+
         public void ActivateActionGroup(int group, bool force, bool forceDir)
         {
 
