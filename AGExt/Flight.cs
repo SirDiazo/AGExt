@@ -209,6 +209,7 @@ namespace ActionGroupsExtended
 
         public void Start()
         {
+            string errLine = "1";
             try
             {
                 useRT = true;
@@ -219,6 +220,7 @@ namespace ActionGroupsExtended
                 AGXguiMod1Groups[i] = false;
                 AGXguiMod2Groups[i] = false;
             }
+            errLine = "2";
             defaultActionsListThisType = new List<BaseAction>(); //initialize list
             defaultActionsListAll = new List<BaseAction>(); //initialize list
             ThisGroupActions = new List<AGXAction>();
@@ -234,7 +236,7 @@ namespace ActionGroupsExtended
             ScrollPosSelPartsActs = Vector2.zero;
             ScrollGroups = Vector2.zero;
             CurGroupsWin = Vector2.zero;
-
+            errLine = "3";
             //AGXVsl = new AGXVessel();
 
             //AGXWinStyle = new GUIStyle(HighLogic.Skin.window);
@@ -250,7 +252,7 @@ namespace ActionGroupsExtended
             AGXguiKeys = new Dictionary<int, KeyCode>();
 
 
-
+            errLine = "4";
             for (int i = 1; i <= 250; i = i + 1)
             {
                 AGXguiNames[i] = "";
@@ -263,7 +265,20 @@ namespace ActionGroupsExtended
             KeyCodeNames.Remove("None");
             JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
             KeyCodeNames.RemoveAll(JoySticks);
-            AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            errLine = "5";
+            try
+            {
+                AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            }
+                catch
+            {
+                print("AGX Flight Start CRITICAL FAIL: AGExt.cfg not found. Check install path.");
+            }
+                if(AGExtNode == null)
+                {
+                    print("AGX Flight Start CRITICAL FAIL: AGExt.cfg not loaded. Check install path.");
+                }
+                errLine = "6";
             CurrentKeySetFlight = 1;
             CurrentKeySetNameFlight = (string)AGExtNode.GetValue("KeySetName1");
             KeySetNamesFlight[0] = (string)AGExtNode.GetValue("KeySetName1");
@@ -273,6 +288,7 @@ namespace ActionGroupsExtended
             KeySetNamesFlight[4] = (string)AGExtNode.GetValue("KeySetName5");
             CurrentVesselActions = new List<AGXAction>();
             AGXRoot = null;
+            errLine = "7";
             GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltGroupsX")), Convert.ToInt32(AGExtNode.GetValue("FltGroupsY")), 250, 530);
             SelPartsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltSelPartsX")), Convert.ToInt32(AGExtNode.GetValue("FltSelPartsY")), 365, 270);
             KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeY")), 410, 730);
@@ -282,6 +298,7 @@ namespace ActionGroupsExtended
             GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX"))+235, Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
             RemoteTechQueueWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("RTWinX")), Convert.ToInt32(AGExtNode.GetValue("RTWinY")), 350, 125);
             ActiveGroups = new Dictionary<int, bool>();
+            errLine = "8";
             if(AGExtNode.GetValue("FlightWinShowKeys") == "1")
             {
                 FlightWinShowKeycodes = true;
@@ -290,7 +307,7 @@ namespace ActionGroupsExtended
             {
                 FlightWinShowKeycodes = false;
             }
-            
+            errLine = "9";
 
 
            // UnbindDefaultKeys();  //obsolete with INputLockManager
@@ -310,15 +327,17 @@ namespace ActionGroupsExtended
                     AGXLockSet = true;
                     //print("one found");
                 }
+                errLine = "10";
 
             }
             catch
             {
+                errLine = "11";
                 InputLockManager.SetControlLock(ControlTypes.CUSTOM_ACTION_GROUPS, "AGExtControlLock");
                 AGXLockSet = true;
                 //print("Catch");
             }
-
+            errLine = "12";
             groupCooldowns = new List<AGXCooldown>(); //setup values for group cooldowns logic
             try
             {
@@ -328,10 +347,10 @@ namespace ActionGroupsExtended
             {
                 print("AGX Default cooldown not found, using 5 Update frames");
             }
-
+            errLine = "13";
             if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
             {
-
+                errLine = "14";
 
                 AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
                 AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
@@ -365,19 +384,21 @@ namespace ActionGroupsExtended
             }
             else
             {
+                errLine = "15";
                 AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
             }
-
+            errLine = "16";
             if (AGExtNode.GetValue("FltShow") == "0")
             {
                 ShowAGXMod = false;
             }
+            errLine = "17";
             float facilityLevel = Mathf.Max(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding));
-                
+            print("AGX Career check: " + facilityLevel);
             if (AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
             {
                 //print("b");
-
+                errLine = "18";
                 if ((string)AGExtNode.GetValue("OverrideCareer") == "1")
                 {
                     //print("c");
@@ -411,7 +432,7 @@ namespace ActionGroupsExtended
             else
             {
                 //print("j");
-                
+                errLine = "19";
 
                 if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
                 {
@@ -433,7 +454,7 @@ namespace ActionGroupsExtended
                 }
             }
            // print("startd " + showCareerCustomAGs);
-
+            errLine = "20";
             IsGroupToggle = new Dictionary<int, bool>();
             ShowGroupInFlight = new bool[6,251];
             ShowGroupInFlightNames = new string[6];
@@ -445,7 +466,8 @@ namespace ActionGroupsExtended
             //foreach (ModuleAGExtData agData in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
             //{
             //    ShowGroupInFlightNames = agData.LoadShowGroupNames();
-            //}
+
+            errLine = "21";
             for (int i = 1; i <= 250; i++)
             {
                 IsGroupToggle[i] = false;
@@ -456,7 +478,7 @@ namespace ActionGroupsExtended
             }
             ShowGroupInFlightCurrent = 1;
            // print("AGXStart " + Planetarium.GetUniversalTime());
-
+            errLine = "22";
             AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
             AGXWinStyle = new GUIStyle(AGXSkin.window); 
             AGXLblStyle = new GUIStyle(AGXSkin.label);
@@ -466,7 +488,7 @@ namespace ActionGroupsExtended
             AGXFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
             AGXLblStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
             AGXLblStyle.wordWrap = false;
-
+            errLine = "23";
             AGXBtnStyle = new GUIStyle(AGXSkin.button);
             AGXBtnStyle.fontStyle = FontStyle.Normal;
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
@@ -481,6 +503,7 @@ namespace ActionGroupsExtended
             byte[] importPartPlus = File.ReadAllBytes(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/PartLocPlus.png");
             //byte[] testXport = AGXBtnStyle.normal.background.EncodeToPNG();
             //File.WriteAllBytes(Application.dataPath + "/SavedScreen.png", testXport);
+            errLine = "24";
             ButtonTexture.LoadImage(importTxt);
             ButtonTexture.Apply();
             ButtonTextureRed.LoadImage(importTxtRed);
@@ -503,6 +526,7 @@ namespace ActionGroupsExtended
             PartPlus.Apply();
             SettingsWinRect = new Rect(500, 500, 150, 75);
             partOldVessel = new List<AGXPartVesselCheck>();
+            errLine = "25";
             //GameEvents.onVesselGoOffRails.Add(VesselOffRails); //triggers when vessel loads at flight scene start also
             //GameEvents.onVesselGoOnRails.Add(VesselOnRails);
             //GameEvents.onPartDestroyed.Add(partDead);
@@ -512,19 +536,24 @@ namespace ActionGroupsExtended
             
             //AGXBaseNode = AGextScenario.LoadBaseNode();
             AGXFlightNode = new ConfigNode();
+            errLine = "26";
             if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
             {
+                errLine = "27";
                 AGXEditorNodeFlight = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
             }
             else
             {
+                errLine = "28";
                 AGXEditorNodeFlight = new ConfigNode("EDITOR");
                 AGXEditorNodeFlight.AddValue("name", "editor");
             }
             //AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"); 
             //AllVesselsActions = new List<AGXAction>();
             loadedVessels = new List<Vessel>();
+            errLine = "29";
             LoadCurrentKeyBindings();
+            errLine = "30";
             oldShipParts = new List<Part>();
             //KeySetNamesFlight[0] = AGExtNode.GetValue("KeySetName1");
             // /print("3a");
@@ -548,7 +577,7 @@ namespace ActionGroupsExtended
                     RTFound = true;
                 }
             }
-
+            errLine = "31";
                 if(RTFound && bool.Parse(AGExtNode.GetValue("RTWinShow")))
                 {
                     RTWinShow = true;
@@ -558,10 +587,11 @@ namespace ActionGroupsExtended
                     RTWinShow = false;
                 }
                 Debug.Log("RemoteTech " + RTWinShow);
+                print("AGX Started Okay");
         }
         catch(Exception e)
     {
-        print("AGX Flight Start FAIL " + e);
+        print("AGX Flight Start FAIL " + errLine + " " + e);
     }
         }
 
@@ -798,13 +828,28 @@ namespace ActionGroupsExtended
 
         public static void LoadGroupVisibilityNames(string LoadString) //ver2 only
         {
-            for (int i = 1; i <= 4; i++)
+            string errLine = "1";
+            try
             {
-                int KeyLength = LoadString.IndexOf('\u2023');
-                ShowGroupInFlightNames[i] = LoadString.Substring(0, KeyLength);
-                LoadString = LoadString.Substring(KeyLength + 1);
+                for (int i = 1; i <= 4; i++)
+                {
+                    errLine = "2";
+                    int KeyLength = LoadString.IndexOf('\u2023');
+                    ShowGroupInFlightNames[i] = LoadString.Substring(0, KeyLength);
+                    LoadString = LoadString.Substring(KeyLength + 1);
+                }
+                errLine = "3";
+                ShowGroupInFlightNames[5] = LoadString;
             }
-            ShowGroupInFlightNames[5] = LoadString;
+            catch(Exception e)
+            {
+                Debug.Log("AGX LoadGroupVisiblityNames Fail " + errLine + " " + e);
+                ShowGroupInFlightNames[1] = "Group 1";
+                ShowGroupInFlightNames[2] = "Group 2";
+                ShowGroupInFlightNames[3] = "Group 3";
+                ShowGroupInFlightNames[4] = "Group 4";
+                ShowGroupInFlightNames[5] = "Group 5";
+            }
         }
 
         public static void SaveWindowPositions()
@@ -3413,6 +3458,7 @@ namespace ActionGroupsExtended
         }
         public void LoadGroupVisibility(string stringToLoad)
         {
+            string errLine = "1";
             try
             {
                 //foreach (PartModule pm in FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGExtData>())
@@ -3421,11 +3467,13 @@ namespace ActionGroupsExtended
                    // print("AGXTogLoad" + pm.part.ConstructID + " " + LoadString);
                     if (LoadString.Length == 1501)
                     {
+                        errLine = "2";
                         ShowGroupInFlightCurrent = Convert.ToInt32(LoadString.Substring(0, 1));
                         LoadString = LoadString.Substring(1);
 
                         for (int i = 1; i <= 250; i++)
                         {
+                            errLine = "3";
                             if (LoadString[0] == '1')
                             {
                                 IsGroupToggle[i] = true;
@@ -3434,16 +3482,20 @@ namespace ActionGroupsExtended
                             {
                                 IsGroupToggle[i] = false;
                             }
+                            errLine = "4";
                             LoadString = LoadString.Substring(1);
                             //ReturnStr = ReturnStr + Convert.ToInt16(IsGroupToggle[i]).ToString(); //add toggle state for group
                             for (int i2 = 1; i2 <= 5; i2++)
                             {
+                                errLine = "5";
                                 if (LoadString[0] == '1')
                                 {
+                                    errLine = "6";
                                     ShowGroupInFlight[i2, i] = true;
                                 }
                                 else
                                 {
+                                    errLine = "7";
                                     ShowGroupInFlight[i2, i] = false;
                                 }
                                 LoadString = LoadString.Substring(1);
@@ -3453,9 +3505,11 @@ namespace ActionGroupsExtended
                     }
                     else
                     {
+                        errLine = "8";
                         ShowGroupInFlightCurrent = 1;
                         for (int i = 1; i <= 250; i++)
                         {
+                            errLine = "9";
                                 IsGroupToggle[i] = false;
                             for (int i2 = 1; i2 <= 5; i2++)
                             {
@@ -3463,13 +3517,23 @@ namespace ActionGroupsExtended
                             }
                         }
                     }
+                    errLine = "10";
                 //}
                 CalculateActionsToShow();
                // print("AGXTogLoadFin: " + IsGroupToggle[1] + IsGroupToggle[2] + IsGroupToggle[3] + IsGroupToggle[4] + IsGroupToggle[5] + IsGroupToggle[6] + IsGroupToggle[7] + IsGroupToggle[8] + IsGroupToggle[9] + IsGroupToggle[10]);
             }
-            catch
+            catch(Exception e)
             {
-                print("AGX Load Actions Visibility Fail!");
+                print("AGX LoadGroupVisibility Fail! " + errLine + " " + e);
+                ShowGroupInFlightCurrent = 1;
+                for (int i = 1; i <= 250; i++)
+                {
+                    IsGroupToggle[i] = false;
+                    for (int i2 = 1; i2 <= 5; i2++)
+                    {
+                        ShowGroupInFlight[i2, i] = true;
+                    }
+                }
             }
         }
 
@@ -3480,65 +3544,62 @@ namespace ActionGroupsExtended
 
         public void LoadGroupNames(string namesToLoad, bool doReset)
         {
-
-
-            if (doReset)
+            string errLine = "1";
+            try
             {
-                for (int i = 1; i <= 250; i = i + 1)
+                if (doReset)
                 {
-                    AGXguiNames[i] = "";
-                }
-            }
-          
-
-            string LoadNames = namesToLoad;
-          
-            //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-            //{
-                
-                //foreach (PartModule pm in p.Modules.OfType<ModuleAGExtData>())                   c cc 
-                //{
-                  
-
-                    //LoadNames = (string)pm.Fields.GetValue("AGXNames");
-                    //print("AGX Load Name: "+ p.partName+ " " + LoadNames);
-           // print("Loadnames " + LoadNames);        
-                    if (LoadNames.Length > 0) //also update PartVesselCheck method
+                    errLine = "2";
+                    for (int i = 1; i <= 250; i = i + 1)
                     {
-                        while (LoadNames[0] == '\u2023')
+                        AGXguiNames[i] = "";
+                    }
+                }
+                errLine = "3";
+
+                string LoadNames = namesToLoad;
+
+                if (LoadNames.Length > 0) //also update PartVesselCheck method
+                {
+                    errLine = "4";
+                    while (LoadNames[0] == '\u2023')
+                    {
+                        errLine = "5";
+                        int groupNum = new int();
+                        string groupName = "";
+                        LoadNames = LoadNames.Substring(1);
+                        groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
+                        LoadNames = LoadNames.Substring(3);
+                        errLine = "6";
+                        if (LoadNames.IndexOf('\u2023') == -1)
                         {
-                        
-                            int groupNum = new int();
-                            string groupName = "";
-                            LoadNames = LoadNames.Substring(1);
-                            groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
-                            LoadNames = LoadNames.Substring(3);
-
-                            if (LoadNames.IndexOf('\u2023') == -1)
-                            {
-                               
-                                groupName = LoadNames;
-                            }
-                            else
-                            {
-                               
-                                groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
-                                LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
-                            }
-
-                            //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
-                            if (AGXguiNames[groupNum].Length < 1)
-                            {
-                                //print("Add name in");
-                                AGXguiNames[groupNum] = groupName;
-                            }
-
+                            errLine = "7";
+                            groupName = LoadNames;
                         }
-                   // }
-               // }
-            }
-          
+                        else
+                        {
+                            errLine = "8";
+                            groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
+                            LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
+                        }
+                        errLine = "9";
+                        //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
+                        if (AGXguiNames[groupNum].Length < 1)
+                        {
+                            //print("Add name in");
+                            AGXguiNames[groupNum] = groupName;
+                        }
 
+                    }
+                    // }
+                    // }
+                }
+
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX LoadGroupNamesFail " + errLine + " " + e);
+            }
         }
 
 
@@ -3595,8 +3656,16 @@ namespace ActionGroupsExtended
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit,Mathf.Infinity,RayMask))
             {
-               
-               return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
+                Part hitPart = (Part)UIPartActionController.GetComponentUpwards("Part", hit.collider.gameObject); //how to find small parts that are "inside" the large part they are attached to.
+                if(FlightGlobals.ActiveVessel.parts.Contains(hitPart))
+                {
+                    return hitPart;
+                }
+                else
+                {
+                    return null;
+                }
+               //return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
             }
             return null;
         }
@@ -3646,6 +3715,15 @@ namespace ActionGroupsExtended
                 errLine = "7";
                 //print("AGX flight node found");
                 newVsl = AGXFlightNode.GetNode(FlightGlobals.ActiveVessel.id.ToString());
+            }
+            else
+            {
+                newVsl = new ConfigNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
+                newVsl.AddValue("currentKeyset", "1");
+                newVsl.AddValue("groupNames", "");
+                newVsl.AddValue("groupVisibility", "1");
+                newVsl.AddValue("groupVisibilityNames", "Group1‣Group2‣Group3‣Group4‣Group5");
+
             }
             errLine = "8";
             CurrentKeySetFlight = Convert.ToInt32(newVsl.GetValue("currentKeyset"));
@@ -3756,7 +3834,15 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
-            //print("alpha 1 " + Input.GetKeyDown(KeyCode.Alpha1));
+            //print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
+            //if ((ControlTypes.ALL_SHIP_CONTROLS & (ControlTypes)InputLockManager.lockMask) == 0)
+            //{
+            //    print("not Locked");
+            //}
+            //else
+            //{
+            //    print("locked");
+            //}
             //print("AGXLock state " + AGXLockSet);
             string errLine = "1";
             try
@@ -4035,11 +4121,22 @@ namespace ActionGroupsExtended
                                 errLine = "24f";
                                 CurrentKeySetFlight = Convert.ToInt32((string)vslNode.GetValue("currentKeyset"));
                                 //LoadCurrentKeyBindings();
+                                try
+                                {
+                                    if(CurrentKeySetFlight < 1 || CurrentKeySetFlight > 5)
+                                    {
+                                        CurrentKeySetFlight = 1;
+                                    }
+                                }
+                                catch
+                                {
+                                    CurrentKeySetFlight = 1;
+                                }
                                 CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
                                 LoadGroupNames(vslNode.GetValue("groupNames"));
                                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
                                 LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
-
+                                errLine = "24fg";
                                 foreach (ConfigNode prtNode in vslNode.nodes)
                                 {
 
@@ -4047,6 +4144,7 @@ namespace ActionGroupsExtended
                                     Part gamePart = new Part();
                                     if (prtNode.HasValue("flightID"))
                                     {
+                                        errLine = "24h";
                                         uint flightIDFromFile = Convert.ToUInt32(prtNode.GetValue("flightID"));
                                         gamePart = FlightGlobals.ActiveVessel.parts.First(prt => prt.flightID == flightIDFromFile);
                                         partDist = 0f;
@@ -4054,6 +4152,7 @@ namespace ActionGroupsExtended
 
                                     else
                                     {
+                                        errLine = "24i";
                                         foreach (Part p in FlightGlobals.ActiveVessel.parts) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
                                         {
                                             Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
@@ -4066,7 +4165,7 @@ namespace ActionGroupsExtended
                                         }
                                     }
                                     bool ShowAmbiguousMessage2 = true; //show actions ambiguous message?
-
+                                    errLine = "24j";
                                     //if (ShowAmbiguousMessage && partDist < 0.3f)
                                     if (partDist < 0.3f)//do not show it if part found is more then 0.3meters off
                                     {
@@ -4076,6 +4175,7 @@ namespace ActionGroupsExtended
                                     {
                                         ShowAmbiguousMessage2 = false;
                                     }
+                                    errLine = "24k";
                                     //print("gamepart " + gamePart.ConstructID + " " + partDist);
                                     foreach (ConfigNode actNode in prtNode.nodes)
                                     {
@@ -4088,7 +4188,7 @@ namespace ActionGroupsExtended
                                         }
                                     }
                                 }
-
+                                errLine = "24l";
                                 List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
                                 CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
                                 CustomActions.Add(KSPActionGroup.Custom02);
@@ -4118,7 +4218,7 @@ namespace ActionGroupsExtended
                                     //}
                                     // print("part orgpos " + p.ConstructID+ " "  + p.orgPos + " " + p.orgRot);
                                 }
-
+                                errLine = "24m";
                                 foreach (BaseAction baLoad in partAllActions)
                                 {
                                     foreach (KSPActionGroup agrp in CustomActions)
@@ -4154,13 +4254,13 @@ namespace ActionGroupsExtended
                         //} //close backet on else statment that this is not dock/undock
 
 
-                        errLine = "22";
+                        errLine = "32";
 
 
                         AGXRoot = FlightGlobals.ActiveVessel.rootPart;
                         oldShipParts = new List<Part>(FlightGlobals.ActiveVessel.parts);
 
-                        errLine = "22a";
+                        errLine = "32a";
 
                         overrideRootChange = false;
                         LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
@@ -4169,15 +4269,15 @@ namespace ActionGroupsExtended
                         RefreshCurrentActions();
                         loadFinished = true;
                         //print("sit " + FlightGlobals.ActiveVessel.situation.ToString());
-                        errLine = "23"; 
+                        errLine = "33"; 
                         CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
                         LoadCurrentKeyBindings();
-                        errLine = "23a";
+                        errLine = "33a";
                         FlightSaveToFile(AGXFlightNode);//add save current vessel here
-                        errLine = "23b";
+                        errLine = "33b";
                     }
                 }
-                errLine = "24";
+                errLine = "34";
                 if (LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //parts count changed, remove any actions assigned to parts that have disconnected/been destroyed
                 {
                     print("Part count change, reload AGX");
@@ -4195,11 +4295,11 @@ namespace ActionGroupsExtended
                     RefreshCurrentActions();
                     LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
                     oldShipParts = new List<Part>(FlightGlobals.ActiveVessel.parts);
-                    errLine = "25";
+                    errLine = "35";
 
                 }
             }
-            errLine = "26";
+            errLine = "36";
                
             if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)// && InputLockManager.IsLocked(ControlTypes.All))//&& !InputLockManager.IsLocked(ControlTypes.All))
             {
@@ -4207,7 +4307,7 @@ namespace ActionGroupsExtended
                 foreach (KeyCode KC in ActiveKeys)
                 {
                     
-                    errLine = "27";
+                    errLine = "37";
                     if (Input.GetKeyDown(KC))
                     {
                          //print("keydown " + KC);
@@ -4222,7 +4322,7 @@ namespace ActionGroupsExtended
                     }
                 }
             }
-            errLine = "28";
+            errLine = "38";
             //if (!ActiveActionsCalculated)
             //{
             //    CalculateActiveActions();
@@ -4230,22 +4330,22 @@ namespace ActionGroupsExtended
             //}
             if(Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
             {
-            errLine = "29";
+            errLine = "39";
                 Part selPart = new Part();
             selPart = SelectPartUnderMouse();
             if(selPart != null)
             {
                 AddSelectedPart(selPart);
             }
-            errLine = "30";
+            errLine = "40";
             }
-            errLine = "31";
+            errLine = "41";
             if (RightClickDelay < 3)
             {
-                errLine = "32";
+                errLine = "42";
                 if (RightClickDelay == 2)
                 {
-                    errLine = "33";
+                    errLine = "43";
                     UIPartActionWindow UIPartsListThing = new UIPartActionWindow();
                     UIPartsListThing = (UIPartActionWindow)FindObjectOfType(typeof(UIPartActionWindow));
                     //UnityEngine.Object[] TempObj = FindObjectsOfType(typeof(UIPartActionWindow));
@@ -4268,10 +4368,10 @@ namespace ActionGroupsExtended
                 
                     RightClickDelay = RightClickDelay + 1; 
                 
-                errLine = "34";
+                errLine = "44";
             }
 
-            errLine = "35";
+            errLine = "45";
             
             if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
             {
@@ -4279,7 +4379,7 @@ namespace ActionGroupsExtended
                 RightLickPartAdded = false;
 
             }
-            errLine = "36";
+            errLine = "46";
 
             //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             //{
@@ -4302,7 +4402,7 @@ namespace ActionGroupsExtended
             //    actionsCheckFrameCount = actionsCheckFrameCount + (int)(Time.deltaTime * 1000f);
             //}
             //print("delta time " + actionsCheckFrameCount);
-            errLine = "37";
+            errLine = "47";
             
                 //count down action cool downs
             groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
@@ -4311,12 +4411,12 @@ namespace ActionGroupsExtended
                 agCD.delayLeft = agCD.delayLeft + 1;
                 
             }
-            errLine = "38";
+            errLine = "48";
                 if(RTFound)
                 {
                     CheckRTQueue();
                 }
-                errLine = "39";
+                errLine = "49";
             //PrintPartActs();
             //print("landed " + FlightGlobals.ActiveVessel.landedAt);
         }

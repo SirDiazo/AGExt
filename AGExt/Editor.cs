@@ -337,13 +337,15 @@ namespace ActionGroupsExtended
                         {
                            // print("e");
                             facilityLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar);
+                            print("AGX Career check SPH: " + facilityLevel);
                         }
                         else
                         {
                             //print("f");
                             facilityLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding);
+                            print("AGX Career check VAB: " + facilityLevel);
                         }
-                            
+                          
                     if(GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
                     {
                        // print("g");
