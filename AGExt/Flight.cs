@@ -289,14 +289,7 @@ namespace ActionGroupsExtended
             CurrentVesselActions = new List<AGXAction>();
             AGXRoot = null;
             errLine = "7";
-            GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltGroupsX")), Convert.ToInt32(AGExtNode.GetValue("FltGroupsY")), 250, 530);
-            SelPartsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltSelPartsX")), Convert.ToInt32(AGExtNode.GetValue("FltSelPartsY")), 365, 270);
-            KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("FltKeyCodeY")), 410, 730);
-            KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltKeySetX")), Convert.ToInt32(AGExtNode.GetValue("FltKeySetY")), 185, 335);
-            CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltCurActsX")), Convert.ToInt32(AGExtNode.GetValue("FltCurActsY")), 345, 140);
-            FlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX")), Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 235, 100);
-            GroupsInFlightWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("FltMainX"))+235, Convert.ToInt32(AGExtNode.GetValue("FltMainY")), 80, 110);
-            RemoteTechQueueWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("RTWinX")), Convert.ToInt32(AGExtNode.GetValue("RTWinY")), 350, 125);
+            StartLoadWindowPositions();
             ActiveGroups = new Dictionary<int, bool>();
             errLine = "8";
             if(AGExtNode.GetValue("FlightWinShowKeys") == "1")
@@ -592,9 +585,99 @@ namespace ActionGroupsExtended
         catch(Exception e)
     {
         print("AGX Flight Start FAIL " + errLine + " " + e);
+        print("AGX AGExt node dump: " + AGExtNode);
     }
         }
 
+
+        public void StartLoadWindowPositions()
+        {
+            string errLine = "1";
+            try
+            {
+                errLine = "2";
+                int WinX;
+                int WinY;
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltGroupsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltGroupsY"), out WinY))
+                {
+                    GroupsWin = new Rect(WinX, WinY, 250, 530);
+                }
+                else
+                {
+                    GroupsWin = new Rect(100, 100, 250, 530);
+                }
+                errLine = "3";
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltSelPartsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltSelPartsY"), out WinY))
+                {
+                    SelPartsWin = new Rect(WinX, WinY, 365, 270);
+                }
+                else
+                {
+                    SelPartsWin = new Rect(100, 100, 365, 270);
+                }
+                errLine = "4";
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltKeyCodeX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltKeyCodeY"), out WinY))
+                {
+                    KeyCodeWin = new Rect(WinX, WinY, 410, 730);
+                }
+                else
+                {
+                    KeyCodeWin = new Rect(100, 100, 410, 730);
+                }
+                errLine = "5";
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltKeySetX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltKeySetY"), out WinY))
+                {
+                    KeySetWin = new Rect(WinX, WinY, 185, 335);
+                }
+                else
+                {
+                    KeySetWin = new Rect(100, 100, 185, 335);
+                }
+                errLine = "6";
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltCurActsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltCurActsY"), out WinY))
+                {
+                    CurActsWin = new Rect(WinX, WinY, 345, 140);
+                }
+                else
+                {
+                    CurActsWin = new Rect(100, 100, 345, 140);
+                }
+                errLine = "7";
+                if (Int32.TryParse((string)AGExtNode.GetValue("FltMainX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltMainY"), out WinY))
+                {
+                    FlightWin = new Rect(WinX, WinY, 235, 100);
+                    GroupsInFlightWin = new Rect(WinX + 235, WinY, 80, 110);
+                }
+                else
+                {
+                    FlightWin = new Rect(100, 100, 235, 100);
+                    GroupsInFlightWin = new Rect(335, 100, 80, 110);
+                }
+                errLine = "8";
+                errLine = "9";
+                if (Int32.TryParse((string)AGExtNode.GetValue("RTWinX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("RTWinY"), out WinY))
+                {
+                    RemoteTechQueueWin = new Rect(WinX, WinY, 350, 125);
+                }
+                else
+                {
+                    RemoteTechQueueWin = new Rect(100, 100, 350, 125);
+                }
+                errLine = "10";
+            }
+            catch(Exception e)
+            {
+                print("AGX StartLoadWindowPostion Error, Recovered. " + errLine + " " + e);
+                GroupsWin = new Rect(100, 100, 250, 530);
+                SelPartsWin = new Rect(100, 100, 365, 270);
+                KeyCodeWin = new Rect(100, 100, 410, 730);
+                KeySetWin = new Rect(100, 100, 185, 335);
+                CurActsWin = new Rect(100, 100, 345, 140);
+                FlightWin = new Rect(100, 100, 235, 100);
+                GroupsInFlightWin = new Rect(335, 100, 80, 110);
+                RemoteTechQueueWin = new Rect(100, 100, 350, 125);
+            }
+        }
 
         public class SettingsWindow : MonoBehaviour, IDrawable
         {

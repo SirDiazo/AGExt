@@ -309,15 +309,7 @@ namespace ActionGroupsExtended
                 errLine = "8";
                 AGXRoot = null;
                 errLine = "9";
-                GroupsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdGroupsX")), Convert.ToInt32(AGExtNode.GetValue("EdGroupsY")), 250, 530);
-                errLine = "10";
-                SelPartsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdSelPartsX")), Convert.ToInt32(AGExtNode.GetValue("EdSelPartsY")), 365, 270);
-                errLine = "11";
-                KeyCodeWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeX")), Convert.ToInt32(AGExtNode.GetValue("EdKeyCodeY")), 410, 730);
-                errLine = "12";
-                KeySetWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdKeySetX")), Convert.ToInt32(AGExtNode.GetValue("EdKeySetY")), 185, 335);
-                errLine = "13";
-                CurActsWin = new Rect(Convert.ToInt32(AGExtNode.GetValue("EdCurActsX")), Convert.ToInt32(AGExtNode.GetValue("EdCurActsY")), 345, 140);
+                StartLoadWindowPositions();
                 errLine = "14";
                 //print("a");
                 if(AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
@@ -560,6 +552,7 @@ namespace ActionGroupsExtended
             catch(Exception e)
             {
                 print("AGX Editor Start Fail " + errLine + " " + e);
+                print("AGX AGExt node dump: " + AGExtNode);
             }
            }
 
@@ -569,6 +562,69 @@ namespace ActionGroupsExtended
         //    UIScrollList lst = (UIScrollList)obj;
         //    print(lst.
         //}
+
+        public void StartLoadWindowPositions()
+        {
+            string errLine = "1";
+            try
+            {
+                int WinX;
+                int WinY;
+                if (Int32.TryParse((string)AGExtNode.GetValue("EdGroupsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("EdGroupsY"), out WinY))
+                {
+                    GroupsWin = new Rect(WinX, WinY, 250, 530);
+                }
+                else
+                {
+                    GroupsWin = new Rect(100, 100, 250, 530);
+                }
+                errLine = "10";
+                if (Int32.TryParse((string)AGExtNode.GetValue("EdSelPartsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("EdSelPartsY"), out WinY))
+                {
+                    SelPartsWin = new Rect(WinX, WinY, 365, 270);
+                }
+                else
+                {
+                    SelPartsWin = new Rect(100, 100, 365, 270);
+                }
+                errLine = "11";
+                if (Int32.TryParse((string)AGExtNode.GetValue("EdKeyCodeX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("EdKeyCodeY"), out WinY))
+                {
+                    KeyCodeWin = new Rect(WinX, WinY, 410, 730);
+                }
+                else
+                {
+                    KeyCodeWin = new Rect(100, 100, 410, 730);
+                }
+                errLine = "12";
+                if (Int32.TryParse((string)AGExtNode.GetValue("EdKeySetX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("EdKeySetY"), out WinY))
+                {
+                    KeySetWin = new Rect(WinX, WinY, 185, 335);
+                }
+                else
+                {
+                    KeySetWin = new Rect(100, 100, 185, 335);
+                }
+                errLine = "13";
+                if (Int32.TryParse((string)AGExtNode.GetValue("EdCurActsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("EdCurActsY"), out WinY))
+                {
+                    CurActsWin = new Rect(WinX, WinY, 345, 140);
+                }
+                else
+                {
+                    CurActsWin = new Rect(100, 100, 345, 140);
+                }
+            }
+            catch(Exception e)
+            {
+                print("AGX StartLoadWindowPostion Error, Recovered. " + errLine + " " + e);
+                GroupsWin = new Rect(100, 100, 250, 530);
+                SelPartsWin = new Rect(100, 100, 365, 270);
+                KeyCodeWin = new Rect(100, 100, 410, 730);
+                KeySetWin = new Rect(100, 100, 185, 335);
+                CurActsWin = new Rect(100, 100, 345, 140);
+            }
+        }
 
         public void DummyVoid()
         {
