@@ -823,7 +823,7 @@ namespace ActionGroupsExtended
             }
         }
 
-        public static void RTDataReceive(ConfigNode node) //receive data back from RT
+        public static bool RTDataReceive(ConfigNode node) //receive data back from RT
         {
             Debug.Log("AGX Call: RemoteTechCallback");
             if (HighLogic.LoadedSceneIsFlight)
@@ -845,6 +845,7 @@ namespace ActionGroupsExtended
                 ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER); 
                 
             }
+            return true;
         }
     }
 

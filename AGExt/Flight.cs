@@ -1052,7 +1052,7 @@ namespace ActionGroupsExtended
                     FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
                     if (RTWinShow)
                     {
-                        RemoteTechQueueWin = GUI.Window(673467798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
+                        RemoteTechQueueWin = GUI.Window(673462798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
                     }
                     //TrapMouse |= FlightWin.Contains(RealMousePos);
                    
@@ -1785,10 +1785,12 @@ namespace ActionGroupsExtended
             if (groupToCall >= 1 && groupToCall <= 250)
             {
                 ConfigNode passAction = new ConfigNode("AGXAction");
-                passAction.AddValue("Description", "Action Group: " + groupToCall.ToString());
-                passAction.AddValue("ShortName", "AGX "+groupToCall.ToString());
-                passAction.AddValue("ReflectionGetType", "ActionGroupsExtended.AGXRemoteTechLinks, AGExt");
-                passAction.AddValue("ReflectionInvokeMember", "RTDataReceive");
+                passAction.AddValue("Executor", "AGX");
+                passAction.AddValue("QueueLabel", "Action Group: " + groupToCall.ToString());
+                passAction.AddValue("ActiveLabel", "Action Group: " + groupToCall.ToString());
+                passAction.AddValue("ShortLabel", "AGX " + groupToCall.ToString());
+                passAction.AddValue("ReflectionType", "ActionGroupsExtended.AGXRemoteTechLinks, AGExt");
+                passAction.AddValue("ReflectionPopMethod", "RTDataReceive");
                 passAction.AddValue("GUIDString", FlightGlobals.ActiveVessel.id.ToString());
                 passAction.AddValue("FlightID", FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
                 passAction.AddValue("Group", groupToCall.ToString());
@@ -1811,7 +1813,7 @@ namespace ActionGroupsExtended
                 try
                 {
                     Type calledType = Type.GetType("RemoteTech.API.API, RemoteTech");
-                    calledType.InvokeMember("ReceiveData", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { passAction });
+                    calledType.InvokeMember("QueueCommandToFlightComputer", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { passAction });
 
                 }
 
