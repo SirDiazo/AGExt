@@ -109,6 +109,7 @@ namespace ActionGroupsExtended
         private static bool ActionsListDirty = true; //is our actions requiring update?
        private static bool ShowCurActsWin = true;
         public static Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
+        public static Dictionary<int, bool> isDirectAction = new Dictionary<int, bool>();
         private bool AGXShow = false;
         private static GUISkin AGXSkin;
         public static GUIStyle AGXWinStyle = null;
@@ -541,10 +542,12 @@ namespace ActionGroupsExtended
                 GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
                 GameEvents.onPartRemove.Add(PartRemove);
                 GameEvents.onEditorShipModified.Add(VesselChanged);
+                isDirectAction = new Dictionary<int, bool>();
                 CurrentVesselActions.Clear();
                 EditorLoadFromFile();
                 EditorLoadFromNode();
                 errLine = "21";
+                
                 //print("Loading now");
                 //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
                 LoadFinished = true;
@@ -2447,7 +2450,7 @@ namespace ActionGroupsExtended
 
                     Color TxtClr = GUI.contentColor;
                     GUI.contentColor = Color.green;
-                    if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: Yes", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 155, 80, 22), "Toggle:Yes", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = false;
@@ -2456,12 +2459,32 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: No", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 155, 80, 22), "Toggle:No", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = true;
                     }
                 }
+
+                if (isDirectAction[AGXCurActGroup])
+                {
+                    Color btnClr = AGXBtnStyle.normal.textColor;
+                    AGXBtnStyle.normal.textColor = Color.red;
+                    if (GUI.Button(new Rect(SelPartsLeft + 315, 155, 55, 22), "Hold", AGXBtnStyle))
+                    {
+                        isDirectAction[AGXCurActGroup] = true;
+                    }
+                    AGXBtnStyle.normal.textColor = btnClr;
+                }
+                else
+                {
+                    if (GUI.Button(new Rect(SelPartsLeft + 315, 155, 55, 22), "Tap", AGXBtnStyle))
+                    {
+                        isDirectAction[AGXCurActGroup] = true;
+                    }
+                }
+
+
                 GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:", AGXLblStyle);
                 Color TxtClr2 = GUI.contentColor;
 
@@ -2608,6 +2631,73 @@ namespace ActionGroupsExtended
         //        print("AGX Editor Fail (SaveCurrentVesselActions) " + errLine + " " + e);
         //    }
         //}
+
+
+        public static void LoadDirectActionState(string DirectActions)
+        {
+            try
+            {
+                isDirectAction = new Dictionary<int, bool>();
+                if(DirectActions.Length == 250)
+                {
+                    for (int i = 1; i <= 250; i++)
+                    {
+                        if (DirectActions[0] == '1')
+                        {
+                            isDirectAction[i] = true;
+                        }
+                        else
+                        {
+                            isDirectAction[i] = false;
+                        }
+                        DirectActions = DirectActions.Substring(1);
+                    }
+                }
+                else
+                {
+                    for (int i = 1; i <= 250; i++)
+                    {
+                        isDirectAction[i] = false;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX LoadDirectActions Fail " + e);
+                for(int i = 1;i <=251;i++)
+                {
+                    isDirectAction[i] = false;
+                }
+            }
+        }
+
+        public static string SaveDirectActionState(string str)
+        {
+            try
+            {
+
+                string ReturnStr = ""; 
+
+                for (int i = 1; i <= 250; i++)
+                {
+                    if(isDirectAction[i])
+                    {
+                        ReturnStr = ReturnStr + "1";
+                    }
+                    else
+                    {
+                        ReturnStr = ReturnStr + "0";
+                    }
+
+                }
+                return ReturnStr;
+
+            }
+            catch
+            {
+                return str;
+            }
+        }
 
         public void RefreshDefaultActionsList()
         {
@@ -3945,6 +4035,14 @@ namespace ActionGroupsExtended
                     {
                         LoadGroupVisibilityNames("Group1" + '\u2023' + "Group2" + '\u2023' + "Group3" + '\u2023' + "Group4" + '\u2023' + "Group5");
                     }
+                    if (thisVsl.HasValue("DirectActionState"))
+                    {
+                        LoadDirectActionState(thisVsl.GetValue("DirectActionState"));
+                    }
+                    else
+                    {
+                        LoadDirectActionState("");
+                    }
                     errLine = "15a";
                     //print("adfg " + thisVsl.CountNodes);
                     foreach (ConfigNode prtNode in thisVsl.nodes)
@@ -4044,6 +4142,7 @@ namespace ActionGroupsExtended
                             }
                             errLine = "18";
                         }
+                       
                     }
                     catch
                     {
@@ -4316,6 +4415,8 @@ namespace ActionGroupsExtended
                     errLine = "16";
                     thisVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                     errLine = "17";
+                    thisVsl.AddValue("DirectActionState", SaveDirectActionState(""));
+                    errLine = "17a";
                     UpdateAGXActionGroupNames();
                     try
                     {
