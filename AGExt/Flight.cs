@@ -4230,9 +4230,16 @@ namespace ActionGroupsExtended
                                     if (prtNode.HasValue("flightID"))
                                     {
                                         errLine = "24h";
-                                        uint flightIDFromFile = Convert.ToUInt32(prtNode.GetValue("flightID"));
-                                        gamePart = FlightGlobals.ActiveVessel.parts.First(prt => prt.flightID == flightIDFromFile);
-                                        partDist = 0f;
+                                        try
+                                        {
+                                            uint flightIDFromFile = Convert.ToUInt32(prtNode.GetValue("flightID"));
+                                            gamePart = FlightGlobals.ActiveVessel.parts.First(prt => prt.flightID == flightIDFromFile);
+                                            partDist = 0f;
+                                        }
+                                        catch
+                                        {
+                                            continue; //bad FLightID in file, skip this action
+                                        }
                                     }
 
                                     else

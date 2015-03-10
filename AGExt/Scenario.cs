@@ -584,6 +584,54 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         //actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
                     }
                 }
+                else if (pmName == "REGO_ModuleAnimationGroup")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("deployAnimationName") + (string)b2.listParent.module.Fields.GetValue("activeAnimationName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleResourceHarvester")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("ResourceName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleResourceConverter")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("RecipeOutputs") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleAsteroidDrill")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("ImpactTransform") != (string)actNode.GetValue("custom1"));
+                    }
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare
@@ -748,6 +796,39 @@ namespace ActionGroupsExtended //add scenario module for data storage
                 //actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
                 errLine = "22";
             }
+            else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleAnimationGroup") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("deployAnimationName") + (string)agxAct.ba.listParent.module.Fields.GetValue("activeAnimationName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleResourceHarvester") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeInputs") + (string)agxAct.ba.listParent.module.Fields.GetValue("ResourceName")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleResourceConverter") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeInputs") + (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeOutputs")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleAsteroidDrill") //
+            {
+                errLine = "20";
+                //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                errLine = "21";
+                actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("ImpactTransform")); //u2021 is sciencemodule
+                errLine = "22";
+            }
+            
             //BTSMModuleReactionWheel does not need custom save, just load
             else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
             {
