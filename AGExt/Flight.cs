@@ -13,6 +13,7 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        public static Dictionary<int, bool> isDirectAction = new Dictionary<int, bool>();
         bool showCareerStockAGs = false;
          bool showCareerCustomAGs = false;
         ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
@@ -73,6 +74,8 @@ namespace ActionGroupsExtended
 
         private static Dictionary<int, bool> ActiveGroups;
         private List<KeyCode> ActiveKeys;
+        private Dictionary<int,KeyCode> ActiveKeysDirect;
+        private Dictionary<int,bool> DirectKeysState;
         private IButton AGXBtn;
         //public Dictionary<string, ConfigNode> loadedVessels;
         public static List<AGXRemoteTechQueueItem> AGXRemoteTechQueue;
@@ -212,6 +215,7 @@ namespace ActionGroupsExtended
             string errLine = "1";
             try
             {
+                
                 useRT = true;
             AGXguiMod1Groups = new Dictionary<int, bool>();
             AGXguiMod2Groups = new Dictionary<int, bool>();
@@ -227,6 +231,13 @@ namespace ActionGroupsExtended
             //Save10Keys = new Dictionary<int, KeyCode>();
             //foreach (Part p in 
             ActiveKeys = new List<KeyCode>();
+            ActiveKeysDirect = new Dictionary<int, KeyCode>();
+            DirectKeysState = new Dictionary<int,bool>();
+                for(int i = 1;i <= 250;i++)
+                {
+                    DirectKeysState[i]=false;
+
+                }
 
             TestWin = new Rect(600, 300, 100, 100);
             RenderingManager.AddToPostDrawQueue(33, AGXOnDraw); //was 0, 33 random number to fix FAR issue
@@ -580,7 +591,13 @@ namespace ActionGroupsExtended
                     RTWinShow = false;
                 }
                 Debug.Log("RemoteTech " + RTWinShow);
-                print("AGX Started Okay");
+                isDirectAction = new Dictionary<int, bool>();
+                for (int i = 1; i <= 250; i++ )
+                {
+                    isDirectAction[i] = false;
+                }
+
+                    print("AGX Started Okay");
         }
         catch(Exception e)
     {
@@ -589,6 +606,72 @@ namespace ActionGroupsExtended
     }
         }
 
+        public static void LoadDirectActionState(string DirectActions)
+        {
+            //Debug.Log("load state " + DirectActions);
+            try
+            {
+                isDirectAction = new Dictionary<int, bool>();
+                if (DirectActions.Length == 250)
+                {
+                    for (int i = 1; i <= 250; i++)
+                    {
+                        if (DirectActions[0] == '1')
+                        {
+                            isDirectAction[i] = true;
+                        }
+                        else
+                        {
+                            isDirectAction[i] = false;
+                        }
+                        DirectActions = DirectActions.Substring(1);
+                    }
+                }
+                else
+                {
+                    for (int i = 1; i <= 250; i++)
+                    {
+                        isDirectAction[i] = false;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("AGX LoadDirectActions Fail " + e);
+                for (int i = 1; i <= 251; i++)
+                {
+                    isDirectAction[i] = false;
+                }
+            }
+        }
+
+        public static string SaveDirectActionState(string str)
+        {
+            try
+            {
+
+                string ReturnStr = "";
+
+                for (int i = 1; i <= 250; i++)
+                {
+                    if (isDirectAction[i])
+                    {
+                        ReturnStr = ReturnStr + "1";
+                    }
+                    else
+                    {
+                        ReturnStr = ReturnStr + "0";
+                    }
+
+                }
+                return ReturnStr;
+
+            }
+            catch
+            {
+                return str;
+            }
+        }
 
         public void StartLoadWindowPositions()
         {
@@ -826,6 +909,8 @@ namespace ActionGroupsExtended
                     errLine = "16";
                     thisVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                    // thisRootPart.AddValue("groupVisibilityNames", thisVsl.GetValue("groupVisibilityNames"));
+            thisVsl.AddValue("DirectActionState", SaveDirectActionState(""));
+                    
                     errLine = "17";
 
                         //if(RootParts.HasNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString()))
@@ -1244,6 +1329,17 @@ namespace ActionGroupsExtended
             {
                 //print("AGX Key activate for some reason " + group);
                 ActivateActionGroup(group, false, false);
+            }
+        }
+
+        public static void ActivateActionGroupCheckModKeys(int group, bool force, bool forceDir) //backwards compatibility, toggle group
+        {
+
+            //print("AGX Key check for some reason " + group);
+            if (AGXguiMod1Groups[group] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[group] == Input.GetKey(AGXguiMod2Key))
+            {
+                //print("AGX Key activate for some reason " + group);
+                ActivateActionGroup(group, force, forceDir);
             }
         }
 
@@ -2945,7 +3041,7 @@ namespace ActionGroupsExtended
 
                     Color TxtClr = GUI.contentColor;
                     GUI.contentColor = Color.green;
-                    if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: Yes", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 80, 22), "Toggle:Yes", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = false;
@@ -2954,12 +3050,33 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 245, 160, 110, 22), "Toggle Grp: No", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 80, 22), "Toggle:No", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = true;
                     }
                 }
+
+                if (isDirectAction[AGXCurActGroup])
+                {
+                    Color btnClr = AGXBtnStyle.normal.textColor;
+                    AGXBtnStyle.normal.textColor = Color.red;
+                    AGXBtnStyle.hover.textColor = Color.red;
+                    if (GUI.Button(new Rect(SelPartsLeft + 315, 160, 55, 22), "Hold", AGXBtnStyle))
+                    {
+                        isDirectAction[AGXCurActGroup] = false;
+                    }
+                    AGXBtnStyle.normal.textColor = btnClr;
+                    AGXBtnStyle.hover.textColor = btnClr;
+                }
+                else
+                {
+                    if (GUI.Button(new Rect(SelPartsLeft + 315, 160, 55, 22), "Tap", AGXBtnStyle))
+                    {
+                        isDirectAction[AGXCurActGroup] = true;
+                    }
+                }
+
                 GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:", AGXLblStyle);
                 Color TxtClr2 = GUI.contentColor;
 
@@ -3819,6 +3936,14 @@ namespace ActionGroupsExtended
             errLine = "11";
             LoadGroupVisibilityNames(newVsl.GetValue("groupVisibilityNames"));
             errLine = "12";
+            if (newVsl.HasNode("DirectActionState"))
+            {
+                LoadDirectActionState(newVsl.GetValue("DirectActionState"));
+            }
+            else
+            {
+                LoadDirectActionState("");
+            }
             List<ConfigNode> NodesToAdd = new List<ConfigNode>();
             errLine = "13";
             List<string> partIDs = new List<string>();
@@ -3937,7 +4062,7 @@ namespace ActionGroupsExtended
             try
             {
                 errLine = "3";
-                if (FlightGlobals.ActiveVessel.parts.Count > 0)
+                if (FlightGlobals.ActiveVessel.parts.Count > 0) //we are actually checking null here on teh try-catch block, the if statement is a dummy
                 {
                     errLine = "4";
                 }
@@ -4076,6 +4201,16 @@ namespace ActionGroupsExtended
 
                                     oldVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
                                     errLine = "16";
+                                    if (oldVsl.HasValue("DirectActionState"))
+                                    {
+                                        errLine = "16b";
+                                        oldVsl.RemoveValue("DirectActionState");
+                                        errLine = "16c";
+                                    }
+                                    errLine = "16d";
+
+                                    oldVsl.AddValue("DirectActionState", SaveDirectActionState(""));
+
 
                                     oldVsl.RemoveNodes("PART");
 
@@ -4201,6 +4336,7 @@ namespace ActionGroupsExtended
                                     vslNode.AddValue("groupNames", "");
                                     vslNode.AddValue("groupVisibility", "1011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111011111");
                                     vslNode.AddValue("groupVisibilityNames", "Group 1‣Group 2‣Group 3‣Group 4‣Group 5");
+                                    vslNode.AddValue("DirectActionState", "");
                                     AGXFlightNode.AddNode(vslNode);
                                 }
                                 errLine = "24f";
@@ -4221,6 +4357,17 @@ namespace ActionGroupsExtended
                                 LoadGroupNames(vslNode.GetValue("groupNames"));
                                 LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
                                 LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
+                                //Debug.Log(vslNode);
+                                if (vslNode.HasValue("DirectActionState"))
+                                {
+                                    //Debug.Log("has state");
+                                    LoadDirectActionState(vslNode.GetValue("DirectActionState"));
+                                }
+                                else
+                                {
+                                    //Debug.Log("no state");
+                                    LoadDirectActionState("");
+                                }
                                 errLine = "24fg";
                                 foreach (ConfigNode prtNode in vslNode.nodes)
                                 {
@@ -4411,6 +4558,22 @@ namespace ActionGroupsExtended
                                 ActivateActionGroupCheckModKeys(i);
                             }
                         }
+                    }
+                }
+
+                foreach (KeyValuePair<int,KeyCode> kcPair in ActiveKeysDirect)
+                {
+                    if(Input.GetKey(kcPair.Value) && !DirectKeysState[kcPair.Key])
+                    {
+                        ActivateActionGroupCheckModKeys(kcPair.Key,true,true);
+                        DirectKeysState[kcPair.Key] = true;
+                        Debug.Log("turn on");
+                    }
+                    else if(!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
+                    {
+                        ActivateActionGroupCheckModKeys(kcPair.Key,true,false);
+                        DirectKeysState[kcPair.Key] = false;
+                        Debug.Log("turn off");
                     }
                 }
             }
@@ -4665,6 +4828,7 @@ namespace ActionGroupsExtended
                         //vsl2node.AddValue("groupNames", SaveGroupNames(""));
                         vsl2node.AddValue("groupVisibility", SaveGroupVisibility(""));
                         vsl2node.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                        vsl2node.AddValue("DirectActionState", SaveDirectActionState(""));
                     }
                     if (vsl2node.HasValue("groupNames"))
                     {
@@ -5119,6 +5283,7 @@ namespace ActionGroupsExtended
 
                 }
                 ActiveKeys.Clear();
+                ActiveKeysDirect.Clear();
                 if (ActiveActionsState.Count > 0)
                     //if (ActiveActions.Count > 0)
                 {
@@ -5126,7 +5291,14 @@ namespace ActionGroupsExtended
                     //foreach (int i2 in ActiveActions)
                     {
                         //ActiveKeys.Add(AGXguiKeys[i2]);
-                        ActiveKeys.Add(AGXguiKeys[i2.group]);
+                        if (isDirectAction[i2.group])
+                        {
+                            ActiveKeysDirect.Add(i2.group,AGXguiKeys[i2.group]);
+                        }
+                        else
+                        {
+                            ActiveKeys.Add(AGXguiKeys[i2.group]);
+                        }
                     }
                 }
 

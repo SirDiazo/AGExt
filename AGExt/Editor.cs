@@ -2470,11 +2470,13 @@ namespace ActionGroupsExtended
                 {
                     Color btnClr = AGXBtnStyle.normal.textColor;
                     AGXBtnStyle.normal.textColor = Color.red;
+                    AGXBtnStyle.hover.textColor = Color.red;
                     if (GUI.Button(new Rect(SelPartsLeft + 315, 155, 55, 22), "Hold", AGXBtnStyle))
                     {
-                        isDirectAction[AGXCurActGroup] = true;
+                        isDirectAction[AGXCurActGroup] = false;
                     }
                     AGXBtnStyle.normal.textColor = btnClr;
+                    AGXBtnStyle.hover.textColor = btnClr;
                 }
                 else
                 {
