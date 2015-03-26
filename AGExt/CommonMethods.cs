@@ -44,8 +44,296 @@ namespace ActionGroupsExtended
     public static class AGXStaticData
     {
         public static bool cleanupAlreadyRun = false;
+        public static ConfigNode AGExtConfig;
+        public static bool nodeLoaded = false;
+        public static ConfigNode LoadBaseConfigNode()
+        {
+            if (nodeLoaded)
+            {
+                return AGExtConfig;
+            }
+            else
+            {
+                ConfigNode nodeLoad = new ConfigNode("AGExtConfig");
+                nodeLoad = GameDatabase.Instance.GetConfigNode("Diazo/AGExt/AGExt/AGExtConfig");
+                if (nodeLoad == null)
+                {
+                    nodeLoad = new ConfigNode("AGExtConfig");
+                }
+                if (!nodeLoad.HasValue("name"))
+                {
+                    nodeLoad.AddValue("name", "AGExtConfig");
+                }
+                if (!nodeLoad.HasValue("ActiveKeySet"))
+                {
+                    nodeLoad.AddValue("ActiveKeySet", "1");
+                }
+                if (!nodeLoad.HasValue("KeySet1"))
+                {
+                    nodeLoad.AddValue("KeySet1", "‣001Alpha1‣002Alpha2‣003Alpha3‣004Alpha4‣005Alpha5‣006Alpha6‣007Alpha7‣008Alpha8‣009Alpha9‣010Alpha0");
+                }
+                if (!nodeLoad.HasValue("KeySet2"))
+                {
+                    nodeLoad.AddValue("KeySet2", "‣001Alpha1‣002Alpha2‣003Alpha3‣004Alpha4‣005Alpha5‣006Alpha6‣007Alpha7‣008Alpha8‣009Alpha9‣010Alpha0");
+                }
+                if (!nodeLoad.HasValue("KeySet3"))
+                {
+                    nodeLoad.AddValue("KeySet3", "‣001Alpha1‣002Alpha2‣003Alpha3‣004Alpha4‣005Alpha5‣006Alpha6‣007Alpha7‣008Alpha8‣009Alpha9‣010Alpha0");
+                }
+                if (!nodeLoad.HasValue("KeySet4"))
+                {
+                    nodeLoad.AddValue("KeySet4", "‣001Alpha1‣002Alpha2‣003Alpha3‣004Alpha4‣005Alpha5‣006Alpha6‣007Alpha7‣008Alpha8‣009Alpha9‣010Alpha0");
+                }
+                if (!nodeLoad.HasValue("KeySet5"))
+                {
+                    nodeLoad.AddValue("KeySet5", "‣001Alpha1‣002Alpha2‣003Alpha3‣004Alpha4‣005Alpha5‣006Alpha6‣007Alpha7‣008Alpha8‣009Alpha9‣010Alpha0");
+                }
+                if (!nodeLoad.HasValue("KeySetName1"))
+                {
+                    nodeLoad.AddValue("KeySetName1", "KeySet1");
+                }
+                if (!nodeLoad.HasValue("KeySetName2"))
+                {
+                    nodeLoad.AddValue("KeySetName2", "KeySet2");
+                }
+                if (!nodeLoad.HasValue("KeySetName3"))
+                {
+                    nodeLoad.AddValue("KeySetName3", "KeySet3");
+                }
+                if (!nodeLoad.HasValue("KeySetName4"))
+                {
+                    nodeLoad.AddValue("KeySetName4", "KeySet4");
+                }
+                if (!nodeLoad.HasValue("KeySetName5"))
+                {
+                    nodeLoad.AddValue("KeySetName5", "KeySet5");
+                }
+                if (!nodeLoad.HasValue("EdSelPartsX"))
+                {
+                    nodeLoad.AddValue("EdSelPartsX", "100");
+                }
+                if (!nodeLoad.HasValue("EdSelPartsY"))
+                {
+                    nodeLoad.AddValue("EdSelPartsY", "100");
+                }
+                if (!nodeLoad.HasValue("EdKeySetX"))
+                {
+                    nodeLoad.AddValue("EdKeySetX", "120");
+                }
+                if (!nodeLoad.HasValue("EdKeySetY"))
+                {
+                    nodeLoad.AddValue("EdKeySetY", "120");
+                }
+                if (!nodeLoad.HasValue("EdGroupsX"))
+                {
+                    nodeLoad.AddValue("EdGroupsX", "140");
+                }
+                if (!nodeLoad.HasValue("EdGroupsY"))
+                {
+                    nodeLoad.AddValue("EdGroupsY", "140");
+                }
+                if (!nodeLoad.HasValue("EdKeyCodeX"))
+                {
+                    nodeLoad.AddValue("EdKeyCodeX", "160");
+                }
+
+                if (!nodeLoad.HasValue("EdKeyCodeY"))
+                {
+                    nodeLoad.AddValue("EdKeyCodeY", "160");
+                }
+                if (!nodeLoad.HasValue("EdCurActsX"))
+                {
+                    nodeLoad.AddValue("EdCurActsX", "180");
+                }
+                if (!nodeLoad.HasValue("EdCurActsY"))
+                {
+                    nodeLoad.AddValue("EdCurActsY", "180");
+                }
+                if (!nodeLoad.HasValue("FltSelPartsX"))
+                {
+                    nodeLoad.AddValue("FltSelPartsX", "100");
+                }
+                if (!nodeLoad.HasValue("FltSelPartsY"))
+                {
+                    nodeLoad.AddValue("FltSelPartsY", "100");
+                }
+                if (!nodeLoad.HasValue("FltKeySetX"))
+                {
+                    nodeLoad.AddValue("FltKeySetX", "120");
+                }
+                if (!nodeLoad.HasValue("FltKeySetY"))
+                {
+                    nodeLoad.AddValue("FltKeySetY", "120");
+                }
+                if (!nodeLoad.HasValue("FltGroupsX"))
+                {
+                    nodeLoad.AddValue("FltGroupsX", "140");
+                }
+                if (!nodeLoad.HasValue("FltGroupsY"))
+                {
+                    nodeLoad.AddValue("FltGroupsY", "140");
+                }
+                if (!nodeLoad.HasValue("FltKeyCodeX"))
+                {
+                    nodeLoad.AddValue("FltKeyCodeX", "160");
+                }
+                if (!nodeLoad.HasValue("FltKeyCodeY"))
+                {
+                    nodeLoad.AddValue("FltKeyCodeY", "160");
+                }
+                if (!nodeLoad.HasValue("FltCurActsX"))
+                {
+                    nodeLoad.AddValue("FltCurActsX", "180");
+                }
+                if (!nodeLoad.HasValue("FltCurActsY"))
+                {
+                    nodeLoad.AddValue("FltCurActsY", "180");
+                }
+                if (!nodeLoad.HasValue("FltMainX"))
+                {
+                    nodeLoad.AddValue("FltMainX", "200");
+                }
+                if (!nodeLoad.HasValue("FltMainY"))
+                {
+                    nodeLoad.AddValue("FltMainY", "200");
+                }
+                if (!nodeLoad.HasValue("RTWinX"))
+                {
+                    nodeLoad.AddValue("RTWinX", "220");
+                }
+                if (!nodeLoad.HasValue("RTWinY"))
+                {
+                    nodeLoad.AddValue("RTWinY", "220");
+                }
+                if (!nodeLoad.HasValue("FltShow"))
+                {
+                    nodeLoad.AddValue("FltShow", "1");
+                }
+                if (!nodeLoad.HasValue("EditShow"))
+                {
+                    nodeLoad.AddValue("EditShow", "1");
+                }
+                if (!nodeLoad.HasValue("RTWinShow"))
+                {
+                    nodeLoad.AddValue("RTWinShow", "True");
+                }
+                if (!nodeLoad.HasValue("FlightWinShowKeys"))
+                {
+                    nodeLoad.AddValue("FlightWinShowKeys", "1");
+                }
+                if (!nodeLoad.HasValue("DeleteOldSaves"))
+                {
+                    nodeLoad.AddValue("DeleteOldSaves", "1");
+                }
+                if (!nodeLoad.HasValue("LockOutKSPManager"))
+                {
+                    nodeLoad.AddValue("LockOutKSPManager", "1");
+                }
+                if (!nodeLoad.HasValue("KeySetMod1Group1"))
+                {
+                    nodeLoad.AddValue("KeySetMod1Group1", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod2Group1"))
+                {
+                    nodeLoad.AddValue("KeySetMod2Group1", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod1Group2"))
+                {
+                    nodeLoad.AddValue("KeySetMod1Group2", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod2Group2"))
+                {
+                    nodeLoad.AddValue("KeySetMod2Group2", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod1Group3"))
+                {
+                    nodeLoad.AddValue("KeySetMod1Group3", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod2Group3"))
+                {
+                    nodeLoad.AddValue("KeySetMod2Group3", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod1Group4"))
+                {
+                    nodeLoad.AddValue("KeySetMod1Group4", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod2Group4"))
+                {
+                    nodeLoad.AddValue("KeySetMod2Group4", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod1Group5"))
+                {
+                    nodeLoad.AddValue("KeySetMod1Group5", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetMod2Group5"))
+                {
+                    nodeLoad.AddValue("KeySetMod2Group5", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey11"))
+                {
+                    nodeLoad.AddValue("KeySetModKey11", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey21"))
+                {
+                    nodeLoad.AddValue("KeySetModKey21", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey12"))
+                {
+                    nodeLoad.AddValue("KeySetModKey12", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey22"))
+                {
+                    nodeLoad.AddValue("KeySetModKey22", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey13"))
+                {
+                    nodeLoad.AddValue("KeySetModKey13", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey23"))
+                {
+                    nodeLoad.AddValue("KeySetModKey23", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey14"))
+                {
+                    nodeLoad.AddValue("KeySetModKey14", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey24"))
+                {
+                    nodeLoad.AddValue("KeySetModKey24", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey15"))
+                {
+                    nodeLoad.AddValue("KeySetModKey15", "None");
+                }
+                if (!nodeLoad.HasValue("KeySetModKey25"))
+                {
+                    nodeLoad.AddValue("KeySetModKey25", "None");
+                }
+                if (!nodeLoad.HasValue("ActivationCooldown"))
+                {
+                    nodeLoad.AddValue("ActivationCooldown", "5");
+                }
+                if (!nodeLoad.HasValue("OverrideCareer"))
+                {
+                    nodeLoad.AddValue("OverrideCareer", "0");
+                }
+                AGExtConfig = nodeLoad;
+                nodeLoaded = true;
+                return nodeLoad;
+            }
+        }
+    
+        public static void SaveBaseConfigNode(ConfigNode cNode)
+        {
+            ConfigNode toSave = new ConfigNode("AGExtConfig");
+            toSave.AddNode(cNode);
+            toSave.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            
+        }
     }
    
+
+
     public class ModuleAGX : PartModule
     {
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)] 

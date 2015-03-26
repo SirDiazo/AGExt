@@ -279,7 +279,8 @@ namespace ActionGroupsExtended
             errLine = "5";
             try
             {
-                AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                //AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                AGExtNode = AGXStaticData.LoadBaseConfigNode();
             }
                 catch
             {
@@ -681,6 +682,7 @@ namespace ActionGroupsExtended
                 errLine = "2";
                 int WinX;
                 int WinY;
+                
                 if (Int32.TryParse((string)AGExtNode.GetValue("FltGroupsX"), out WinX) && Int32.TryParse((string)AGExtNode.GetValue("FltGroupsY"), out WinY))
                 {
                     GroupsWin = new Rect(WinX, WinY, 250, 530);
@@ -794,7 +796,8 @@ namespace ActionGroupsExtended
                     {
                         AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "0");
                     }
-                    AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                    //AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                    AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 }
 
                 if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
@@ -1047,7 +1050,8 @@ namespace ActionGroupsExtended
                // print("show");
                 AGExtNode.SetValue("FltShow", "1");
             }
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
         }
 
         public void OnDisable()
@@ -1269,7 +1273,8 @@ namespace ActionGroupsExtended
                 {
                     AGXFlight.AGExtNode.SetValue("FlightWinShowKeys", "0");
                 }
-                AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                //AGXFlight.AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                AGXStaticData.SaveBaseConfigNode(AGExtNode);
             }
 
             if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
@@ -2085,7 +2090,8 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetName4", KeySetNamesFlight[3]);
             AGExtNode.SetValue("KeySetName5", KeySetNamesFlight[4]);
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
         }
         public static void FlightSaveKeysetStuffStatic()
         {
@@ -2095,7 +2101,8 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetName4", KeySetNamesFlight[3]);
             AGExtNode.SetValue("KeySetName5", KeySetNamesFlight[4]);
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
         }
         public void KeySetWindow(int WindowID)
         {
@@ -2482,7 +2489,8 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetMod2Group" + CurrentKeySetFlight.ToString(), GroupsMod2ToSave);
             AGExtNode.SetValue("KeySetModKey1" + CurrentKeySetFlight.ToString(), AGXguiMod1Key.ToString());
             AGExtNode.SetValue("KeySetModKey2" + CurrentKeySetFlight.ToString(), AGXguiMod2Key.ToString());
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
             //if (CurrentKeySet == 1)
             //{
             //    SaveDefaultCustomKeys();
@@ -4567,13 +4575,13 @@ namespace ActionGroupsExtended
                     {
                         ActivateActionGroupCheckModKeys(kcPair.Key,true,true);
                         DirectKeysState[kcPair.Key] = true;
-                        Debug.Log("turn on");
+                        //Debug.Log("turn on");
                     }
                     else if(!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
                     {
                         ActivateActionGroupCheckModKeys(kcPair.Key,true,false);
                         DirectKeysState[kcPair.Key] = false;
-                        Debug.Log("turn off");
+                        //Debug.Log("turn off");
                     }
                 }
             }
@@ -4674,6 +4682,15 @@ namespace ActionGroupsExtended
                 errLine = "49";
             //PrintPartActs();
             //print("landed " + FlightGlobals.ActiveVessel.landedAt);
+
+                //if (test == null)
+                //{
+                //    Debug.Log("NULL");
+                //}
+                //else
+                //{
+                //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
+                //}
         }
             catch(Exception e)
             {
