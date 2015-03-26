@@ -285,7 +285,8 @@ namespace ActionGroupsExtended
                 KeyCodeNames.Remove("None");
                 JoyStickCodes.AddRange(KeyCodeNames.Where(JoySticks));
                 KeyCodeNames.RemoveAll(JoySticks);
-                AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                //AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                AGExtNode = AGXStaticData.LoadBaseConfigNode();
                 errLine = "4";
                 if (AGExtNode.GetValue("EditShow") == "0")
                 {
@@ -675,7 +676,8 @@ namespace ActionGroupsExtended
                         AGExtNode.SetValue("EditShow", "1");
                         EditorPanels.Instance.panelManager.Dismiss();
                     }
-                    AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                    //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                    AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 }
                 else
                 {
@@ -1178,7 +1180,8 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("EdKeySetY", KeySetWin.y.ToString());
             AGExtNode.SetValue("EdCurActsX", CurActsWin.x.ToString());
             AGExtNode.SetValue("EdCurActsY", CurActsWin.y.ToString());
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
            
             
         }
@@ -1854,7 +1857,8 @@ namespace ActionGroupsExtended
 
 
 
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 //if (CurrentKeySet == 1)
                 //{
                 //    SaveDefaultCustomKeys();
@@ -4376,7 +4380,8 @@ namespace ActionGroupsExtended
             AGExtNode.SetValue("KeySetName4", KeySetNames[3]);
             AGExtNode.SetValue("KeySetName5", KeySetNames[4]);
             CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
-            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            //AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            AGXStaticData.SaveBaseConfigNode(AGExtNode);
         }
 
         public static void EditorWriteNodeToFile()

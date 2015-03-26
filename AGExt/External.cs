@@ -845,7 +845,7 @@ namespace ActionGroupsExtended
                 ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER); 
                 
             }
-            return true;
+            return false;
         }
     }
 

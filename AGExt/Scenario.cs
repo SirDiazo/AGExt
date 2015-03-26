@@ -28,7 +28,8 @@ namespace ActionGroupsExtended //add scenario module for data storage
             bool ClearOldSaves = true;
             try
             {
-                ConfigNode AGXSettings = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                //ConfigNode AGXSettings = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+                ConfigNode AGXSettings = AGXStaticData.LoadBaseConfigNode();
                 if (AGXSettings.GetValue("DeleteOldSaves") == "0")
                 {
                     ClearOldSaves = false;
@@ -237,39 +238,39 @@ namespace ActionGroupsExtended //add scenario module for data storage
            // print("j");
         }
 
-        public static ConfigNode LoadBaseNode()
-        {
-            string errLine = "1";
-            ConfigNode AGXBaseNode = new ConfigNode();
-            try
-            {
-                if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg"))
-                {
-                    errLine = "3";
-                    AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-                    //print("AGX ConfigNode Load Okay!");
-                }
-                else
-                {
-                    errLine = "4";
-                    //print("AGX ConfigNode not found, creating.....");
-                    errLine = "5";
-                    AGXBaseNode.AddValue("name", "Action Groups Extended save file");
-                    AGXBaseNode.AddNode("FLIGHT");
-                    errLine = "6";
-                    AGXBaseNode.AddNode("EDITOR");
-                    errLine = "7";
-                    AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
-                    errLine = "8";
-                }
-                return AGXBaseNode;
-            }
-            catch (Exception e)
-            {
-                print("AGXScen LoadBaseNode FAIL " + errLine + " " + e);
-                    return new ConfigNode();
-            }
-        }
+        //public static ConfigNode LoadBaseNode()
+        //{
+        //    string errLine = "1";
+        //    ConfigNode AGXBaseNode = new ConfigNode();
+        //    try
+        //    {
+        //        if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg"))
+        //        {
+        //            errLine = "3";
+        //            AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
+        //            //print("AGX ConfigNode Load Okay!");
+        //        }
+        //        else
+        //        {
+        //            errLine = "4";
+        //            //print("AGX ConfigNode not found, creating.....");
+        //            errLine = "5";
+        //            AGXBaseNode.AddValue("name", "Action Groups Extended save file");
+        //            AGXBaseNode.AddNode("FLIGHT");
+        //            errLine = "6";
+        //            AGXBaseNode.AddNode("EDITOR");
+        //            errLine = "7";
+        //            AGXBaseNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExt.cfg");
+        //            errLine = "8";
+        //        }
+        //        return AGXBaseNode;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        print("AGXScen LoadBaseNode FAIL " + errLine + " " + e);
+        //            return new ConfigNode();
+        //    }
+        //}
 
         
 
