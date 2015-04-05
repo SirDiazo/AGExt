@@ -720,7 +720,7 @@ namespace ActionGroupsExtended
                         //Debug.Log("part attached detect"); 
                         ErrLine = "10";
                         CurrentVesselActions.Add(agAct);
-                        DetachedPartActions.Add(agAct);
+                        //DetachedPartActions.Add(agAct);
                         ErrLine = "11";
 
                         ErrLine = "11b";
@@ -739,6 +739,7 @@ namespace ActionGroupsExtended
                         //Debug.Log("part attached not detect"); 
                     }
                     ErrLine = "15";
+                    DetachedPartActions.Add(agAct);
                 }
                 ErrLine = "16";
                 AttachAGXPart(host_target.host);
@@ -1051,10 +1052,7 @@ namespace ActionGroupsExtended
                         CurrentVesselActions.Add(actToAdd);
                         //print("add act");
                     }
-                    //else
-                    //{
-                    //    print("part not added");
-                    //}
+                    p.Modules.OfType<ModuleAGX>().First().agxActionsThisPart.Clear();
                 }
             }
             DetachedPartActions.Clear();
@@ -2707,28 +2705,51 @@ namespace ActionGroupsExtended
 
         public void RefreshDefaultActionsList()
         {
-            defaultActionsListAll.Clear();
-
-            foreach (Part p in EditorLogic.SortedShipList)
+            string errLine = "1";
+            try
             {
-                defaultActionsListAll.AddRange(p.Actions);
-                foreach (PartModule pm in p.Modules)
+                defaultActionsListAll.Clear();
+                errLine = "2";
+                foreach (Part p in EditorLogic.SortedShipList)
                 {
-                    defaultActionsListAll.AddRange(pm.Actions);
+                    errLine = "3";
+                    defaultActionsListAll.AddRange(p.Actions);
+                    errLine = "4";
+                    foreach (PartModule pm in p.Modules)
+                    {
+                        errLine = "5";
+                        defaultActionsListAll.AddRange(pm.Actions);
+                    }
                 }
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX RefDefActsList Error " + errLine + " " + e);
             }
 
         }
 
         public void RefreshDefaultActionsListType()
         {
-            defaultActionsListThisType.Clear();
-            foreach (BaseAction act in defaultActionsListAll)
+            string errLine = "1";
+            try
             {
-                if ((act.actionGroup & defaultGroupToShow) == defaultGroupToShow)
+                errLine = "2";
+                defaultActionsListThisType.Clear();
+                errLine = "3";
+                foreach (BaseAction act in defaultActionsListAll)
                 {
-                    defaultActionsListThisType.Add(act);
+                    errLine = "4";
+                    if ((act.actionGroup & defaultGroupToShow) == defaultGroupToShow)
+                    {
+                        errLine = "5";
+                        defaultActionsListThisType.Add(act);
+                    }
                 }
+            }
+            catch(Exception e)
+            {
+                Debug.Log("AGX RefDefActsListType Error " + errLine + " " + e);
             }
         }
 

@@ -10,36 +10,36 @@ using UnityEngine;
 namespace ActionGroupsExtended
 {
 
-  public enum AGXRemoteTechItemState
-  {
-      COUNTDOWN,
-      GOOD,
-      FAILED,
-      NOCOMMS,
-  }
+    public enum AGXRemoteTechItemState
+    {
+        COUNTDOWN,
+        GOOD,
+        FAILED,
+        NOCOMMS,
+    }
     public class AGXRemoteTechQueueItem //queue for remotetech action groups
-  {
-      public AGXRemoteTechItemState state;
-      public int group;
-      public string grpName;
-      public Vessel vsl;
-      public double timeToActivate;
-      public bool forcing;
-      public bool forceDir;
+    {
+        public AGXRemoteTechItemState state;
+        public int group;
+        public string grpName;
+        public Vessel vsl;
+        public double timeToActivate;
+        public bool forcing;
+        public bool forceDir;
 
-      public AGXRemoteTechQueueItem(int Group, string GroupName, Vessel vessel, double actTime, bool force, bool ForceDir, AGXRemoteTechItemState State)
-      {
-          state = State;
-          group = Group;
-          grpName = GroupName;
-          vsl = vessel;
-          timeToActivate = actTime;
-          forcing = force;
-          forceDir = ForceDir;
-      }
+        public AGXRemoteTechQueueItem(int Group, string GroupName, Vessel vessel, double actTime, bool force, bool ForceDir, AGXRemoteTechItemState State)
+        {
+            state = State;
+            group = Group;
+            grpName = GroupName;
+            vsl = vessel;
+            timeToActivate = actTime;
+            forcing = force;
+            forceDir = ForceDir;
+        }
 
-  }
-  
+    }
+
 
     public static class AGXStaticData
     {
@@ -322,76 +322,138 @@ namespace ActionGroupsExtended
                 return nodeLoad;
             }
         }
-    
+
         public static void SaveBaseConfigNode(ConfigNode cNode)
         {
             ConfigNode toSave = new ConfigNode("AGExtConfig");
             toSave.AddNode(cNode);
             toSave.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-            
+
         }
     }
-   
+
 
 
     public class ModuleAGX : PartModule
     {
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)] 
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
         public string placeHolder = "Hello World"; //Config nodes can behave wierd when empty, a part with no actions on it will have no data besides this line
         //config nodes get added/removed via OnLoad/OnSave here
         public List<AGXAction> agxActionsThisPart = new List<AGXAction>();
 
         public override void OnStart(StartState state)
         {
-            if(agxActionsThisPart == null)
+            if (agxActionsThisPart == null)
             {
                 agxActionsThisPart = new List<AGXAction>();
             }
         }
-        
+
         public override void OnSave(ConfigNode node)
         {
             string ErrLine = "1";
+            //Debug.Log("AGX Saving Module");
             try
             {
-                node.RemoveNodes("ACTION"); 
+                node.RemoveNodes("ACTION");
+                node.RemoveNodes("TOGGLE");
+                node.RemoveNodes("HOLD");
                 ErrLine = "2";
-                if(agxActionsThisPart.Count > 0)
+                if (agxActionsThisPart.Count > 0)
                 {
                     ErrLine = "3";
-                foreach (AGXAction agAct in agxActionsThisPart)
-                {
-                    ErrLine = "4";
-                    ConfigNode actionNode = new ConfigNode("ACTION");
-                    ErrLine = "5";
-                    if (agAct != null)
+                    foreach (AGXAction agAct in agxActionsThisPart)
                     {
-                        ErrLine = "5a";
-                        actionNode = AGextScenario.SaveAGXActionVer2(agAct);
+                        ErrLine = "4";
+                        ConfigNode actionNode = new ConfigNode("ACTION");
+                        ErrLine = "5";
+                        if (agAct != null)
+                        {
+                            ErrLine = "5a";
+                            actionNode = AGextScenario.SaveAGXActionVer2(agAct);
+                        }
+                        ErrLine = "6";
+                        node.AddNode(actionNode);
+                        ErrLine = "7";
                     }
-                    ErrLine = "6";
-                    node.AddNode(actionNode);
-                    ErrLine = "7";
                 }
+                if (HighLogic.LoadedSceneIsEditor)
+                {
+                    ConfigNode toggleStates = new ConfigNode("TOGGLE");
+                    ConfigNode holdStates = new ConfigNode("HOLD");
+                    for (int i = 1; i <= 250; i++)
+                    {
+                        if (AGXEditor.IsGroupToggle[i])
+                        {
+                            toggleStates.AddValue("toggle", i.ToString());
+                        }
+                        if (AGXEditor.isDirectAction[i])
+                        {
+                            holdStates.AddValue("hold", i.ToString());
+                        }
+                    }
+                    node.AddNode(toggleStates);
+                    node.AddNode(holdStates);
                 }
             }
-        catch(Exception e)
-        {
-            print("AGX partModule OnSave fail: " + ErrLine + " " + e);
-        }
+            catch (Exception e)
+            {
+                print("AGX partModule OnSave fail: " + ErrLine + " " + e);
+            }
         }
 
-            public override void OnLoad(ConfigNode node)
+        public override void OnLoad(ConfigNode node)
+        {
+            string errLine = "1";
+            try
             {
-                
-                ConfigNode[] actionsNodes = node.GetNodes("ACTION");
-                foreach(ConfigNode actionNode in actionsNodes)
+                errLine = "2";
+                ConfigNode[] actionsNodes = node.GetNodes("ACTION"); 
+                errLine = "3";
+                string[] toggles;
+                if(node.HasNode("TOGGLE"))
                 {
-                    agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode,this.part,false));
+                    toggles = node.GetNode("TOGGLE").GetValues();
                 }
-                //print("Load called " + agxActionsThisPart.Count);
+                else
+                { 
+                    toggles = new string[1];
+                }
+                errLine = "4";
+                string[] holds;
+                if(node.HasNode("HOLD"))
+                {
+                    holds = node.GetNode("HOLD").GetValues();
+                }
+                else
+                {
+                    holds = new string[1];
+                }
+                errLine = "5";
+                foreach (ConfigNode actionNode in actionsNodes)
+                {
+                    errLine = "6";
+                    if (HighLogic.LoadedSceneIsEditor && toggles.Contains(actionNode.GetValue("group")) && AGXEditor.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    {
+                        errLine = "7";
+                        AGXEditor.IsGroupToggle[int.Parse(actionNode.GetValue("group"))] = true;
+                    }
+                    if (HighLogic.LoadedSceneIsEditor && holds.Contains(actionNode.GetValue("group")) && AGXEditor.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    {
+                        errLine = "8";
+                        AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
+                    }
+                    errLine = "9";
+                    agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode, this.part, false));
+                }
             }
-       
+            catch(Exception e)
+            {
+                Debug.Log("AGX Module OnLoad Error " + errLine + " " + e);
+            }
+            //print("Load called " + agxActionsThisPart.Count);
+        }
+
     }//ModuleAGX
 
     public class AGXOtherVessel //data class for a vessel that does not have focus
@@ -409,24 +471,24 @@ namespace ActionGroupsExtended
             thisVsl = loadedVessels.Find(ves => ves.rootPart.flightID == flightID);
             //Debug.Log("After");
             actionsList = new List<AGXAction>();
-            if(thisVsl == null) //check vessel is loaded
+            if (thisVsl == null) //check vessel is loaded
             {
                 vesselInstanceOK = false;
                 //ScreenMessages.PostScreenMessage("AGX cannot activate actions on unloaded vessels.", 10F, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
             ConfigNode nodeLoad = new ConfigNode();
-            if(AGXFlight.AGXFlightNode != null)
+            if (AGXFlight.AGXFlightNode != null)
             {
-                if(AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
+                if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
                 {
                     nodeLoad = AGXFlight.AGXFlightNode.GetNode(flightID.ToString());
                     ConfigNode[] partNodes = nodeLoad.GetNodes("PART");
-                    foreach(ConfigNode prtNode in partNodes)
+                    foreach (ConfigNode prtNode in partNodes)
                     {
                         Part thisPrt = thisVsl.Parts.Find(p => p.flightID == Convert.ToUInt32(prtNode.GetValue("flightID")));
                         ConfigNode[] actionNodes = prtNode.GetNodes("ACTION");
-                        foreach(ConfigNode aNode in actionNodes)
+                        foreach (ConfigNode aNode in actionNodes)
                         {
                             actionsList.Add(AGextScenario.LoadAGXActionVer2(aNode, thisPrt, false));
                         }
@@ -485,10 +547,10 @@ namespace ActionGroupsExtended
                 return new List<AGXAction>();
             }
         }
-        
+
         public void ActivateActionString(string groupStr, bool force, bool forceDir) //main activation method
         {
-            if(thisVsl.HoldPhysics)
+            if (thisVsl.HoldPhysics)
             {
                 ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
             }
@@ -555,14 +617,14 @@ namespace ActionGroupsExtended
         }
 
         public void ActivateActionGroupActivation(int group, bool force, bool forceDir) //main activation method
-            {
-                string ErrLine = "1";    
+        {
+            string ErrLine = "1";
             try
+            {
+                if (thisVsl.HoldPhysics)
                 {
-                    if (thisVsl.HoldPhysics)
-                    {
-                        ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
-                    }    
+                    ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                }
                 else if (vesselInstanceOK)
                 {
                     ErrLine = "2";
@@ -601,7 +663,7 @@ namespace ActionGroupsExtended
                             KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                             //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                             ErrLine = "8";
-                           // Debug.Log("act it " + agAct.ba.active);
+                            // Debug.Log("act it " + agAct.ba.active);
                             agAct.ba.Invoke(actParam);
                             agAct.activated = false;
                             ErrLine = "9";
@@ -660,15 +722,15 @@ namespace ActionGroupsExtended
                     }
                     ErrLine = "22";
                 }
-                    SaveThisVessel();
-        }
-        catch(Exception e)
-                        {
-                            Debug.Log("AGX OtherVsl ActivateActionGroup " + ErrLine + " " + e);
-
-    }
+                SaveThisVessel();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("AGX OtherVsl ActivateActionGroup " + ErrLine + " " + e);
 
             }
+
+        }
 
         public bool StateCheckGroup(int group)
         {
@@ -678,13 +740,13 @@ namespace ActionGroupsExtended
                 bool groupState = true;
                 if (actionsList.Where(ag => ag.group == group).Count() >= 1)
                 {
-                foreach (AGXAction agAct in actionsList.Where(ag => ag.group == group))
-                {
-                    if (!agAct.activated)
+                    foreach (AGXAction agAct in actionsList.Where(ag => ag.group == group))
                     {
-                        groupState = false;
+                        if (!agAct.activated)
+                        {
+                            groupState = false;
+                        }
                     }
-                }
                 }
                 else
                 {
@@ -695,7 +757,7 @@ namespace ActionGroupsExtended
             else
             {
                 Debug.Log("AGX Group State FALSE due to vessel not loaded.");
-                    return false;
+                return false;
             }
         }
 
@@ -767,14 +829,14 @@ namespace ActionGroupsExtended
                     AGXFlight.AGXFlightNode.AddNode(thisVslNode);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("AGX OtherVslSaveNode Fail " + errLine + " " + e);
             }
 
         }
 
-        }
-   
+    }
+
 
 }//name space closing bracket
