@@ -13,8 +13,19 @@ namespace ActionGroupsExtended
         //abandoned module, no longer needed for key rebinding
         public void Start()
         {
-            print("AGExt Ver. 1.31a loaded");
+            print("AGExt Ver. 1.31c loaded");
+
+            
         }
 
     }
+
+    //public static class StaticMethods
+    //{
+    //    public static GUISkin ourSkin;
+    //    public static void initSkin()
+    //    {
+    //        ourSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
+    //    }
+    //}
 }

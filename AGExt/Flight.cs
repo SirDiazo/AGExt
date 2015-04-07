@@ -137,6 +137,7 @@ namespace ActionGroupsExtended
         public static GUIStyle AGXBtnStyle = null; //window style
         private static GUIStyle AGXFldStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
+        //private static GUIStyle AGXScrollStyle = null; //window style
         private bool ShowSettingsWin = false;
         private Rect SettingsWinRect;
         public static bool FlightWinShowKeycodes = true;
@@ -401,7 +402,7 @@ namespace ActionGroupsExtended
                 }
                 errLine = "17";
                 float facilityLevel = Mathf.Max(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding));
-                print("AGX Career check: " + facilityLevel);
+                //print("AGX Career check: " + facilityLevel);
                 if (AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
                 {
                     //print("b");
@@ -486,6 +487,7 @@ namespace ActionGroupsExtended
                 ShowGroupInFlightCurrent = 1;
                 // print("AGXStart " + Planetarium.GetUniversalTime());
                 errLine = "22";
+                //AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
                 AGXSkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
                 AGXWinStyle = new GUIStyle(AGXSkin.window);
                 AGXLblStyle = new GUIStyle(AGXSkin.label);
@@ -497,6 +499,7 @@ namespace ActionGroupsExtended
                 AGXLblStyle.wordWrap = false;
                 errLine = "23";
                 AGXBtnStyle = new GUIStyle(AGXSkin.button);
+                //AGXScrollStyle = new GUIStyle(HighLogic.skin.scrollView);
                 AGXBtnStyle.fontStyle = FontStyle.Normal;
                 AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
                 AGXBtnStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
@@ -525,6 +528,21 @@ namespace ActionGroupsExtended
                 AGXBtnStyle.active.background = ButtonTexture;
                 AGXBtnStyle.focused.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
+                
+                
+                //foreach(Font fnt in fonts)
+                //{
+                //    Debug.Log("fnt " + fnt.name);
+                //}
+                AGXBtnStyle.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                AGXLblStyle.font = AGXBtnStyle.font;
+                AGXFldStyle.font = AGXBtnStyle.font;
+                //Debug.Log(AGXBtnStyle.font.name);
+     
+                //AGXScrollStyle = new GUIStyle(AGXSkin.verticalScrollbar);
+                
+                //AGXScrollStyle.normal.background = null;
+                //AGXBtnStyle.font = Font.
                 PartCenter.LoadImage(importPartCenter);
                 PartCenter.Apply();
                 PartCross.LoadImage(importPartCross);
@@ -575,15 +593,16 @@ namespace ActionGroupsExtended
                 //KeySetNamesFlight[CurrentKeySetFlight - 1] = CurrentKeySetNameFlight;
                 AGXRemoteTechQueue = new List<AGXRemoteTechQueueItem>();
                 RTFound = false;
-                foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies) //auto detect KAS for Skycrane
+                foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
                 {
                     if (Asm.dllName == "RemoteTech")
                     {
-                        Debug.Log("RemoteTech found");
+                        //Debug.Log("RemoteTech found");
                         //AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, FlightGlobals.ActiveVessel.rootPart.flightID, Planetarium.GetUniversalTime() + 10, force, forceDir));
                         RTFound = true;
                     }
                 }
+                //print("RT FOUND " + RTFound); 
                 errLine = "31";
                 if (RTFound && bool.Parse(AGExtNode.GetValue("RTWinShow")))
                 {
@@ -593,14 +612,14 @@ namespace ActionGroupsExtended
                 {
                     RTWinShow = false;
                 }
-                Debug.Log("RemoteTech " + RTWinShow);
+                //Debug.Log("RemoteTech " + RTWinShow);
                 isDirectAction = new Dictionary<int, bool>();
                 for (int i = 1; i <= 250; i++)
                 {
                     isDirectAction[i] = false;
                 }
 
-                print("AGX Flight Started Okay");
+                //print("AGX Flight Started Okay");
             }
             catch (Exception e)
             {
@@ -787,7 +806,7 @@ namespace ActionGroupsExtended
             public void DrawSettingsWin(int WindowID)
             {
 
-                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes"))
+                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes",AGXBtnStyle))
                 {
                     AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
                     if (AGXFlight.FlightWinShowKeycodes)
@@ -802,12 +821,12 @@ namespace ActionGroupsExtended
                     AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 }
 
-                if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
+                if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
                 {
                     AGXFlight.ClickEditButton();
 
                 }
-                if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows"))
+                if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
                 {
                     KeySetWin.x = 250;
                     KeySetWin.y = 250;
@@ -828,14 +847,16 @@ namespace ActionGroupsExtended
                 {
                     AutoHideGroupsWin = !AutoHideGroupsWin;
                 }
-                if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech"))
+                AGXBtnStyle.normal.background = ButtonTexture;
+                AGXBtnStyle.hover.background = ButtonTexture;
+                if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
                 {
                     if (RTFound)
                     {
                         RTWinShow = !RTWinShow;
                     }
                 }
-                if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech"))
+                if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
                 {
                     useRT = !useRT;
                 }
@@ -1123,7 +1144,8 @@ namespace ActionGroupsExtended
 
         public void AGXOnDraw()
         {
-
+            GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
+            
             if (!showCareerStockAGs)
             {
                 ShowAGXMod = false;
@@ -1259,12 +1281,17 @@ namespace ActionGroupsExtended
                 Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
             }
+            //print("guis " + HighLogic.Skin.font.name + " " + GUI.skin.font.name); 
+            
+            //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
+            //Debug.Log("fntc " + fonts.Count());
+            GUI.skin = defaults;
         }
 
         public void DrawSettingsWin(int WindowID)
         {
 
-            if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes"))
+            if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
             {
                 AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
                 if (AGXFlight.FlightWinShowKeycodes)
@@ -1279,12 +1306,12 @@ namespace ActionGroupsExtended
                 AGXStaticData.SaveBaseConfigNode(AGExtNode);
             }
 
-            if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions"))
+            if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
             {
                 AGXFlight.ClickEditButton();
 
             }
-            if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows"))
+            if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
             {
                 KeySetWin.x = 250;
                 KeySetWin.y = 250;
@@ -1307,14 +1334,16 @@ namespace ActionGroupsExtended
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
             }
-            if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech"))
+            AGXBtnStyle.normal.background =  ButtonTexture;
+            AGXBtnStyle.hover.background = ButtonTexture;
+            if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
             {
                 if (RTFound)
                 {
                     RTWinShow = !RTWinShow;
                 }
             }
-            if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech"))
+            if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
             {
                 useRT = !useRT;
             }
@@ -1623,7 +1652,11 @@ namespace ActionGroupsExtended
 
         public void FlightWindow(int WindowID)
         {
-            HighLogic.Skin.scrollView.normal.background = null;
+            
+            //Debug.Log("flight win");
+            //AGXScrollStyle.normal.background = null;
+            GUI.skin.scrollView.normal.background = null;
+            //HighLogic.Skin.scrollView.normal.background = ButtonTextureRed;
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
             if (GUI.Button(new Rect(160, 5, 70, 20), ShowGroupInFlightNames[ShowGroupInFlightCurrent], AGXBtnStyle))
             {
@@ -1634,7 +1667,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
+                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow; 
                 }
             }
 
@@ -1753,7 +1786,6 @@ namespace ActionGroupsExtended
 
             if (ActiveActionsState.Count == 0)
             {
-
                 GUI.Label(new Rect(40, 30, 150, 20), "No actions available", AGXLblStyle);
             }
             else if (ActiveActionsStateToShow.Count == 0)
@@ -1802,6 +1834,7 @@ namespace ActionGroupsExtended
 
         public void RTQueueWindow(int WindowID)
         {
+            GUI.skin.scrollView.normal.background = null;
             RTWinScroll = GUI.BeginScrollView(new Rect(5, 20, 263, Math.Min(100, 20 + (20 * (AGXRemoteTechQueue.Count - 1)))), RTWinScroll, new Rect(0, 0, 250, (20 * (AGXRemoteTechQueue.Count))));
             for (int i2 = 1; i2 <= AGXRemoteTechQueue.Count; i2 = i2 + 1)
             {
@@ -1929,7 +1962,8 @@ namespace ActionGroupsExtended
 
         public void CurrentActionsWindow(int WindowID)
         {
-            HighLogic.Skin.scrollView.normal.background = null;
+            GUI.skin.scrollView.normal.background = null;
+            //AGXScrollStyle.normal.background = null;
             ThisGroupActions = new List<AGXAction>();
             ThisGroupActions.AddRange(CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
             GUI.Box(new Rect(5, 25, 310, 110), "");
@@ -2796,9 +2830,9 @@ namespace ActionGroupsExtended
 
         public void SelParts(int WindowID)
         {
-
+            GUI.skin.scrollView.normal.background = null;
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
-            HighLogic.Skin.scrollView.normal.background = null;
+            //AGXScrollStyle.normal.background = null;
             SelectedPartsCount = AGEditorSelectedParts.Count;
             int SelPartsLeft = new int(); //move everything left or right by tweaking this variable
             SelPartsLeft = -10;
@@ -3222,9 +3256,9 @@ namespace ActionGroupsExtended
 
         public void GroupsWindow(int WindowID)
         {
-
+            GUI.skin.scrollView.normal.background = null;
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
-            HighLogic.Skin.scrollView.normal.background = null;
+            //AGXScrollStyle.normal.background = null;
             if (AutoHideGroupsWin)
             {
                 //GUI.DrawTexture(new Rect(6, 4, 78, 18), BtnTexRed);
@@ -4722,6 +4756,7 @@ namespace ActionGroupsExtended
                 //{
                 //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
                 //}
+                //Debug.Log("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
             }
             catch (Exception e)
             {

@@ -159,7 +159,7 @@ namespace ActionGroupsExtended
             public void DrawSettingsWinEditor(int WindowID)
             {
 
-                if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows"))
+                if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows",AGXBtnStyle))
                 {
                     KeySetWin.x = 250;
                     KeySetWin.y = 250;
@@ -191,7 +191,7 @@ namespace ActionGroupsExtended
         public void DrawSettingsWinEditor(int WindowID)
         {
 
-            if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows"))
+            if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows", AGXBtnStyle))
             {
                 KeySetWin.x = 250;
                 KeySetWin.y = 250;
@@ -524,6 +524,9 @@ namespace ActionGroupsExtended
                 AGXBtnStyle.active.background = ButtonTexture;
                 AGXBtnStyle.focused.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
+                AGXBtnStyle.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                AGXLblStyle.font = AGXBtnStyle.font;
+                AGXFldStyle.font = AGXBtnStyle.font;
                 PartCenter.LoadImage(importPartCenter);
                 PartCenter.Apply();
                 PartCross.LoadImage(importPartCross);
@@ -1336,7 +1339,7 @@ namespace ActionGroupsExtended
 
         public void CurrentActionsWindow(int WindowID)
         {
-            HighLogic.Skin.scrollView.normal.background = null;
+            GUI.skin.scrollView.normal.background = null;
             ThisGroupActions = new List<AGXAction>();
             ThisGroupActions.AddRange(CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
             GUI.Box(new Rect(5, 25, 310, 110), "");
@@ -2177,7 +2180,7 @@ namespace ActionGroupsExtended
         public void SelParts(int WindowID)
         {
             AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
-            HighLogic.Skin.scrollView.normal.background = null;
+            GUI.skin.scrollView.normal.background = null;
 
             SelectedPartsCount = AGEditorSelectedParts.Count;
             int SelPartsLeft = new int();
@@ -2756,7 +2759,7 @@ namespace ActionGroupsExtended
 
         public void GroupsWindow(int WindowID)
         {
-
+            GUI.skin.scrollView.normal.background = null;
             string ErrLine = "1";
             try
             {
