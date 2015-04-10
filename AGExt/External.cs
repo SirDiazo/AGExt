@@ -551,7 +551,7 @@ namespace ActionGroupsExtended
                 }
                 catch
                 {
-                    return false;
+                    return AGXFlight.groupActivatedState[i];
                 }
             }
             else

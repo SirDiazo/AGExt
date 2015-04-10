@@ -168,6 +168,7 @@ namespace ActionGroupsExtended
         private bool showGroupsIsGroups = true;
         public static bool useRT = true;
         // private bool showGroupsIsKeySet = false;
+        public static Dictionary<int, bool> groupActivatedState; //group activated state, this does NOT save, provided for kOS script usage
 
         public void DummyVoid()
         {
@@ -265,12 +266,13 @@ namespace ActionGroupsExtended
 
                 AGXguiKeys = new Dictionary<int, KeyCode>();
 
-
+                groupActivatedState = new Dictionary<int, bool>();
                 errLine = "4";
                 for (int i = 1; i <= 250; i = i + 1)
                 {
                     AGXguiNames[i] = "";
                     AGXguiKeys[i] = KeyCode.None;
+                    groupActivatedState[i] = false;
                 }
 
 
@@ -528,8 +530,8 @@ namespace ActionGroupsExtended
                 AGXBtnStyle.active.background = ButtonTexture;
                 AGXBtnStyle.focused.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
-                
-                
+
+
                 //foreach(Font fnt in fonts)
                 //{
                 //    Debug.Log("fnt " + fnt.name);
@@ -538,9 +540,9 @@ namespace ActionGroupsExtended
                 AGXLblStyle.font = AGXBtnStyle.font;
                 AGXFldStyle.font = AGXBtnStyle.font;
                 //Debug.Log(AGXBtnStyle.font.name);
-     
+
                 //AGXScrollStyle = new GUIStyle(AGXSkin.verticalScrollbar);
-                
+
                 //AGXScrollStyle.normal.background = null;
                 //AGXBtnStyle.font = Font.
                 PartCenter.LoadImage(importPartCenter);
@@ -806,7 +808,7 @@ namespace ActionGroupsExtended
             public void DrawSettingsWin(int WindowID)
             {
 
-                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes",AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
                 {
                     AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
                     if (AGXFlight.FlightWinShowKeycodes)
@@ -1145,7 +1147,7 @@ namespace ActionGroupsExtended
         public void AGXOnDraw()
         {
             GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
-            
+
             if (!showCareerStockAGs)
             {
                 ShowAGXMod = false;
@@ -1282,7 +1284,7 @@ namespace ActionGroupsExtended
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
             }
             //print("guis " + HighLogic.Skin.font.name + " " + GUI.skin.font.name); 
-            
+
             //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
             //Debug.Log("fntc " + fonts.Count());
             GUI.skin = defaults;
@@ -1334,7 +1336,7 @@ namespace ActionGroupsExtended
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
             }
-            AGXBtnStyle.normal.background =  ButtonTexture;
+            AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
             {
@@ -1530,6 +1532,20 @@ namespace ActionGroupsExtended
                 //pmAgx.AGXData = pmAgx.SaveActionGroups();
 
             }
+
+            if (force && forceDir)
+            {
+                groupActivatedState[group] = true;
+            }
+            else if (force && !forceDir)
+            {
+                groupActivatedState[group] = false;
+            }
+            else
+            {
+                groupActivatedState[group] = !groupActivatedState[group];
+            }
+
             groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
         }
@@ -1652,7 +1668,7 @@ namespace ActionGroupsExtended
 
         public void FlightWindow(int WindowID)
         {
-            
+
             //Debug.Log("flight win");
             //AGXScrollStyle.normal.background = null;
             GUI.skin.scrollView.normal.background = null;
@@ -1667,7 +1683,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow; 
+                    ShowGroupsInFlightWindow = !ShowGroupsInFlightWindow;
                 }
             }
 
@@ -4628,24 +4644,32 @@ namespace ActionGroupsExtended
                             //Debug.Log("turn off");
                         }
                     }
-                    foreach (KeyValuePair<int, KeyCode> kcPair2 in DefaultTen) //toggle default 10 groups if no actions are assigned
+                    foreach (KeyValuePair<int, KeyCode> kcPair2 in DefaultTen) //toggle groups if no actions are assigned
                     {
                         if (Input.GetKeyDown(kcPair2.Value))
                         {
                             if (AGXguiMod1Groups[kcPair2.Key] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[kcPair2.Key] == Input.GetKey(AGXguiMod2Key))
                             {
-                                Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                                CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                                CustomActions.Add(2, KSPActionGroup.Custom02);
-                                CustomActions.Add(3, KSPActionGroup.Custom03);
-                                CustomActions.Add(4, KSPActionGroup.Custom04);
-                                CustomActions.Add(5, KSPActionGroup.Custom05);
-                                CustomActions.Add(6, KSPActionGroup.Custom06);
-                                CustomActions.Add(7, KSPActionGroup.Custom07);
-                                CustomActions.Add(8, KSPActionGroup.Custom08);
-                                CustomActions.Add(9, KSPActionGroup.Custom09);
-                                CustomActions.Add(10, KSPActionGroup.Custom10);
-                                FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
+                                if (kcPair2.Key <= 10)
+                                {
+                                    Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+                                    CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
+                                    CustomActions.Add(2, KSPActionGroup.Custom02);
+                                    CustomActions.Add(3, KSPActionGroup.Custom03);
+                                    CustomActions.Add(4, KSPActionGroup.Custom04);
+                                    CustomActions.Add(5, KSPActionGroup.Custom05);
+                                    CustomActions.Add(6, KSPActionGroup.Custom06);
+                                    CustomActions.Add(7, KSPActionGroup.Custom07);
+                                    CustomActions.Add(8, KSPActionGroup.Custom08);
+                                    CustomActions.Add(9, KSPActionGroup.Custom09);
+                                    CustomActions.Add(10, KSPActionGroup.Custom10);
+                                    FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
+                                    groupActivatedState[kcPair2.Key] = FlightGlobals.ActiveVessel.ActionGroups[CustomActions[kcPair2.Key]];
+                                }
+                                else
+                                {
+                                    groupActivatedState[kcPair2.Key] = !groupActivatedState[kcPair2.Key];
+                                }
                             }
                         }
                     }
@@ -5369,7 +5393,7 @@ namespace ActionGroupsExtended
             ActiveKeys.Clear();
             ActiveKeysDirect.Clear();
             DefaultTen.Clear();
-            for (int i2 = 1; i2 <= 10; i2++) //add default 10 groups to key detection
+            for (int i2 = 1; i2 <= 250; i2++) //add all keycodes to key detections
             {
                 if (AGXguiKeys[i2] != KeyCode.None)
                 {
@@ -5393,10 +5417,12 @@ namespace ActionGroupsExtended
                     {
                         ActiveKeys.Add(AGXguiKeys[i2.group]);
                     }
-                    if (i2.group <= 10 && DefaultTen.ContainsKey(i2.group))
+
+                    if (DefaultTen.ContainsKey(i2.group)) //remove assigned groups from basic key detection
                     {
-                        DefaultTen.Remove(i2.group); //group is less then 10, remove it from the defaultTen
+                        DefaultTen.Remove(i2.group);
                     }
+
                 }
 
             }
@@ -5448,6 +5474,44 @@ namespace ActionGroupsExtended
                     errLine = "8";
                 }
                 errLine = "9";
+                foreach (AGXActionsState actState in ActiveActionsState) //update our state list, in theory this is never used but just in case, all action groups updated at this time have actions assigned and are state checked that way
+                {
+                    errLine = "10";
+                    if(actState.group <= 10)
+                    {
+                        Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+                        CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
+                        CustomActions.Add(2, KSPActionGroup.Custom02);
+                        CustomActions.Add(3, KSPActionGroup.Custom03);
+                        CustomActions.Add(4, KSPActionGroup.Custom04);
+                        CustomActions.Add(5, KSPActionGroup.Custom05);
+                        CustomActions.Add(6, KSPActionGroup.Custom06);
+                        CustomActions.Add(7, KSPActionGroup.Custom07);
+                        CustomActions.Add(8, KSPActionGroup.Custom08);
+                        CustomActions.Add(9, KSPActionGroup.Custom09);
+                        CustomActions.Add(10, KSPActionGroup.Custom10);
+                        if (actState.actionOn && !actState.actionOff)
+                        {
+                            FlightGlobals.ActiveVessel.ActionGroups.SetGroup(CustomActions[actState.group], true);
+                            groupActivatedState[actState.group] = true;
+                        }
+                        else
+                        {
+                            FlightGlobals.ActiveVessel.ActionGroups.SetGroup(CustomActions[actState.group], false);
+                            groupActivatedState[actState.group] = false;
+                        }
+
+                    }
+                    else if (actState.actionOn && !actState.actionOff)
+                    {
+                        groupActivatedState[actState.group] = true;
+                    }
+                    else
+                    {
+                        groupActivatedState[actState.group] = false;
+                    }
+                }
+
             }
             catch (Exception e)
             {
