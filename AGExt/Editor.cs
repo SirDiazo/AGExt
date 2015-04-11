@@ -2334,7 +2334,7 @@ namespace ActionGroupsExtended
                                         if (ba.name == baname)
                                         {
                                             ba.actionGroup = ba.actionGroup | defaultGroupToShow;
-                                            Debug.Log("adding act");
+                                            //Debug.Log("adding act");
 
                                         }
                                     }

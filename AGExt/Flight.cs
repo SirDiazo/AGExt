@@ -1400,17 +1400,17 @@ namespace ActionGroupsExtended
                 {
                     if (FlightGlobals.ActiveVessel.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                     {
-                        Debug.Log("RemoteTech local");
+                        Debug.Log("AGX RemoteTech local");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                     }
                     else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
                     {
-                        Debug.Log("RemoteTech infinity");
+                        Debug.Log("AGX RemoteTech infinity");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                     }
                     else
                     {
-                        Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                        Debug.Log("AGX RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
 
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
 
@@ -1431,7 +1431,7 @@ namespace ActionGroupsExtended
 
         public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
-            Debug.Log("activating group " + group);
+            //Debug.Log("activating group " + group);
             Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
             CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
             CustomActions.Add(2, KSPActionGroup.Custom02);
@@ -1545,10 +1545,10 @@ namespace ActionGroupsExtended
             {
                 groupActivatedState[group] = !groupActivatedState[group];
             }
-            Debug.Log("Endactivation");
+            //Debug.Log("Endactivation");
             groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
-            Debug.Log("Endactivation2");
+            //Debug.Log("Endactivation2");
         }
 
         public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
@@ -4113,7 +4113,7 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
-            Debug.Log("Start update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
+            //Debug.Log("Start update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
             //if ((ControlTypes.ALL_SHIP_CONTROLS & (ControlTypes)InputLockManager.lockMask) == 0)
             //{
             //    print("not Locked");
@@ -4679,7 +4679,7 @@ namespace ActionGroupsExtended
                 //if (!ActiveActionsCalculated)
                 //{
                 //    CalculateActiveActions();
-                Debug.Log("AGX update middel A");
+               // Debug.Log("AGX update middel A");
                 //}
                 if (Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
                 {
@@ -4692,7 +4692,7 @@ namespace ActionGroupsExtended
                     }
                     errLine = "40";
                 }
-                Debug.Log("AGX update middel b");
+                //Debug.Log("AGX update middel b");
                 errLine = "41";
                 if (RightClickDelay < 3)
                 {
@@ -4724,7 +4724,7 @@ namespace ActionGroupsExtended
 
                     errLine = "44";
                 }
-                Debug.Log("AGX update middel c");
+                //Debug.Log("AGX update middel c");
                 errLine = "45";
 
                 if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
@@ -4734,7 +4734,7 @@ namespace ActionGroupsExtended
 
                 }
                 errLine = "46";
-                Debug.Log("AGX update middel d");
+               // Debug.Log("AGX update middel d");
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    foreach (PartModule pm in p.Modules)
@@ -4757,7 +4757,7 @@ namespace ActionGroupsExtended
                 //}
                 //print("delta time " + actionsCheckFrameCount);
                 errLine = "47";
-                Debug.Log("AGX update middel e2");
+                //Debug.Log("AGX update middel e2");
                 //count down action cool downs
                 groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
                 foreach (AGXCooldown agCD in groupCooldowns)
@@ -4765,13 +4765,13 @@ namespace ActionGroupsExtended
                     agCD.delayLeft = agCD.delayLeft + 1;
 
                 }
-                Debug.Log("AGX update middel e");
+                //Debug.Log("AGX update middel e");
                 errLine = "48";
                 if (RTFound)
                 {
                     CheckRTQueue();
                 }
-                Debug.Log("AGX update middel f");
+                //Debug.Log("AGX update middel f");
                 errLine = "49";
                 //PrintPartActs();
                 //print("landed " + FlightGlobals.ActiveVessel.landedAt);
@@ -4785,7 +4785,7 @@ namespace ActionGroupsExtended
                 //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
                 //}
                 //Debug.Log("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
-                Debug.Log("End update!");
+                //Debug.Log("End update!");
             }
             catch (Exception e)
             {
@@ -5380,7 +5380,7 @@ namespace ActionGroupsExtended
 
         public void CalculateActiveActions()
         {
-            Debug.Log("calculateActiveActions22 Start");
+            //Debug.Log("calculateActiveActions22 Start");
             //ActiveActions.Clear();
             ActiveActionsState.Clear();
             for (int i = 1; i <= 250; i = i + 1)
@@ -5434,7 +5434,7 @@ namespace ActionGroupsExtended
             //print("Def 10 count " + DefaultTen.Count + " " + ActiveKeys.Count + " " + ActiveKeysDirect.Count);
 
 
-            Debug.Log("calculateActiveActions22 end");
+            //Debug.Log("calculateActiveActions22 end");
             //if (ActiveActionsState.Count > 0)
             //{
             CalculateActionsState();
@@ -5448,12 +5448,12 @@ namespace ActionGroupsExtended
         public static void CalculateActionsState() //flag each actiongroup as activated or not
         {
             // print("Calculate start");
-            Debug.Log("CalclateActionsState33 start!");
-            foreach(bool b in FlightGlobals.ActiveVessel.ActionGroups.groups)
-            {
+            //Debug.Log("CalclateActionsState33 start!");
+            //foreach(bool b in FlightGlobals.ActiveVessel.ActionGroups.groups)
+            //{
 
-                Debug.Log("bool state " + b.ToString());
-            }
+            //    Debug.Log("bool state " + b.ToString());
+            //}
             string errLine = "1";
             try
             {
@@ -5522,7 +5522,7 @@ namespace ActionGroupsExtended
                         groupActivatedState[actState.group] = false;
                     }
                 }
-                Debug.Log("CalclateActionsState33 end!");
+                //Debug.Log("CalclateActionsState33 end!");
             }
             catch (Exception e)
             {
@@ -5684,11 +5684,11 @@ namespace ActionGroupsExtended
 
         public static void CheckActionsActive()
         {
-            Debug.Log("CheckActionsActice Start");
+            //Debug.Log("CheckActionsActice Start");
             CurrentVesselActions = CheckActionsActiveActualCode(CurrentVesselActions);
-            Debug.Log("CheckActionsActice Mid");
+           // Debug.Log("CheckActionsActice Mid");
             CalculateActionsState();
-            Debug.Log("CheckActionsActice End");
+           // Debug.Log("CheckActionsActice End");
         }
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
@@ -6609,7 +6609,7 @@ namespace ActionGroupsExtended
                             }
                             else if (pm.moduleName == "FARControllableSurface")
                             {
-                                Debug.Log("Start FAR Module");
+                                //Debug.Log("Start FAR Module");
                                 int i;
                                 if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
                                 {
@@ -6659,7 +6659,7 @@ namespace ActionGroupsExtended
                                         }
                                     }
                                 }
-                                Debug.Log("end FAR Module");
+                                //Debug.Log("end FAR Module");
                             }
                         }
                     }
@@ -6726,7 +6726,7 @@ namespace ActionGroupsExtended
                             agAct.activated = false;
                         }
                     }
-                    Debug.Log("End calc active action!");
+                    //Debug.Log("End calc active action!");
                 }
                     
                 catch
