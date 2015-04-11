@@ -1431,7 +1431,7 @@ namespace ActionGroupsExtended
 
         public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
-
+            Debug.Log("activating group " + group);
             Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
             CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
             CustomActions.Add(2, KSPActionGroup.Custom02);
@@ -1545,9 +1545,10 @@ namespace ActionGroupsExtended
             {
                 groupActivatedState[group] = !groupActivatedState[group];
             }
-
+            Debug.Log("Endactivation");
             groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
+            Debug.Log("Endactivation2");
         }
 
         public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
@@ -4112,7 +4113,7 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
-            //print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
+            Debug.Log("Start update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
             //if ((ControlTypes.ALL_SHIP_CONTROLS & (ControlTypes)InputLockManager.lockMask) == 0)
             //{
             //    print("not Locked");
@@ -4678,7 +4679,7 @@ namespace ActionGroupsExtended
                 //if (!ActiveActionsCalculated)
                 //{
                 //    CalculateActiveActions();
-
+                Debug.Log("AGX update middel A");
                 //}
                 if (Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
                 {
@@ -4691,6 +4692,7 @@ namespace ActionGroupsExtended
                     }
                     errLine = "40";
                 }
+                Debug.Log("AGX update middel b");
                 errLine = "41";
                 if (RightClickDelay < 3)
                 {
@@ -4722,7 +4724,7 @@ namespace ActionGroupsExtended
 
                     errLine = "44";
                 }
-
+                Debug.Log("AGX update middel c");
                 errLine = "45";
 
                 if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
@@ -4732,7 +4734,7 @@ namespace ActionGroupsExtended
 
                 }
                 errLine = "46";
-
+                Debug.Log("AGX update middel d");
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    foreach (PartModule pm in p.Modules)
@@ -4755,7 +4757,7 @@ namespace ActionGroupsExtended
                 //}
                 //print("delta time " + actionsCheckFrameCount);
                 errLine = "47";
-
+                Debug.Log("AGX update middel e2");
                 //count down action cool downs
                 groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
                 foreach (AGXCooldown agCD in groupCooldowns)
@@ -4763,11 +4765,13 @@ namespace ActionGroupsExtended
                     agCD.delayLeft = agCD.delayLeft + 1;
 
                 }
+                Debug.Log("AGX update middel e");
                 errLine = "48";
                 if (RTFound)
                 {
                     CheckRTQueue();
                 }
+                Debug.Log("AGX update middel f");
                 errLine = "49";
                 //PrintPartActs();
                 //print("landed " + FlightGlobals.ActiveVessel.landedAt);
@@ -4781,6 +4785,7 @@ namespace ActionGroupsExtended
                 //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
                 //}
                 //Debug.Log("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
+                Debug.Log("End update!");
             }
             catch (Exception e)
             {
@@ -5375,7 +5380,7 @@ namespace ActionGroupsExtended
 
         public void CalculateActiveActions()
         {
-
+            Debug.Log("calculateActiveActions22 Start");
             //ActiveActions.Clear();
             ActiveActionsState.Clear();
             for (int i = 1; i <= 250; i = i + 1)
@@ -5429,7 +5434,7 @@ namespace ActionGroupsExtended
             //print("Def 10 count " + DefaultTen.Count + " " + ActiveKeys.Count + " " + ActiveKeysDirect.Count);
 
 
-
+            Debug.Log("calculateActiveActions22 end");
             //if (ActiveActionsState.Count > 0)
             //{
             CalculateActionsState();
@@ -5443,6 +5448,12 @@ namespace ActionGroupsExtended
         public static void CalculateActionsState() //flag each actiongroup as activated or not
         {
             // print("Calculate start");
+            Debug.Log("CalclateActionsState33 start!");
+            foreach(bool b in FlightGlobals.ActiveVessel.ActionGroups.groups)
+            {
+
+                Debug.Log("bool state " + b.ToString());
+            }
             string errLine = "1";
             try
             {
@@ -5479,25 +5490,25 @@ namespace ActionGroupsExtended
                     errLine = "10";
                     if(actState.group <= 10)
                     {
-                        Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                        CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                        CustomActions.Add(2, KSPActionGroup.Custom02);
-                        CustomActions.Add(3, KSPActionGroup.Custom03);
-                        CustomActions.Add(4, KSPActionGroup.Custom04);
-                        CustomActions.Add(5, KSPActionGroup.Custom05);
-                        CustomActions.Add(6, KSPActionGroup.Custom06);
-                        CustomActions.Add(7, KSPActionGroup.Custom07);
-                        CustomActions.Add(8, KSPActionGroup.Custom08);
-                        CustomActions.Add(9, KSPActionGroup.Custom09);
-                        CustomActions.Add(10, KSPActionGroup.Custom10);
+                        //Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+                        //CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
+                        //CustomActions.Add(2, KSPActionGroup.Custom02);
+                        //CustomActions.Add(3, KSPActionGroup.Custom03);
+                        //CustomActions.Add(4, KSPActionGroup.Custom04);
+                        //CustomActions.Add(5, KSPActionGroup.Custom05);
+                        //CustomActions.Add(6, KSPActionGroup.Custom06);
+                        //CustomActions.Add(7, KSPActionGroup.Custom07);
+                        //CustomActions.Add(8, KSPActionGroup.Custom08);
+                        //CustomActions.Add(9, KSPActionGroup.Custom09);
+                        //CustomActions.Add(10, KSPActionGroup.Custom10);
                         if (actState.actionOn && !actState.actionOff)
                         {
-                            FlightGlobals.ActiveVessel.ActionGroups.SetGroup(CustomActions[actState.group], true);
+                            FlightGlobals.ActiveVessel.ActionGroups.groups[actState.group + 6] = true;
                             groupActivatedState[actState.group] = true;
                         }
                         else
                         {
-                            FlightGlobals.ActiveVessel.ActionGroups.SetGroup(CustomActions[actState.group], false);
+                            FlightGlobals.ActiveVessel.ActionGroups.groups[actState.group + 6] = false;
                             groupActivatedState[actState.group] = false;
                         }
 
@@ -5511,7 +5522,7 @@ namespace ActionGroupsExtended
                         groupActivatedState[actState.group] = false;
                     }
                 }
-
+                Debug.Log("CalclateActionsState33 end!");
             }
             catch (Exception e)
             {
@@ -5673,8 +5684,11 @@ namespace ActionGroupsExtended
 
         public static void CheckActionsActive()
         {
+            Debug.Log("CheckActionsActice Start");
             CurrentVesselActions = CheckActionsActiveActualCode(CurrentVesselActions);
+            Debug.Log("CheckActionsActice Mid");
             CalculateActionsState();
+            Debug.Log("CheckActionsActice End");
         }
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
@@ -6593,29 +6607,59 @@ namespace ActionGroupsExtended
                                     }
                                 }
                             }
-                            if (pm.moduleName == "FARControllableSurface")
+                            else if (pm.moduleName == "FARControllableSurface")
                             {
-                                if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
+                                Debug.Log("Start FAR Module");
+                                int i;
+                                if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
                                 {
-                                    if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
+                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
                                     {
-                                        agAct.activated = false;
+                                        if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
+                                        {
+                                            agAct.activated = false;
+                                        }
+                                    }
+                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
+                                    {
+                                        if ((float)pm.Fields.GetValue("yawaxis") == 0f)
+                                        {
+                                            agAct.activated = false;
+                                        }
+                                    }
+                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
+                                    {
+                                        if ((float)pm.Fields.GetValue("rollaxis") == 0f)
+                                        {
+                                            agAct.activated = false;
+                                        }
                                     }
                                 }
-                                else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
+                                else //NEAR installed
                                 {
-                                    if ((float)pm.Fields.GetValue("yawaxis") == 0f)
+                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
                                     {
-                                        agAct.activated = false;
+                                        if ((bool)pm.Fields.GetValue("pitchaxis") == false)
+                                        {
+                                            agAct.activated = false;
+                                        }
+                                    }
+                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
+                                    {
+                                        if ((bool)pm.Fields.GetValue("yawaxis") == false)
+                                        {
+                                            agAct.activated = false;
+                                        }
+                                    }
+                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
+                                    {
+                                        if ((bool)pm.Fields.GetValue("rollaxis") == false)
+                                        {
+                                            agAct.activated = false;
+                                        }
                                     }
                                 }
-                                else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                {
-                                    if ((float)pm.Fields.GetValue("rollaxis") == 0f)
-                                    {
-                                        agAct.activated = false;
-                                    }
-                                }
+                                Debug.Log("end FAR Module");
                             }
                         }
                     }
@@ -6682,7 +6726,9 @@ namespace ActionGroupsExtended
                             agAct.activated = false;
                         }
                     }
+                    Debug.Log("End calc active action!");
                 }
+                    
                 catch
                 {
                     print("AGX Action State Check Fail " + agAct.ba.name + " " + agAct.ba.listParent.module.moduleName);
