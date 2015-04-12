@@ -4083,7 +4083,7 @@ namespace ActionGroupsExtended
                             //print("node " + actNode + " " + gamePart.ConstructID);
                             AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage2);
                             //print("act to add " + actToAdd.ba);
-                            if (actToAdd.ba != null)
+                            if (actToAdd.ba != null && !CurrentVesselActions.Contains(actToAdd))
                             {
                                 CurrentVesselActions.Add(actToAdd);
                             }
@@ -4490,7 +4490,7 @@ namespace ActionGroupsExtended
                                         //print("node " + actNode + " " + gamePart.ConstructID);
                                         AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage2);
                                         //print("act to add " + actToAdd.ba);
-                                        if (actToAdd.ba != null)
+                                        if (actToAdd.ba != null && !CurrentVesselActions.Contains(actToAdd))
                                         {
                                             CurrentVesselActions.Add(actToAdd);
                                         }

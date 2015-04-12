@@ -2363,17 +2363,18 @@ namespace ActionGroupsExtended
                                     {
                                         ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = PartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
                                     }
-                                    List<AGXAction> Checking = new List<AGXAction>();
-                                    Checking.AddRange(CurrentVesselActions);
-                                    Checking.RemoveAll(p => p.group != ToAdd.group);
+                                    //List<AGXAction> Checking = new List<AGXAction>();
+                                    //Checking.AddRange(CurrentVesselActions);
+                                    //Checking.RemoveAll(p => p.group != ToAdd.group);
 
-                                    Checking.RemoveAll(p => p.prt != ToAdd.prt);
+                                    //Checking.RemoveAll(p => p.prt != ToAdd.prt);
 
-                                    Checking.RemoveAll(p => p.ba != ToAdd.ba);
+                                    //Checking.RemoveAll(p => p.ba != ToAdd.ba);
 
 
 
-                                    if (Checking.Count == 0)
+                                    //if (Checking.Count == 0)
+                                    if(!CurrentVesselActions.Contains(ToAdd))
                                     {
 
                                         CurrentVesselActions.Add(ToAdd);
@@ -4127,7 +4128,7 @@ namespace ActionGroupsExtended
                         foreach (ConfigNode actNode in prtNode.nodes)
                         {
                             AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage);
-                            if (actToAdd.ba != null)
+                            if (actToAdd.ba != null && !CurrentVesselActions.Contains(actToAdd))
                             {
                                 CurrentVesselActions.Add(actToAdd);
                             }
