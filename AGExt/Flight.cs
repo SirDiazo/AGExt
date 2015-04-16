@@ -4745,11 +4745,14 @@ namespace ActionGroupsExtended
                 //        }
                 //    }
                 //}
-                if (actionsCheckFrameCount >= 15) //this increments in the FixedUpdate frame now
+                if (ShowAGXMod)
                 {
-                    CheckActionsActive();
-                    //PartVesselChangeCheck();
-                    actionsCheckFrameCount = 0;
+                    if (actionsCheckFrameCount >= 15) //this increments in the FixedUpdate frame now
+                    {
+                        CheckActionsActive();
+                        //PartVesselChangeCheck();
+                        actionsCheckFrameCount = 0;
+                    }
                 }
                 //else
                 //{
@@ -4841,7 +4844,10 @@ namespace ActionGroupsExtended
 
         public void FixedUpdate()
         {
-            actionsCheckFrameCount = actionsCheckFrameCount + 1; //this affects actions on vessel, limit how often we check toggle states
+            if (ShowAGXMod)
+            {
+                actionsCheckFrameCount = actionsCheckFrameCount + 1; //this affects actions on vessel, limit how often we check toggle states
+            }
         }
 
         public void PrintPartActs()
