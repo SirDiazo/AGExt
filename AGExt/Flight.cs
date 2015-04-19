@@ -1146,7 +1146,7 @@ namespace ActionGroupsExtended
 
         public void AGXOnDraw()
         {
-            GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
+            ////GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
 
             if (!showCareerStockAGs)
             {
@@ -1287,7 +1287,8 @@ namespace ActionGroupsExtended
 
             //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
             //Debug.Log("fntc " + fonts.Count());
-            GUI.skin = defaults;
+           //// GUI.skin = defaults;
+            
         }
 
         public void DrawSettingsWin(int WindowID)
