@@ -5832,7 +5832,7 @@ namespace ActionGroupsExtended
                     {
                         if (agAct.ba.name == "OnAction")
                         {
-                            //print((string)agAct.ba.listParent.module.Fields.GetValue("storedGearState"));
+                            //print((string)agAct.ba.listParent.module.Fields.GetValue("gearState") + " gear test");
                             if ((string)agAct.ba.listParent.module.Fields.GetValue("storedGearState") == "DEPLOYED")
                             {
                                 agAct.activated = true;

@@ -159,7 +159,7 @@ namespace ActionGroupsExtended
             public void DrawSettingsWinEditor(int WindowID)
             {
 
-                if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows",AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 25, 130, 25), "Reset Windows", AGXBtnStyle))
                 {
                     KeySetWin.x = 250;
                     KeySetWin.y = 250;
@@ -546,6 +546,7 @@ namespace ActionGroupsExtended
                 GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
                 GameEvents.onPartRemove.Add(PartRemove);
                 GameEvents.onEditorShipModified.Add(VesselChanged);
+                GameEvents.onEditorLoad.Add(OnShipLoad);
                 isDirectAction = new Dictionary<int, bool>();
                 CurrentVesselActions.Clear();
                 EditorLoadFromFile();
@@ -555,12 +556,27 @@ namespace ActionGroupsExtended
                 //print("Loading now");
                 //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
                 LoadFinished = true;
-                Debug.Log("AGX Editor Start Okay");
+                //Debug.Log("AGX Editor Start Okay");
             }
             catch (Exception e)
             {
                 print("AGX Editor Start Fail " + errLine + " " + e);
                 print("AGX AGExt node dump: " + AGExtNode);
+            }
+        }
+
+        public void OnShipLoad(ShipConstruct ship ,CraftBrowser.LoadType loadType)
+        {
+            if (loadType == CraftBrowser.LoadType.Normal)
+            {
+                CurrentVesselActions.Clear();
+                //EditorLoadFromFile();
+                EditorLoadFromNode();
+                //Debug.Log("AGX Ship Load of type NORMAL detected");
+            }
+            else
+            {
+                Debug.Log("AGX Ship Load of type MERGE detected");
             }
         }
 
@@ -1155,6 +1171,7 @@ namespace ActionGroupsExtended
             GameEvents.onPartAttach.Remove(PartAttaching);
             GameEvents.onPartRemove.Remove(PartRemove);
             GameEvents.onEditorShipModified.Remove(VesselChanged);
+            GameEvents.onEditorLoad.Remove(OnShipLoad);
             //GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
 
 
@@ -2374,7 +2391,7 @@ namespace ActionGroupsExtended
 
 
                                     //if (Checking.Count == 0)
-                                    if(!CurrentVesselActions.Contains(ToAdd))
+                                    if (!CurrentVesselActions.Contains(ToAdd))
                                     {
 
                                         CurrentVesselActions.Add(ToAdd);
@@ -2726,7 +2743,7 @@ namespace ActionGroupsExtended
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("AGX RefDefActsList Error " + errLine + " " + e);
             }
@@ -2751,7 +2768,7 @@ namespace ActionGroupsExtended
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("AGX RefDefActsListType Error " + errLine + " " + e);
             }
@@ -3960,7 +3977,7 @@ namespace ActionGroupsExtended
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("AGX Monitor Default Actions Error " + errLine + " " + e);
             }
