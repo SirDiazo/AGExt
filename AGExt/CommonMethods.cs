@@ -462,6 +462,7 @@ namespace ActionGroupsExtended
         private bool vesselInstanceOK = false; //is this vessel loadable? if this is false, run nothing
         private List<AGXAction> actionsList;
         private Vessel thisVsl;
+        private Dictionary<int, string> guiNames;
 
         public AGXOtherVessel(uint FlightID)
         {
@@ -471,6 +472,7 @@ namespace ActionGroupsExtended
             thisVsl = loadedVessels.Find(ves => ves.rootPart.flightID == flightID);
             //Debug.Log("After");
             actionsList = new List<AGXAction>();
+            guiNames = new Dictionary<int, string>();
             if (thisVsl == null) //check vessel is loaded
             {
                 vesselInstanceOK = false;
@@ -478,11 +480,13 @@ namespace ActionGroupsExtended
                 return;
             }
             ConfigNode nodeLoad = new ConfigNode();
+            
             if (AGXFlight.AGXFlightNode != null)
             {
                 if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
                 {
                     nodeLoad = AGXFlight.AGXFlightNode.GetNode(flightID.ToString());
+                    guiNames = LoadGuiNames(nodeLoad.GetValue("groupNames"));
                     ConfigNode[] partNodes = nodeLoad.GetNodes("PART");
                     foreach (ConfigNode prtNode in partNodes)
                     {
@@ -498,6 +502,44 @@ namespace ActionGroupsExtended
             }
         }
 
+        private Dictionary<int,string> LoadGuiNames(string loadNames)
+        {
+            string LoadNames = loadNames;
+            Dictionary<int, string> guiNames  = new Dictionary<int, string>();
+            if (LoadNames.Length > 0) 
+            {
+                while (LoadNames[0] == '\u2023')
+                {
+                    int groupNum = new int();
+                    string groupName = "";
+                    LoadNames = LoadNames.Substring(1);
+                    groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
+                    LoadNames = LoadNames.Substring(3);
+                    if (LoadNames.IndexOf('\u2023') == -1)
+                    {
+                        groupName = LoadNames;
+                    }
+                    else
+                    {
+                        groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
+                        LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
+                    }
+                        guiNames[groupNum] = groupName;
+                }
+            }
+            return guiNames;
+        }
+
+        public string GetGroupName(int group)
+        {
+            return guiNames[group];
+        }
+        
+        public Dictionary<int,string> GetGroupNamesAll()
+        {
+            return guiNames;
+        }
+        
         public List<AGXAction> GetAssignedActions()
         {
             if (vesselInstanceOK)
