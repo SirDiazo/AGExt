@@ -6193,19 +6193,39 @@ namespace ActionGroupsExtended
                                 agAct.activated = true;
                             }
                         }
-                        if (agAct.ba.name == "ActivateSpoiler")
+
+
+                        if (agAct.ba.name == "ActivateSpoiler")   //THIS CODE WORKS, just need to wait for brake to become public on the next version of FAR
                         {
-                            if (FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Brakes])
+
+
+                            Assembly FarAsm = null;
+                            foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
                             {
-                                agAct.activated = false;
+                                if (Asm.dllName == "FerramAerospaceResearch")
+                                {
+                                    //Debug.Log("far found");
+                                    FarAsm = Asm.assembly;
+                                }
                             }
-                            else
+                            //Debug.Log("far found2");
+                            if (FarAsm != null)
                             {
-                                agAct.activated = true;
+                                Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
+                                //Debug.Log("far found3");
+                                if((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
+                                {
+                                    agAct.activated = true;
+                                }
+                                else
+                                {
+                                    agAct.activated = false;
+                                }
                             }
+
                         }
                     }
-                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim")
+                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim") 
                     {
 
 
@@ -6585,17 +6605,21 @@ namespace ActionGroupsExtended
                     }
                     if (agAct.ba.listParent.module.moduleName == "ModuleControlSurfaceActions") //other acts not needed, bool check
                     {
+                        //Debug.Log("surface found");
                         agAct.activated = true;
                         foreach (PartModule pm in agAct.ba.listParent.part.Modules)
                         //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
                         {
-                            if (pm.moduleName == "ModuleControlSurface")
+                            if (pm is ModuleControlSurface)
                             {
+                                //Debug.Log("surface found2");
                                 ModuleControlSurface CS = (ModuleControlSurface)pm;
                                 if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
                                 {
+                                    //Debug.Log("surface found3");
                                     if (CS.ignorePitch == true)
                                     {
+                                        //Debug.Log("surface found4");
                                         agAct.activated = false;
                                     }
                                 }
@@ -6614,7 +6638,7 @@ namespace ActionGroupsExtended
                                     }
                                 }
                             }
-                            else if (pm.moduleName == "FARControllableSurface")
+                            else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
                             {
                                 //Debug.Log("Start FAR Module");
                                 int i;
@@ -6736,9 +6760,9 @@ namespace ActionGroupsExtended
                     //Debug.Log("End calc active action!");
                 }
                     
-                catch
+                catch(Exception e)
                 {
-                    print("AGX Action State Check Fail " + agAct.ba.name + " " + agAct.ba.listParent.module.moduleName);
+                    print("AGX Action State Check Fail " + agAct.ba.name + " " + agAct.ba.listParent.module.moduleName + " " + e);
                 }
 
 

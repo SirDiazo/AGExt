@@ -576,7 +576,22 @@ namespace ActionGroupsExtended
             }
             else
             {
-                Debug.Log("AGX Ship Load of type MERGE detected");
+                //Debug.Log("AGX Ship Load of type MERGE detected");
+                //foreach (Part p in ship.parts)
+                //{
+                //    ModuleAGX agxPM = p.Modules.OfType<ModuleAGX>().First();
+                //    foreach (AGXAction agAct in agxPM.agxActionsThisPart)
+                //    {
+                //        if (!CurrentVesselActions.Contains(agAct))
+                //        {
+                //            CurrentVesselActions.Add(agAct);
+                //            if (AGXguiNames[agAct.group].Length == 0)
+                //            {
+                //                AGXguiNames[agAct.group] = agAct.grpName;
+                //            }
+                //        }
+                //    }
+                //}
             }
         }
 
@@ -709,6 +724,7 @@ namespace ActionGroupsExtended
 
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
+            //Debug.Log("Part attache fire!");
             string ErrLine = "1";
             try
             {

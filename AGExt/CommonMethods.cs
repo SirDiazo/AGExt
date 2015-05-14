@@ -359,10 +359,19 @@ namespace ActionGroupsExtended
                 node.RemoveNodes("TOGGLE");
                 node.RemoveNodes("HOLD");
                 ErrLine = "2";
-                if (agxActionsThisPart.Count > 0)
+                List<AGXAction> actsToSave = new List<AGXAction>();
+                actsToSave.AddRange(agxActionsThisPart);
+                if(HighLogic.LoadedSceneIsEditor)
                 {
+                    actsToSave.AddRange(AGXEditor.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
+                }
+                else if(HighLogic.LoadedSceneIsFlight)
+                {
+                    actsToSave.AddRange(AGXFlight.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
+                }
+                
                     ErrLine = "3";
-                    foreach (AGXAction agAct in agxActionsThisPart)
+                    foreach (AGXAction agAct in actsToSave)
                     {
                         ErrLine = "4";
                         ConfigNode actionNode = new ConfigNode("ACTION");
@@ -376,7 +385,7 @@ namespace ActionGroupsExtended
                         node.AddNode(actionNode);
                         ErrLine = "7";
                     }
-                }
+                
                 if (HighLogic.LoadedSceneIsEditor)
                 {
                     ConfigNode toggleStates = new ConfigNode("TOGGLE");
@@ -404,6 +413,7 @@ namespace ActionGroupsExtended
 
         public override void OnLoad(ConfigNode node)
         {
+            //Debug.Log("Part Load " + this.part.partName); 
             string errLine = "1";
             try
             {
