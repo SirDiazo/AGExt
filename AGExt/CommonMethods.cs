@@ -360,14 +360,47 @@ namespace ActionGroupsExtended
                 node.RemoveNodes("HOLD");
                 ErrLine = "2";
                 List<AGXAction> actsToSave = new List<AGXAction>();
+                ErrLine = "2a";
                 actsToSave.AddRange(agxActionsThisPart);
+                ErrLine = "2b";
                 if(HighLogic.LoadedSceneIsEditor)
                 {
-                    actsToSave.AddRange(AGXEditor.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
+                    ErrLine = "2c";
+                    actsToSave.AddRange(StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
                 }
                 else if(HighLogic.LoadedSceneIsFlight)
                 {
-                    actsToSave.AddRange(AGXFlight.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
+                    ErrLine = "2d";
+                    //if (StaticData.CurrentVesselActions == null)
+                    //{
+                    //    Debug.Log("AGX Partmodule Save CurrentVessels is null");
+                    //}
+                    //else
+                    //{
+                    //    Debug.Log("AGX Partmodule Save CurrentVessels is not null");
+                    //}
+                    //foreach (AGXAction testAct in StaticData.CurrentVesselActions)
+                    //{
+                    //    if(testAct == null)
+                    //    {
+                    //        Debug.Log("AGX Partmodule Save current action is null");
+                    //    }
+                    //    else
+                    //    {
+                    //        Debug.Log("AGX Partmodule Save action " + testAct.ToString());
+                    //    }
+                    //    if(testAct.ba.listParent.part == this.part)
+                    //    {
+                    //        Debug.Log("AGX Partmodule Save actions is on this part");
+                    //    }
+                    //    else
+                    //    {
+                    //        Debug.Log("AGX Partmodule Save actions is NOT on this part");
+                    //    }
+                    //}
+
+                    actsToSave.AddRange(StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
+                    //Debug.Log("AGX Partmodule Save action saved okay");
                 }
                 
                     ErrLine = "3";
@@ -404,6 +437,7 @@ namespace ActionGroupsExtended
                     node.AddNode(toggleStates);
                     node.AddNode(holdStates);
                 }
+                //Debug.Log("AGX PartModule Save Okay"); //temporary
             }
             catch (Exception e)
             {
@@ -413,7 +447,7 @@ namespace ActionGroupsExtended
 
         public override void OnLoad(ConfigNode node)
         {
-            //Debug.Log("Part Load " + this.part.partName); 
+            //Debug.Log("AGX Load Module"); 
             string errLine = "1";
             try
             {
@@ -443,12 +477,12 @@ namespace ActionGroupsExtended
                 foreach (ConfigNode actionNode in actionsNodes)
                 {
                     errLine = "6";
-                    if (HighLogic.LoadedSceneIsEditor && toggles.Contains(actionNode.GetValue("group")) && AGXEditor.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    if (HighLogic.LoadedSceneIsEditor && toggles.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
                     {
                         errLine = "7";
                         AGXEditor.IsGroupToggle[int.Parse(actionNode.GetValue("group"))] = true;
                     }
-                    if (HighLogic.LoadedSceneIsEditor && holds.Contains(actionNode.GetValue("group")) && AGXEditor.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    if (HighLogic.LoadedSceneIsEditor && holds.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
                     {
                         errLine = "8";
                         AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
@@ -456,6 +490,7 @@ namespace ActionGroupsExtended
                     errLine = "9";
                     agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode, this.part, false));
                 }
+                //.Log("AGX PartModule Load Okay"); //temporary
             }
             catch(Exception e)
             {
@@ -808,7 +843,7 @@ namespace ActionGroupsExtended
             }
             else
             {
-                Debug.Log("AGX Group State FALSE due to vessel not loaded.");
+               // Debug.Log("AGX Group State FALSE due to vessel not loaded.");
                 return false;
             }
         }
@@ -890,5 +925,15 @@ namespace ActionGroupsExtended
 
     }
 
+    public static class StaticData
+    {
+        public static List<AGXAction> CurrentVesselActions;
+
+        static StaticData()
+        {
+            CurrentVesselActions = new List<AGXAction>();
+        }
+
+    }
 
 }//name space closing bracket

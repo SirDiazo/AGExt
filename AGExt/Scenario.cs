@@ -633,6 +633,17 @@ namespace ActionGroupsExtended //add scenario module for data storage
                         actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("ImpactTransform") != (string)actNode.GetValue("custom1"));
                     }
                 }
+                else if (pmName == "ModuleModActions") //guiName is player editable so can't be used. 
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                    }
+                }
                 else
                 {
                     foreach (PartModule pm in actPart.Modules) //add actions to compare

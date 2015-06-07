@@ -69,7 +69,7 @@ namespace ActionGroupsExtended
         static string[] KeySetNamesFlight = new string[5];
         //private bool TrapMouse = false;
         private int LastPartCount = 0;
-        public static List<AGXAction> CurrentVesselActions;
+        //public static List<AGXAction> CurrentVesselActions;
         //public static List<AGXAction> AllVesselsActions;
 
         private static Dictionary<int, bool> ActiveGroups;
@@ -303,7 +303,7 @@ namespace ActionGroupsExtended
                 KeySetNamesFlight[2] = (string)AGExtNode.GetValue("KeySetName3");
                 KeySetNamesFlight[3] = (string)AGExtNode.GetValue("KeySetName4");
                 KeySetNamesFlight[4] = (string)AGExtNode.GetValue("KeySetName5");
-                CurrentVesselActions = new List<AGXAction>();
+                //CurrentVesselActions = new List<AGXAction>();
                 AGXRoot = null;
                 errLine = "7";
                 StartLoadWindowPositions();
@@ -621,7 +621,7 @@ namespace ActionGroupsExtended
                     isDirectAction[i] = false;
                 }
 
-                //print("AGX Flight Started Okay");
+                Debug.Log("AGX Flight Started Okay"); //temporary
             }
             catch (Exception e)
             {
@@ -954,7 +954,7 @@ namespace ActionGroupsExtended
                     foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                     {
                         List<AGXAction> thisPartsActions = new List<AGXAction>();
-                        thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
+                        thisPartsActions.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
                         errLine = "18";
                         if (thisPartsActions.Count > 0)
                         {
@@ -1099,6 +1099,7 @@ namespace ActionGroupsExtended
                 InputLockManager.RemoveControlLock("AGExtControlLock");
                 AGXLockSet = false;
             }
+            StaticData.CurrentVesselActions.Clear();
 
         }
 
@@ -1258,7 +1259,7 @@ namespace ActionGroupsExtended
                 }
                 if (ShowCurActsWin && ShowSelectedWin)
                 {
-                    CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
+                    CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
                     // TrapMouse |= CurActsWin.Contains(RealMousePos);
 
                 }
@@ -1287,8 +1288,8 @@ namespace ActionGroupsExtended
 
             //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
             //Debug.Log("fntc " + fonts.Count());
-           //// GUI.skin = defaults;
-            
+            //// GUI.skin = defaults;
+
         }
 
         public void DrawSettingsWin(int WindowID)
@@ -1445,7 +1446,7 @@ namespace ActionGroupsExtended
             CustomActions.Add(9, KSPActionGroup.Custom09);
             CustomActions.Add(10, KSPActionGroup.Custom10);
 
-            foreach (AGXAction agAct in CurrentVesselActions.Where(agx => agx.group == group))
+            foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == group))
             {
                 //print("ActactA" + forceDir + " " + agAct.ba.name);
                 if (groupCooldowns.Any(cd => cd.actGroup == agAct.group && cd.vslFlightID == agAct.ba.listParent.part.vessel.rootPart.flightID)) //rather then fight with double negative bools, do noting if both match, run if no match
@@ -1475,7 +1476,7 @@ namespace ActionGroupsExtended
                         agAct.activated = false;
                         if (agAct.ba.name != "kOSVoidAction")
                         {
-                            foreach (AGXAction agxAct in CurrentVesselActions)
+                            foreach (AGXAction agxAct in StaticData.CurrentVesselActions)
                             {
                                 if (agxAct.ba == agAct.ba)
                                 {
@@ -1498,7 +1499,7 @@ namespace ActionGroupsExtended
                         agAct.activated = true;
                         if (agAct.ba.name != "kOSVoidAction")
                         {
-                            foreach (AGXAction agxAct in CurrentVesselActions)
+                            foreach (AGXAction agxAct in StaticData.CurrentVesselActions)
                             {
                                 if (agxAct.ba == agAct.ba)
                                 {
@@ -1555,7 +1556,7 @@ namespace ActionGroupsExtended
         public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
         {
             List<BaseAction> baList = new List<BaseAction>();
-            foreach (AGXAction agAct in CurrentVesselActions)
+            foreach (AGXAction agAct in StaticData.CurrentVesselActions)
             {
                 if (agAct.group == grp)
                 {
@@ -1568,7 +1569,7 @@ namespace ActionGroupsExtended
         public static List<BaseAction> GetActionsList() //return all actions on vessel
         {
             List<BaseAction> baList = new List<BaseAction>();
-            foreach (AGXAction agAct in CurrentVesselActions)
+            foreach (AGXAction agAct in StaticData.CurrentVesselActions)
             {
 
                 baList.Add(agAct.ba);
@@ -1983,7 +1984,7 @@ namespace ActionGroupsExtended
             GUI.skin.scrollView.normal.background = null;
             //AGXScrollStyle.normal.background = null;
             ThisGroupActions = new List<AGXAction>();
-            ThisGroupActions.AddRange(CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
+            ThisGroupActions.AddRange(StaticData.CurrentVesselActions.Where(p => p.group == AGXCurActGroup));
             GUI.Box(new Rect(5, 25, 310, 110), "");
             CurGroupsWin = GUI.BeginScrollView(new Rect(10, 30, 330, 100), CurGroupsWin, new Rect(0, 0, 310, Math.Max(100, 0 + (20 * (ThisGroupActions.Count)))));
             int RowCnt = new int();
@@ -2014,7 +2015,7 @@ namespace ActionGroupsExtended
                         AGXBtnStyle.alignment = TextAnchor.MiddleLeft;
                         if (GUI.Button(new Rect(0, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).group.ToString() + ": " + AGXguiNames[ThisGroupActions.ElementAt(RowCnt - 1).group], AGXBtnStyle))
                         {
-                            CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            StaticData.CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                             ModuleAGX agxMod = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
                             agxMod.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
                             RefreshCurrentActions();
@@ -2027,7 +2028,7 @@ namespace ActionGroupsExtended
 
                         if (GUI.Button(new Rect(100, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).prt.partInfo.title, AGXBtnStyle))
                         {
-                            CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                            StaticData.CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                             ModuleAGX agxMod = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
                             agxMod.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
                             RefreshCurrentActions();
@@ -2057,7 +2058,7 @@ namespace ActionGroupsExtended
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), ThisGroupActions.ElementAt(RowCnt - 1).ba.guiName, AGXBtnStyle))
                             {
-                                CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                                StaticData.CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                                 ModuleAGX agxMod = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
                                 agxMod.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
                                 RefreshCurrentActions();
@@ -2088,7 +2089,7 @@ namespace ActionGroupsExtended
                         {
                             if (GUI.Button(new Rect(200, 0 + (20 * (RowCnt - 1)), 100, 20), "Error", AGXBtnStyle))
                             {
-                                CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
+                                StaticData.CurrentVesselActions.RemoveAll(ag => ag.group == ThisGroupActions.ElementAt(RowCnt - 1).group & ag.ba == ThisGroupActions.ElementAt(RowCnt - 1).ba);
                                 ModuleAGX agxMod = ThisGroupActions.ElementAt(RowCnt - 1).ba.listParent.part.Modules.OfType<ModuleAGX>().First();
                                 agxMod.agxActionsThisPart.RemoveAll(p => p == ThisGroupActions.ElementAt(RowCnt - 1));
                                 RefreshCurrentActions();
@@ -2846,6 +2847,26 @@ namespace ActionGroupsExtended
             GUI.DragWindow();
         }
 
+        public void RefreshPartActions()
+        {
+
+            try
+            {
+                PartActionsList.Clear();
+                PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
+                foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
+                {
+                    PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
+                }
+                //print("AGX Actions refresh found actions: " + PartActionsList.Count);
+            }
+            catch
+            {
+//              print("AGX Actions refresh fail");
+            }
+
+        }
+
         public void SelParts(int WindowID)
         {
             GUI.skin.scrollView.normal.background = null;
@@ -3033,14 +3054,14 @@ namespace ActionGroupsExtended
                                         ToAdd = new AGXAction() { prt = agPrt.AGPart, ba = PartActionsList.ElementAt(ActionsCount - 1), group = AGXCurActGroup, activated = false };
                                     }
                                     List<AGXAction> Checking = new List<AGXAction>();
-                                    Checking.AddRange(CurrentVesselActions);
+                                    Checking.AddRange(StaticData.CurrentVesselActions);
                                     Checking.RemoveAll(p => p.group != ToAdd.group);
                                     Checking.RemoveAll(p => p.prt != ToAdd.prt);
                                     Checking.RemoveAll(p => p.ba != ToAdd.ba);
                                     if (Checking.Count == 0)
                                     {
                                         //CurrentVesselActions.Add(ToAdd);
-                                        CurrentVesselActions.Add(ToAdd);
+                                        StaticData.CurrentVesselActions.Add(ToAdd);
                                         RefreshCurrentActions();
                                         // SaveCurrentVesselActions();
                                     }
@@ -3062,13 +3083,7 @@ namespace ActionGroupsExtended
                     {
                         if (GUI.Button(new Rect(SelPartsLeft + 30, 190, 185, 40), "No actions found.\r\nRefresh?", AGXBtnStyle))
                         {
-                            PartActionsList.Clear();
-                            PartActionsList.AddRange(AGEditorSelectedParts.First().AGPart.Actions.Where(ba => ba.active == true));
-                            foreach (PartModule pm in AGEditorSelectedParts.First().AGPart.Modules)
-                            {
-                                PartActionsList.AddRange(pm.Actions.Where(ba => ba.active == true));
-                            }
-                            print("AGX Actions refresh found actions: " + PartActionsList.Count);
+                            RefreshPartActions();
                         }
                     }
                 }
@@ -3291,7 +3306,7 @@ namespace ActionGroupsExtended
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             bool[] PageGrn = new bool[5];
-            foreach (AGXAction AGact in CurrentVesselActions)
+            foreach (AGXAction AGact in StaticData.CurrentVesselActions)
             {
                 if (AGact.group <= 50)
                 {
@@ -3616,8 +3631,8 @@ namespace ActionGroupsExtended
 
                     else
                     {
-                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
-                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
+                        if (StaticData.CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                        if (StaticData.CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
                         //{
                         //    GUI.DrawTexture(new Rect(1, ((ButtonPos - 1) * 20) + 1, 118, 18), BtnTexGrn);
                         //}
@@ -3663,8 +3678,8 @@ namespace ActionGroupsExtended
                     }
                     else
                     {
-                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
-                        if (CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
+                        if (StaticData.CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.normal.background = ButtonTextureGreen;
+                        if (StaticData.CurrentVesselActions.Any(pfd => pfd.group == ButtonID)) AGXBtnStyle.hover.background = ButtonTextureGreen;
                         //{
                         //    GUI.DrawTexture(new Rect(121, ((ButtonPos - 26) * 20) + 1, 118, 18), BtnTexGrn);
                         //}
@@ -3969,7 +3984,7 @@ namespace ActionGroupsExtended
             {
                 errLine = "2";
                 //print("call dockingevent");
-                CurrentVesselActions.Clear();
+                StaticData.CurrentVesselActions.Clear();
                 errLine = "3";
                 bool ShowAmbiguousMessage = true;
                 errLine = "4";
@@ -4084,9 +4099,9 @@ namespace ActionGroupsExtended
                             //print("node " + actNode + " " + gamePart.ConstructID);
                             AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage2);
                             //print("act to add " + actToAdd.ba);
-                            if (actToAdd.ba != null && !CurrentVesselActions.Contains(actToAdd))
+                            if (actToAdd.ba != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
                             {
-                                CurrentVesselActions.Add(actToAdd);
+                                StaticData.CurrentVesselActions.Add(actToAdd);
                             }
                         }
                         errLine = "27";
@@ -4290,7 +4305,7 @@ namespace ActionGroupsExtended
                                         List<AGXAction> thisPartsActions = new List<AGXAction>();
                                         errLine = "18 ";
                                         //print("part 18a" + p.ConstructID + " " + CurrentVesselActions);
-                                        thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
+                                        thisPartsActions.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
                                         errLine = "18a";
 
                                         //errLine = "18";
@@ -4326,7 +4341,7 @@ namespace ActionGroupsExtended
                                 }
                                 errLine = "24a";
 
-                                CurrentVesselActions.Clear();
+                                StaticData.CurrentVesselActions.Clear();
                                 errLine = "24b";
                             }
                             errLine = "24c";
@@ -4491,9 +4506,9 @@ namespace ActionGroupsExtended
                                         //print("node " + actNode + " " + gamePart.ConstructID);
                                         AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage2);
                                         //print("act to add " + actToAdd.ba);
-                                        if (actToAdd.ba != null && !CurrentVesselActions.Contains(actToAdd))
+                                        if (actToAdd.ba != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
                                         {
-                                            CurrentVesselActions.Add(actToAdd);
+                                            StaticData.CurrentVesselActions.Add(actToAdd);
                                         }
                                     }
                                 }
@@ -4540,7 +4555,7 @@ namespace ActionGroupsExtended
                                             //partAGActions2.Add(new AGXAction() { group = CustomActions.IndexOf(agrp) + 1, prt = this.part, ba = baLoad, activated = false });
                                             AGXAction ToAdd = new AGXAction() { prt = baLoad.listParent.part, ba = baLoad, group = CustomActions.IndexOf(agrp) + 1, activated = false };
                                             List<AGXAction> Checking = new List<AGXAction>();
-                                            Checking.AddRange(CurrentVesselActions);
+                                            Checking.AddRange(StaticData.CurrentVesselActions);
                                             Checking.RemoveAll(p => p.group != ToAdd.group);
 
                                             Checking.RemoveAll(p => p.prt != ToAdd.prt);
@@ -4552,7 +4567,7 @@ namespace ActionGroupsExtended
                                             if (Checking.Count == 0)
                                             {
 
-                                                CurrentVesselActions.Add(ToAdd);
+                                                StaticData.CurrentVesselActions.Add(ToAdd);
 
                                             }
                                         }
@@ -4680,7 +4695,7 @@ namespace ActionGroupsExtended
                 //if (!ActiveActionsCalculated)
                 //{
                 //    CalculateActiveActions();
-               // Debug.Log("AGX update middel A");
+                // Debug.Log("AGX update middel A");
                 //}
                 if (Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
                 {
@@ -4735,7 +4750,7 @@ namespace ActionGroupsExtended
 
                 }
                 errLine = "46";
-               // Debug.Log("AGX update middel d");
+                // Debug.Log("AGX update middel d");
                 //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                 //{
                 //    foreach (PartModule pm in p.Modules)
@@ -4881,7 +4896,7 @@ namespace ActionGroupsExtended
 
         public void PrintPartPos()
         {
-            print("begin update pos " + CurrentVesselActions.Count);
+            print("begin update pos " + StaticData.CurrentVesselActions.Count);
             try
             {
                 foreach (Part p in FlightGlobals.ActiveVessel.Parts)
@@ -4898,7 +4913,7 @@ namespace ActionGroupsExtended
 
         public void partDead(Part p)
         {
-            CurrentVesselActions.RemoveAll(act => act.ba.listParent.part == p);
+            StaticData.CurrentVesselActions.RemoveAll(act => act.ba.listParent.part == p);
             RefreshCurrentActions();
 
             if (AGXFlightNode.HasNode(p.flightID.ToString()))
@@ -4914,7 +4929,7 @@ namespace ActionGroupsExtended
         {
             //print("call checklistformulti");
             List<Vessel> curActsVessels = new List<Vessel>(); //find out if actions exist on vessel that left
-            foreach (AGXAction agAct in CurrentVesselActions)
+            foreach (AGXAction agAct in StaticData.CurrentVesselActions)
             {
                 if (!curActsVessels.Contains(agAct.ba.listParent.part.vessel))
                 {
@@ -4957,7 +4972,7 @@ namespace ActionGroupsExtended
                     foreach (Part p in vsl2.Parts) //cycle parts in separated vessel to find actions
                     {
                         List<AGXAction> thisPartsActions = new List<AGXAction>();
-                        thisPartsActions.AddRange(CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
+                        thisPartsActions.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.ba.listParent.part == p));
                         //errLine = "18";
                         if (thisPartsActions.Count > 0)
                         {
@@ -4985,7 +5000,7 @@ namespace ActionGroupsExtended
                     }
 
                     AGXFlightNode.AddNode(vsl2node);
-                    CurrentVesselActions.RemoveAll(ag => ag.ba.listParent.part.vessel == vsl2);
+                    StaticData.CurrentVesselActions.RemoveAll(ag => ag.ba.listParent.part.vessel == vsl2);
 
 
                 }
@@ -5047,7 +5062,7 @@ namespace ActionGroupsExtended
                                         if (actToAdd.ba != null)
                                         {
                                             List<AGXAction> Checking = new List<AGXAction>();
-                                            Checking.AddRange(CurrentVesselActions);
+                                            Checking.AddRange(StaticData.CurrentVesselActions);
                                             Checking.RemoveAll(p => p.group != actToAdd.group);
 
                                             Checking.RemoveAll(p => p.prt != actToAdd.prt);
@@ -5059,7 +5074,7 @@ namespace ActionGroupsExtended
                                             if (Checking.Count == 0)
                                             {
 
-                                                CurrentVesselActions.Add(actToAdd);
+                                                StaticData.CurrentVesselActions.Add(actToAdd);
 
                                             }
                                         }
@@ -5104,7 +5119,7 @@ namespace ActionGroupsExtended
                                         if (actToAdd.ba != null)
                                         {
                                             List<AGXAction> Checking = new List<AGXAction>();
-                                            Checking.AddRange(CurrentVesselActions);
+                                            Checking.AddRange(StaticData.CurrentVesselActions);
                                             Checking.RemoveAll(p => p.group != actToAdd.group);
 
                                             Checking.RemoveAll(p => p.prt != actToAdd.prt);
@@ -5116,7 +5131,7 @@ namespace ActionGroupsExtended
                                             if (Checking.Count == 0)
                                             {
 
-                                                CurrentVesselActions.Add(actToAdd);
+                                                StaticData.CurrentVesselActions.Add(actToAdd);
 
                                             }
                                         }
@@ -5392,7 +5407,7 @@ namespace ActionGroupsExtended
             ActiveActionsState.Clear();
             for (int i = 1; i <= 250; i = i + 1)
             {
-                if (CurrentVesselActions.Any(a => a.group == i))
+                if (StaticData.CurrentVesselActions.Any(a => a.group == i))
                 {
 
                     // ActiveActions.Add(i);
@@ -5473,7 +5488,7 @@ namespace ActionGroupsExtended
                 }
                 errLine = "4";
                 //print("Calculate start2");
-                foreach (AGXAction agxAct in CurrentVesselActions)
+                foreach (AGXAction agxAct in StaticData.CurrentVesselActions)
                 {
                     // print("actions " + CurrentVesselActions.Count + " " + ActiveActionsState.Count);
                     errLine = "5";
@@ -5495,7 +5510,7 @@ namespace ActionGroupsExtended
                 foreach (AGXActionsState actState in ActiveActionsState) //update our state list, in theory this is never used but just in case, all action groups updated at this time have actions assigned and are state checked that way
                 {
                     errLine = "10";
-                    if(actState.group <= 10)
+                    if (actState.group <= 10)
                     {
                         //Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
                         //CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
@@ -5586,23 +5601,23 @@ namespace ActionGroupsExtended
         public void LoadActionGroups()
         {
 
-            if (CurrentVesselActions == null)
+            if (StaticData.CurrentVesselActions == null)
             {
 
-                CurrentVesselActions = new List<AGXAction>();
+                StaticData.CurrentVesselActions = new List<AGXAction>();
             }
             else
             {
 
-                CurrentVesselActions.Clear();
+                StaticData.CurrentVesselActions.Clear();
             }
 
 
             for (int i = 1; i <= 10; i++)
             {
-                if (CurrentVesselActions.Count(grp => grp.group == i) > 0)
+                if (StaticData.CurrentVesselActions.Count(grp => grp.group == i) > 0)
                 {
-                    AGXAction TempAgxAct = CurrentVesselActions.Find(agx => agx.group == i);
+                    AGXAction TempAgxAct = StaticData.CurrentVesselActions.Find(agx => agx.group == i);
                     Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
                     KSPActs[1] = KSPActionGroup.Custom01;
                     KSPActs[2] = KSPActionGroup.Custom02;
@@ -5692,10 +5707,10 @@ namespace ActionGroupsExtended
         public static void CheckActionsActive()
         {
             //Debug.Log("CheckActionsActice Start");
-            CurrentVesselActions = CheckActionsActiveActualCode(CurrentVesselActions);
-           // Debug.Log("CheckActionsActice Mid");
+            StaticData.CurrentVesselActions = CheckActionsActiveActualCode(StaticData.CurrentVesselActions);
+            // Debug.Log("CheckActionsActice Mid");
             CalculateActionsState();
-           // Debug.Log("CheckActionsActice End");
+            // Debug.Log("CheckActionsActice End");
         }
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
@@ -6213,7 +6228,7 @@ namespace ActionGroupsExtended
                             {
                                 Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
                                 //Debug.Log("far found3");
-                                if((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
+                                if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
                                 {
                                     agAct.activated = true;
                                 }
@@ -6225,7 +6240,7 @@ namespace ActionGroupsExtended
 
                         }
                     }
-                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim") 
+                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim")
                     {
 
 
@@ -6759,8 +6774,8 @@ namespace ActionGroupsExtended
                     }
                     //Debug.Log("End calc active action!");
                 }
-                    
-                catch(Exception e)
+
+                catch (Exception e)
                 {
                     print("AGX Action State Check Fail " + agAct.ba.name + " " + agAct.ba.listParent.module.moduleName + " " + e);
                 }

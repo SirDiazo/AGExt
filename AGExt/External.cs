@@ -36,15 +36,11 @@ namespace ActionGroupsExtended
         public static List<AGXAction> AGXAllActions()//works //all actions on activevessel, returns AGXAction, can other mods even use?
         {
             print("AGX Call: List all actions for active vessel");
-            if (HighLogic.LoadedSceneIsFlight)
+            try
             {
-                return AGXFlight.CurrentVesselActions;
+                return StaticData.CurrentVesselActions;
             }
-            else if (HighLogic.LoadedSceneIsEditor)
-            {
-                return AGXEditor.CurrentVesselActions;
-            }
-            else
+            catch
             {
                 return new List<AGXAction>();
             }
@@ -58,7 +54,7 @@ namespace ActionGroupsExtended
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
                 {
-                    return AGXFlight.CurrentVesselActions;
+                    return StaticData.CurrentVesselActions;
 
                 }
                 else
@@ -69,7 +65,7 @@ namespace ActionGroupsExtended
             }
             else if (HighLogic.LoadedSceneIsEditor)
             {
-                return AGXEditor.CurrentVesselActions;
+                return StaticData.CurrentVesselActions;
             }
             else
             {
@@ -83,7 +79,7 @@ namespace ActionGroupsExtended
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == FlightID)
                 {
-                    return AGXFlight.CurrentVesselActions.FindAll(ag => ag.group == group);
+                    return StaticData.CurrentVesselActions.FindAll(ag => ag.group == group);
 
                 }
                 else
@@ -94,15 +90,7 @@ namespace ActionGroupsExtended
             }
             else if (HighLogic.LoadedSceneIsEditor)
             {
-                if (EditorLogic.RootPart.flightID == FlightID)
-                {
-                    return AGXEditor.CurrentVesselActions.FindAll(ag => ag.group == group);
-
-                }
-                else
-                {
-                    return new List<AGXAction>();
-                }
+                    return StaticData.CurrentVesselActions.FindAll(ag => ag.group == group);
             }
             else
             {
@@ -113,15 +101,11 @@ namespace ActionGroupsExtended
         public static List<AGXAction> AGXGroupActions(int group) //works //all actions on ActiveVessel in group
         {
             print("AGX Call: List actions in active vessel in group " + group); //works
-            if (HighLogic.LoadedSceneIsFlight)
+            try
             {
-                return AGXFlight.CurrentVesselActions.FindAll(ag => ag.group == group);
+                return StaticData.CurrentVesselActions.FindAll(ag => ag.group == group);
             }
-            else if (HighLogic.LoadedSceneIsEditor)
-            {
-                return AGXEditor.CurrentVesselActions.FindAll(ag => ag.group == group);
-            }
-            else
+            catch
             {
                 return new List<AGXAction>();
             }
@@ -757,7 +741,7 @@ namespace ActionGroupsExtended
             if (HighLogic.LoadedSceneIsFlight)
             {
                 List<PartModule> prtList = new List<PartModule>();
-                foreach (AGXAction agAct in AGXFlight.CurrentVesselActions.Where(agx => agx.group == i))
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == i))
                 {
                     if (!prtList.Contains(agAct.ba.listParent.module))
                     {
@@ -769,7 +753,7 @@ namespace ActionGroupsExtended
             else if (HighLogic.LoadedSceneIsEditor)
             {
                 List<PartModule> prtList = new List<PartModule>();
-                foreach (AGXAction agAct in AGXEditor.CurrentVesselActions.Where(agx => agx.group == i))
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == i))
                 {
                     if (!prtList.Contains(agAct.ba.listParent.module))
                     {
@@ -790,7 +774,7 @@ namespace ActionGroupsExtended
             if (HighLogic.LoadedSceneIsFlight)
             {
                 List<Part> prtList = new List<Part>();
-                foreach (AGXAction agAct in AGXFlight.CurrentVesselActions.Where(agx => agx.group == i))
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == i))
                 {
                     if (!prtList.Contains(agAct.ba.listParent.part))
                     {
@@ -802,7 +786,7 @@ namespace ActionGroupsExtended
             else if (HighLogic.LoadedSceneIsEditor)
             {
                 List<Part> prtList = new List<Part>();
-                foreach (AGXAction agAct in AGXEditor.CurrentVesselActions.Where(agx => agx.group == i))
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == i))
                 {
                     if (!prtList.Contains(agAct.ba.listParent.part))
                     {
@@ -906,6 +890,36 @@ namespace ActionGroupsExtended
         {
             //Debug.Log("get has remote");
             return ((int)obj.ba.GetHashCode() + (int)obj.prt.GetHashCode()) ^ obj.group;
+        }
+
+        public override string ToString()
+        {
+            string str = "";
+            if(prt == null)
+            {
+                str = str + "PartNull";
+            }
+            else
+            {
+                str = str + prt.partInfo.name;
+            }
+            if (ba == null)
+            {
+                str = str + ":BANull";
+            }
+            else
+            {
+                str = str + ":" + ba.name;
+            }
+            if (group == null)
+            {
+                str = str + ":GRPnull";
+            }
+            else
+            {
+                str = str + ":" + group.ToString();
+            }
+            return str;
         }
     }
     public class AGXDefaultCheck : MonoBehaviour //used in Editor to monitor default action groups
