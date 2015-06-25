@@ -1001,7 +1001,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                print("FlightSaveToFile error " + errLine + " " + e);
+                print("AGX FlightSaveToFile error " + errLine + " " + e);
                 return origNode;
             }
         }
@@ -1974,7 +1974,7 @@ namespace ActionGroupsExtended
 
                 catch (Exception e)
                 {
-                    Debug.Log("Reflection to RT fail " + e);
+                    Debug.Log("AGX: Reflection to RT fail " + e);
                 }
             }
         }
@@ -5022,7 +5022,7 @@ namespace ActionGroupsExtended
                     //print(vsl1.id + " " + vsl2.id);
                     if (vsl1 != vsl2) //check to make sure this is not the same vessel docking to itself somehow, both vsl1 and vsl2 would be FG.AC then.
                     {
-                        print("Old Docking event!");
+                        print("AGX Old Docking event!");
                         overrideRootChange = true;
                         if (vsl1 == FlightGlobals.ActiveVessel || vsl2 == FlightGlobals.ActiveVessel) //check to make sure at least one vessel is FG.AC  Not sure how a docking event could happen when neither vessel is active but make sure
                         {

@@ -675,17 +675,17 @@ namespace ActionGroupsExtended
                 //print("cur delay" + curDelay);
                 if (thisVsl.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                 {
-                    Debug.Log("RemoteTech local");
+                    Debug.Log("AGX: RemoteTech local action");
                     AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                 }
                 else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(thisVsl))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
                 {
-                    Debug.Log("RemoteTech infinity");
+                    Debug.Log("AGX: RemoteTech infinity");
                     AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                 }
                 else
                 {
-                    Debug.Log("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(thisVsl));
+                    Debug.Log("AGX: RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(thisVsl));
                     if (AGXFlight.useRT)
                     {
                         AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(thisVsl), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
