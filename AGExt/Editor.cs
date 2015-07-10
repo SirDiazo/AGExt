@@ -132,6 +132,7 @@ namespace ActionGroupsExtended
         bool showAllPartsList = false; //show list of all parts in group window?
         List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
         KSPActionGroup KSPDefaultLastActionGroup = KSPActionGroup.Custom01;
+        public static bool disablePartAttaching = false; //disable part attaching feature when loading so non-symmetric actions are not made symmetric
         //static Part partLastHighlight = null;
         ////static Color partHighlighLastColor;
         //static Part.HighlightType partHighlightLastType;
@@ -556,7 +557,7 @@ namespace ActionGroupsExtended
                 //print("Loading now");
                 //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
                 LoadFinished = true;
-                //Debug.Log("AGX Editor Start Okay");
+                //Debug.Log("AGX Editor Start Okay" + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
@@ -567,8 +568,13 @@ namespace ActionGroupsExtended
 
         public void OnShipLoad(ShipConstruct ship ,CraftBrowser.LoadType loadType)
         {
+            
+            DetachedPartReset.Start(); //start timer so it fires even if no parts load
             if (loadType == CraftBrowser.LoadType.Normal)
             {
+                //Debug.Log("OnShipLoadFire!");
+                disablePartAttaching = true; //disable symmetric action loading
+                DetachedPartActions.Clear(); //onPartAttach fires before this point, need to get rid of the actions that adds to this list.
                 StaticData.CurrentVesselActions.Clear();
                 //EditorLoadFromFile();
                 EditorLoadFromNode();
@@ -724,7 +730,7 @@ namespace ActionGroupsExtended
 
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
-            //Debug.Log("Part attache fire!");
+            //Debug.Log("Part attache fire!" + StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
             string ErrLine = "1";
             try
             {
@@ -774,7 +780,10 @@ namespace ActionGroupsExtended
                         //Debug.Log("part attached not detect"); 
                     }
                     ErrLine = "15";
-                    DetachedPartActions.Add(agAct);
+                    if (!disablePartAttaching)
+                    {
+                        DetachedPartActions.Add(agAct);
+                    }
                 }
                 ErrLine = "16";
                 AttachAGXPart(host_target.host);
@@ -786,7 +795,10 @@ namespace ActionGroupsExtended
                     foreach (AGXAction agAct in agxMod.agxActionsThisPart)
                     {
                         ErrLine = "19";
-                        DetachedPartActions.Add(agAct);
+                        if (!disablePartAttaching)
+                        {
+                            DetachedPartActions.Add(agAct);
+                        }
                         if (!StaticData.CurrentVesselActions.Contains(agAct))
                         {
                             //print("adding action " + agAct.ba.guiName + agAct.group);
@@ -806,7 +818,7 @@ namespace ActionGroupsExtended
                 }
                 DetachedPartReset.Start();
                 //RefreshDefaultActionsList();
-
+                //Debug.Log("Part attache fire end!" + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
@@ -819,6 +831,7 @@ namespace ActionGroupsExtended
             string errLine = "1";
             try
             {
+                //.Log("AGX Part Remove Fire " + StaticData.CurrentVesselActions.Count());
                 errLine = "2";
                 UpdateAGXActionGroupNames();
                 errLine = "3";
@@ -850,6 +863,7 @@ namespace ActionGroupsExtended
                     errLine = "13";
                 }
                 errLine = "14";
+                //Debug.Log("AGX Part Remove Fire " + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
@@ -1076,9 +1090,12 @@ namespace ActionGroupsExtended
         public static void ResetDetachedParts(object source, ElapsedEventArgs e)
         {
 
+            //Debug.Log("AGX Detached parts start " + StaticData.CurrentVesselActions.Count());
+            disablePartAttaching = false;
             DetachedPartReset.Stop();
             foreach (AGXAction agAct in DetachedPartActions)
             {
+                //Debug.Log("AGX DetachedPartActions " + DetachedPartActions.Count());
                 foreach (Part p in agAct.prt.symmetryCounterparts)
                 {
                     AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p, false);
@@ -1092,7 +1109,7 @@ namespace ActionGroupsExtended
             }
             DetachedPartActions.Clear();
             EditorSaveToNode();
-
+            //Debug.Log("AGX Detached parts end " + StaticData.CurrentVesselActions.Count());
         }
 
         //public void VesselChanged(ShipConstruct sc)
@@ -3460,7 +3477,8 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
-
+            
+            //Debug.Log("AGX Editor Update" + StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
             if (checkShipsExist)
             {
                 if (checkShipsExistDelay >= 30)
@@ -3589,7 +3607,7 @@ namespace ActionGroupsExtended
             //{
             //    print(p.name + " " + p.symmetryCounterparts.Count + " " + p.GetHashCode());
             //}
-
+            //Debug.Log("AGX Editor Update end" + StaticData.CurrentVesselActions.Count());
             // print("test " + FindObjectsOfType<EditorSubassemblyItem>().Count());
         } //close Update()
         //if(needToAddStockButton)
@@ -3695,7 +3713,7 @@ namespace ActionGroupsExtended
         }
         public void MonitorDefaultActions()
         {
-            //print("2a");
+            //print("AGX Monitor default start " + StaticData.CurrentVesselActions.Count());
             KSPActionGroup KSPDefaultActionGroupThisFrame = KSPActionGroup.Custom01;
             try //find which action group is selected in default ksp editor this pass
             {
@@ -3712,7 +3730,7 @@ namespace ActionGroupsExtended
 
                 KSPDefaultActionGroupThisFrame = (KSPActionGroup)Enum.Parse(typeof(KSPActionGroup), grpText);
                 //print("Selected group " + KSPDefaultLastActionGroup);
-
+                
             }
             catch
             {
@@ -4001,6 +4019,7 @@ namespace ActionGroupsExtended
                         }
                     }
                 }
+                //print("AGX Monitor default end " + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
@@ -4065,7 +4084,7 @@ namespace ActionGroupsExtended
 
         public static void EditorLoadFromNode()
         {
-            //print("LoadFromNode Called");
+            //print("LoadFromNode Called" + StaticData.CurrentVesselActions.Count());
             string errLine = "1";
             try
             {
@@ -4246,6 +4265,7 @@ namespace ActionGroupsExtended
                     //silently fail, if we hit this EditorLogic.sortedShipList is not valid
                 }
                 AGXRoot = EditorLogic.RootPart;
+                //print("LoadFromNode Called End" + StaticData.CurrentVesselActions.Count());
             }
 
 
@@ -4350,6 +4370,7 @@ namespace ActionGroupsExtended
 
         public void UpdateActionsListCheck()
         {
+            //Debug.Log("AGX UpdateActions start " + StaticData.CurrentVesselActions.Count());
             List<AGXAction> KnownGood = new List<AGXAction>();
             KnownGood = new List<AGXAction>();
 
@@ -4363,6 +4384,7 @@ namespace ActionGroupsExtended
             StaticData.CurrentVesselActions = KnownGood;
             RefreshDefaultActionsList();
             ActionsListDirty = false;
+            //Debug.Log("AGX UpdateActions end " + StaticData.CurrentVesselActions.Count());
         }
 
         public void AGXResetPartsList() //clear selected parts list and populate with newly selected part(s)
