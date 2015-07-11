@@ -621,7 +621,7 @@ namespace ActionGroupsExtended
                     isDirectAction[i] = false;
                 }
 
-                Debug.Log("AGX Flight Started Okay"); //temporary
+               // Debug.Log("AGX Flight Started Okay"); //temporary
             }
             catch (Exception e)
             {

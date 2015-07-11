@@ -352,7 +352,7 @@ namespace ActionGroupsExtended
         public override void OnSave(ConfigNode node)
         {
             string ErrLine = "1";
-            //Debug.Log("AGX Saving Module");
+            //Debug.Log("AGX Saving Module start" + StaticData.CurrentVesselActions.Count());
             try
             {
                 node.RemoveNodes("ACTION");
@@ -373,8 +373,8 @@ namespace ActionGroupsExtended
                     ErrLine = "2d";
                     //if (StaticData.CurrentVesselActions == null)
                     //{
-                    //    Debug.Log("AGX Partmodule Save CurrentVessels is null");
-                    //}
+                    //    Debug.Log("AGX Partmodule Save CurrentVessels is null"); 
+                     //}
                     //else
                     //{
                     //    Debug.Log("AGX Partmodule Save CurrentVessels is not null");
@@ -438,6 +438,7 @@ namespace ActionGroupsExtended
                     node.AddNode(holdStates);
                 }
                 //Debug.Log("AGX PartModule Save Okay"); //temporary
+                //Debug.Log("AGX Saving Module end" + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
@@ -447,7 +448,7 @@ namespace ActionGroupsExtended
 
         public override void OnLoad(ConfigNode node)
         {
-            //Debug.Log("AGX Load Module"); 
+            //Debug.Log("AGX Load Module" + StaticData.CurrentVesselActions.Count()); 
             string errLine = "1";
             try
             {
@@ -491,6 +492,7 @@ namespace ActionGroupsExtended
                     agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode, this.part, false));
                 }
                 //.Log("AGX PartModule Load Okay"); //temporary
+                //Debug.Log("AGX Load Module End" + StaticData.CurrentVesselActions.Count()); 
             }
             catch(Exception e)
             {
