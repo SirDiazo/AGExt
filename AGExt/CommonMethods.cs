@@ -339,6 +339,24 @@ namespace ActionGroupsExtended
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
         public string placeHolder = "Hello World"; //Config nodes can behave wierd when empty, a part with no actions on it will have no data besides this line
         //config nodes get added/removed via OnLoad/OnSave here
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public int currentKeyset = 1;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public string groupNames = "";
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public string groupVisibility = "";
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public string groupVisibilityNames = "Group1‣Group2‣Group3‣Group4‣Group5";
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public string DirectActionState = "";
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public bool hasData = false;
+
+        public ConfigNode toggleNode;
+        public ConfigNode holdNode;
+
+
+
         public List<AGXAction> agxActionsThisPart = new List<AGXAction>();
 
         public override void OnStart(StartState state)
@@ -352,91 +370,119 @@ namespace ActionGroupsExtended
         public override void OnSave(ConfigNode node)
         {
             string ErrLine = "1";
-            //Debug.Log("AGX Saving Module start" + StaticData.CurrentVesselActions.Count());
+            //Debug.Log("AGX Saving Module start");
             try
             {
                 node.RemoveNodes("ACTION");
-                node.RemoveNodes("TOGGLE");
-                node.RemoveNodes("HOLD");
+                //node.RemoveNodes("TOGGLE");
+                //node.RemoveNodes("HOLD");
                 ErrLine = "2";
                 List<AGXAction> actsToSave = new List<AGXAction>();
                 ErrLine = "2a";
                 actsToSave.AddRange(agxActionsThisPart);
                 ErrLine = "2b";
-                if(HighLogic.LoadedSceneIsEditor)
-                {
-                    ErrLine = "2c";
-                    actsToSave.AddRange(StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
-                }
-                else if(HighLogic.LoadedSceneIsFlight)
-                {
-                    ErrLine = "2d";
-                    //if (StaticData.CurrentVesselActions == null)
-                    //{
-                    //    Debug.Log("AGX Partmodule Save CurrentVessels is null"); 
-                     //}
-                    //else
-                    //{
-                    //    Debug.Log("AGX Partmodule Save CurrentVessels is not null");
-                    //}
-                    //foreach (AGXAction testAct in StaticData.CurrentVesselActions)
-                    //{
-                    //    if(testAct == null)
-                    //    {
-                    //        Debug.Log("AGX Partmodule Save current action is null");
-                    //    }
-                    //    else
-                    //    {
-                    //        Debug.Log("AGX Partmodule Save action " + testAct.ToString());
-                    //    }
-                    //    if(testAct.ba.listParent.part == this.part)
-                    //    {
-                    //        Debug.Log("AGX Partmodule Save actions is on this part");
-                    //    }
-                    //    else
-                    //    {
-                    //        Debug.Log("AGX Partmodule Save actions is NOT on this part");
-                    //    }
-                    //}
-
-                    actsToSave.AddRange(StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part));
-                    //Debug.Log("AGX Partmodule Save action saved okay");
-                }
-                
-                    ErrLine = "3";
-                    foreach (AGXAction agAct in actsToSave)
-                    {
-                        ErrLine = "4";
-                        ConfigNode actionNode = new ConfigNode("ACTION");
-                        ErrLine = "5";
-                        if (agAct != null)
-                        {
-                            ErrLine = "5a";
-                            actionNode = AGextScenario.SaveAGXActionVer2(agAct);
-                        }
-                        ErrLine = "6";
-                        node.AddNode(actionNode);
-                        ErrLine = "7";
-                    }
-                
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-                    ConfigNode toggleStates = new ConfigNode("TOGGLE");
-                    ConfigNode holdStates = new ConfigNode("HOLD");
-                    for (int i = 1; i <= 250; i++)
+                    //Debug.Log("AGX Editor save called by partmodule!");
+
+                    ErrLine = "2c";
+
+                    foreach (AGXAction agActSD in StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part))
                     {
-                        if (AGXEditor.IsGroupToggle[i])
+                        if (!actsToSave.Contains(agActSD))
                         {
-                            toggleStates.AddValue("toggle", i.ToString());
-                        }
-                        if (AGXEditor.isDirectAction[i])
-                        {
-                            holdStates.AddValue("hold", i.ToString());
+                            actsToSave.Add(agActSD);
                         }
                     }
-                    node.AddNode(toggleStates);
-                    node.AddNode(holdStates);
                 }
+                else if (HighLogic.LoadedSceneIsFlight)
+                {
+                    ErrLine = "2d";
+
+                    foreach (AGXAction agActSD in StaticData.CurrentVesselActions.Where(act => act.ba.listParent.part == this.part))
+                    {
+                        if (!actsToSave.Contains(agActSD))
+                        {
+                            actsToSave.Add(agActSD);
+                        }
+                    }
+                    //Debug.Log("AGX Partmodule Save action saved okay");
+                }
+
+                ErrLine = "3";
+                foreach (AGXAction agAct in actsToSave)
+                {
+                    ErrLine = "4";
+                    ConfigNode actionNode = new ConfigNode("ACTION");
+                    ErrLine = "5";
+                    if (agAct != null)
+                    {
+                        ErrLine = "5a";
+                        
+                        actionNode = StaticData.SaveAGXActionVer2(agAct);
+                    }
+                    ErrLine = "6";
+                    node.AddNode(actionNode);
+                    ErrLine = "7";
+                }
+                //actions themselves are now saved
+                ErrLine = "7a";
+                if (HighLogic.LoadedSceneIsEditor)
+                {
+                    if (AGXEditor.LoadFinished)
+                    {
+                        //node.RemoveNodes("TOGGLE"); //not using confignode to save this stuff
+                        //node.RemoveNodes("HOLD");
+                        //ErrLine = "7b";
+
+                        //ConfigNode toggleStates = new ConfigNode("TOGGLE");
+                        //ConfigNode holdStates = new ConfigNode("HOLD");
+                        //ErrLine = "7c";
+                        //for (int i = 1; i <= 250; i++)
+                        //{
+                        //    ErrLine = "7ca";
+                        //    if (AGXEditor.IsGroupToggle[i])
+                        //    {
+                        //        ErrLine = "7cb";
+                        //        toggleStates.AddValue("toggle", i.ToString());
+                        //    }
+                        //    ErrLine = "7cc";
+                        //    if (AGXEditor.isDirectAction[i])
+                        //    {
+                        //        ErrLine = "7cd";
+                        //        holdStates.AddValue("hold", i.ToString());
+                        //    }
+                        //}
+                        //ErrLine = "7d";
+                        //node.AddNode(toggleStates);
+                        //node.AddNode(holdStates);
+                        //toggleNode = toggleStates;
+                        //holdNode = holdStates;
+
+                        node.SetValue("groupNames", AGXEditor.SaveGroupNames(""), true);
+                        ErrLine = "7e";
+                        node.SetValue("groupVisibility", AGXEditor.SaveGroupVisibility(""), true);
+                        ErrLine = "7f";
+                        node.SetValue("groupVisibilityNames", AGXEditor.SaveGroupVisibilityNames(""), true);
+                        ErrLine = "7g";
+                        node.SetValue("DirectActionState", AGXEditor.SaveDirectActionState(""), true);
+                        node.SetValue("hasData", "true", true);
+                    }
+                }
+                //else if (HighLogic.LoadedSceneIsFlight) //do not save data, we are not guaranteed to be the FLightGlobals.ActiveVessel
+                //{
+                //    //node.SetValue("groupNames", AGXFlight.SaveGroupNames(""), true);
+                //    //ErrLine = "7e";
+                //    //node.SetValue("groupVisibility", AGXFlight.SaveGroupVisibility(""), true);
+                //    //ErrLine = "7f";
+                //    //node.SetValue("groupVisibilityNames", AGXFlight.SaveGroupVisibilityNames(""), true);
+                //    //ErrLine = "7g";
+                //    //node.SetValue("DirectActionState", AGXFlight.SaveDirectActionState(""), true);
+                //    //node.SetValue("hasData", "true", true);
+                //}
+
+
+
                 //Debug.Log("AGX PartModule Save Okay"); //temporary
                 //Debug.Log("AGX Saving Module end" + StaticData.CurrentVesselActions.Count());
             }
@@ -448,53 +494,59 @@ namespace ActionGroupsExtended
 
         public override void OnLoad(ConfigNode node)
         {
-            //Debug.Log("AGX Load Module" + StaticData.CurrentVesselActions.Count()); 
+            //Debug.Log("AGX Load Module" + node.ToString()); 
             string errLine = "1";
             try
             {
                 errLine = "2";
-                ConfigNode[] actionsNodes = node.GetNodes("ACTION"); 
+                ConfigNode[] actionsNodes = node.GetNodes("ACTION");
                 errLine = "3";
-                string[] toggles;
-                if(node.HasNode("TOGGLE"))
-                {
-                    toggles = node.GetNode("TOGGLE").GetValues();
-                }
-                else
-                { 
-                    toggles = new string[1];
-                }
-                errLine = "4";
-                string[] holds;
-                if(node.HasNode("HOLD"))
-                {
-                    holds = node.GetNode("HOLD").GetValues();
-                }
-                else
-                {
-                    holds = new string[1];
-                }
+                //string[] toggles;
+                //if(node.HasNode("TOGGLE")) //done in editor load now
+                //{
+                //    toggles = node.GetNode("TOGGLE").GetValues();
+                //}
+                //else
+                //{ 
+                //    toggles = new string[1];
+                //}
+                //errLine = "4";
+                //string[] holds;
+                //if(node.HasNode("HOLD"))
+                //{
+                //    holds = node.GetNode("HOLD").GetValues();
+                //}
+                //else
+                //{
+                //    holds = new string[1];
+                //}
                 errLine = "5";
                 foreach (ConfigNode actionNode in actionsNodes)
                 {
                     errLine = "6";
-                    if (HighLogic.LoadedSceneIsEditor && toggles.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
-                    {
-                        errLine = "7";
-                        AGXEditor.IsGroupToggle[int.Parse(actionNode.GetValue("group"))] = true;
-                    }
-                    if (HighLogic.LoadedSceneIsEditor && holds.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
-                    {
-                        errLine = "8";
-                        AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
-                    }
+                    //if (HighLogic.LoadedSceneIsEditor && toggles.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    //{
+                    //    errLine = "7";
+                    //    AGXEditor.IsGroupToggle[int.Parse(actionNode.GetValue("group"))] = true;
+                    //}
+                    //if (HighLogic.LoadedSceneIsEditor && holds.Contains(actionNode.GetValue("group")) && StaticData.CurrentVesselActions.FindAll(act => act.group.ToString() == actionNode.GetValue("group")).Count == 0)
+                    //{
+                    //    errLine = "8";
+                    //    AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
+                    //}
                     errLine = "9";
-                    agxActionsThisPart.Add(AGextScenario.LoadAGXActionVer2(actionNode, this.part, false));
+                   // Debug.Log("Step 1 " + actionNode.ToString());
+                    AGXAction actToAdd = StaticData.LoadAGXActionVer2(actionNode, this.part, false);
+                    //Debug.Log("Step 2 " + actToAdd.ToString());
+                    if (actToAdd != null && !agxActionsThisPart.Contains(actToAdd))
+                    {
+                        agxActionsThisPart.Add(actToAdd);
+                    }
                 }
                 //.Log("AGX PartModule Load Okay"); //temporary
-                //Debug.Log("AGX Load Module End" + StaticData.CurrentVesselActions.Count()); 
+                //Debug.Log("AGX Load Module End" + agxActionsThisPart.Count()); 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log("AGX Module OnLoad Error " + errLine + " " + e);
             }
@@ -527,7 +579,7 @@ namespace ActionGroupsExtended
                 return;
             }
             ConfigNode nodeLoad = new ConfigNode();
-            
+
             if (AGXFlight.AGXFlightNode != null)
             {
                 if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
@@ -541,7 +593,11 @@ namespace ActionGroupsExtended
                         ConfigNode[] actionNodes = prtNode.GetNodes("ACTION");
                         foreach (ConfigNode aNode in actionNodes)
                         {
-                            actionsList.Add(AGextScenario.LoadAGXActionVer2(aNode, thisPrt, false));
+                            AGXAction newAct = StaticData.LoadAGXActionVer2(aNode, thisPrt, false);
+                            if (newAct != null)
+                            {
+                                actionsList.Add(newAct);
+                            }
                         }
                     }
                 }
@@ -549,11 +605,11 @@ namespace ActionGroupsExtended
             }
         }
 
-        private Dictionary<int,string> LoadGuiNames(string loadNames)
+        private Dictionary<int, string> LoadGuiNames(string loadNames)
         {
             string LoadNames = loadNames;
-            Dictionary<int, string> guiNames  = new Dictionary<int, string>();
-            if (LoadNames.Length > 0) 
+            Dictionary<int, string> guiNames = new Dictionary<int, string>();
+            if (LoadNames.Length > 0)
             {
                 while (LoadNames[0] == '\u2023')
                 {
@@ -571,7 +627,7 @@ namespace ActionGroupsExtended
                         groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
                         LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
                     }
-                        guiNames[groupNum] = groupName;
+                    guiNames[groupNum] = groupName;
                 }
             }
             return guiNames;
@@ -581,12 +637,12 @@ namespace ActionGroupsExtended
         {
             return guiNames[group];
         }
-        
-        public Dictionary<int,string> GetGroupNamesAll()
+
+        public Dictionary<int, string> GetGroupNamesAll()
         {
             return guiNames;
         }
-        
+
         public List<AGXAction> GetAssignedActions()
         {
             if (vesselInstanceOK)
@@ -815,7 +871,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX OtherVsl ActivateActionGroup " + ErrLine + " " + e);
+                Debug.Log("AGX OtherVsl ActivateActionGroup fail " + ErrLine + " " + e);
 
             }
 
@@ -845,7 +901,7 @@ namespace ActionGroupsExtended
             }
             else
             {
-               // Debug.Log("AGX Group State FALSE due to vessel not loaded.");
+                // Debug.Log("AGX Group State FALSE due to vessel not loaded.");
                 return false;
             }
         }
@@ -892,7 +948,7 @@ namespace ActionGroupsExtended
                             {
                                 //print("acts countb " + thisPartsActions.Count);
                                 errLine = "21";
-                                partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                                partTemp.AddNode(StaticData.SaveAGXActionVer2(agxAct));
                             }
                             errLine = "22";
 
@@ -934,6 +990,608 @@ namespace ActionGroupsExtended
         static StaticData()
         {
             CurrentVesselActions = new List<AGXAction>();
+        }
+
+        public static string EditorHashShipName(string name, bool isVAB)
+        {
+            string hashedName = "";
+            if (isVAB)
+            {
+                hashedName = "VAB";
+            }
+            else
+            {
+                hashedName = "SPH";
+            }
+            foreach (Char ch in name)
+            {
+                hashedName = hashedName + (int)ch;
+            }
+            //print("hashName " + hashedName);
+
+            return hashedName;
+        }
+
+        public static AGXAction LoadAGXActionVer2(ConfigNode actNode, Part actPart, bool showAmbiguousMessage) //returns null on error, check where returned
+        {
+            string errLine = "1";
+            //print("load action " + actPart.partName + " " + actNode);
+            try
+            {
+                errLine = "2";
+                AGXAction ActionToLoad = new AGXAction(); //create action we are loading
+                errLine = "2aa";
+                ActionToLoad.prt = actPart; //assign part
+                errLine = "2bb";
+                ActionToLoad.group = Convert.ToInt32(actNode.GetValue("group")); //assign group
+                errLine = "2cc";
+                if (actNode.HasValue("groupName"))
+                {
+                    ActionToLoad.grpName = actNode.GetValue("groupName"); //assign group
+                }
+                errLine = "2a";
+                if (actNode.GetValue("activated") == "1") //assign activated
+                {
+                    ActionToLoad.activated = true;
+                }
+                else
+                {
+                    ActionToLoad.activated = false;
+                }
+                errLine = "2b";
+                string pmName = actNode.GetValue("partModule");//get partModule name
+                List<BaseAction> actsToCompare = new List<BaseAction>(); //create list of actions we will compare to
+                errLine = "2c";
+                if (pmName == "ModuleEnviroSensor")
+                {
+                    string sensorType = actNode.GetValue("custom1");
+                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleEnviroSensor>())
+                    {
+                        ModuleEnviroSensor mesSensor = (ModuleEnviroSensor)pmSensor;
+                        if (mesSensor.sensorType == sensorType)
+                        {
+                            actsToCompare.AddRange(mesSensor.Actions);
+                        }
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                }
+                else if (pmName == "ModuleScienceExperiment")
+                {
+                    string expID = actNode.GetValue("custom1");
+                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleScienceExperiment>())
+                    {
+                        ModuleScienceExperiment mesExp = (ModuleScienceExperiment)pmSensor;
+                        if (mesExp.experimentID == expID)
+                        {
+                            actsToCompare.AddRange(mesExp.Actions);
+                        }
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    // actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                }
+                else if (pmName == "ModuleAnimateGeneric")
+                {
+                    string animName = actNode.GetValue("custom1");
+                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleAnimateGeneric>())
+                    {
+                        ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
+                        if (mesExp.animationName == animName)
+                        {
+                            actsToCompare.AddRange(mesExp.Actions);
+                        }
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                }
+                else if (pmName == "FSanimateGeneric")
+                {
+                    //print("load it");
+                    string animName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        //ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
+                        if (pm.moduleName == pmName)
+                        {
+                            if ((string)pm.Fields.GetValue("animationName") == animName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                        }
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                }
+                else if (pmName == "DMModuleScienceAnimate")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
+                }
+                else if (pmName == "DMSolarCollector")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
+                }
+                else if (pmName == "BTSMModuleReactionWheel")
+                {
+                    //string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
+                }
+                else if (pmName == "BTSMModuleCrewReport" || pmName == "BTSMModuleScienceExperiment" || pmName == "BTSMModuleScienceExperimentWithTime")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+
+                    }
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("experimentActionName") != (string)startEventName);
+                }
+                else if (pmName == "BTSMModuleResourceActionToggle")
+                {
+                    string startEventName = actNode.GetValue("custom1");
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                            // print("Batest " + actNode.GetValue("actionName") + " " + pm.Fields.GetValue("resourceName") + " " + startEventName); 
+                        }
+
+                    }
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{
+                    //    print("1 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{  
+                    //    print("2 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //print("2a " + startEventName);
+                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("resourceName") != (string)startEventName);
+                    //foreach (BaseAction ba6 in actsToCompare)
+                    //{
+                    //    print("3 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                    //}
+                }
+                else if (pmName == "Capacitor" || pmName == "DischargeCapacitor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "Capacitor" || pm.moduleName == "DischargeCapacitor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "FissionReprocessor" || pmName == "Nuclear Fuel Reprocessor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "FissionReprocessor" || pm.moduleName == "Nuclear Fuel Reprocessor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "FissionGenerator" || pmName == "Fission Reactor") //NearFutureElectrical
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "FissionGenerator" || pm.moduleName == "Fission Reactor")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "ModuleCurvedSolarPanel" || pmName == "Curved Solar Panel") //NearFutureSolar
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "ModuleCurvedSolarPanel" || pm.moduleName == "Curved Solar Panel")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "VariableISPEngine" || pmName == "Variable ISP Engine") //NearFutureSolar
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == "VariableISPEngine" || pm.moduleName == "Variable ISP Engine")
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "ModuleRTAntenna") //Remotetech
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        // actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "SCANsat") //Remotetech
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "ModuleEnginesFX")
+                {
+
+                    foreach (ModuleEnginesFX pm in actPart.Modules.OfType<ModuleEnginesFX>()) //add actions to compare
+                    {
+                        //print("Fields " + (string)pm.Fields.GetValue("engineID") + "||" + (string)actNode.GetValue("custom1"));
+                        if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("custom1"))
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                            //print("Acts to compare " + actsToCompare.Count + " " + pm.Actions.Count + pm.name + pm.moduleName);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+
+                        //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "RealChuteModule")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleAnimationGroup")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("deployAnimationName") + (string)b2.listParent.module.Fields.GetValue("activeAnimationName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleResourceHarvester")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("ResourceName") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleResourceConverter")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("RecipeOutputs") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "REGO_ModuleAsteroidDrill")
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("ImpactTransform") != (string)actNode.GetValue("custom1"));
+                    }
+                }
+                else if (pmName == "ModuleModActions") //guiName is player editable so can't be used. 
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                    }
+                }
+                else if (pmName == "ModuleReactionWheel") //guiName is player editable so can't be used. 
+                {
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                    }
+                }
+                else
+                {
+                    
+                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    {
+                        if (pm.moduleName == pmName)
+                        {
+                            actsToCompare.AddRange(pm.Actions);
+                        }
+                        //foreach(BaseAction ba in actsToCompare)
+                        //{
+                        //    Debug.Log("BA list " + ba.name + " " + ba.guiName);
+                        //}
+                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                    }
+
+                }
+                errLine = "3";
+                //print("ActsCount " + actsToCompare.Count);
+                if (actsToCompare.Count != 1)
+                {
+                    errLine = "4";
+                    Debug.Log("AGX actsToCompare.count != 1 " + actsToCompare.Count + " Part: " + actPart.name + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName") + " " + actNode.GetValue("actionGuiName"));
+                    //if (showAmbiguousMessage)
+                    //{
+                    //    ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
+                    //}
+                    ActionToLoad = null;
+                }
+                errLine = "5";
+                if (actsToCompare.Count > 0)
+                {
+                    // print("ActsCounta");
+                    errLine = "6";
+                    ActionToLoad.ba = actsToCompare.First(); //action to load assign action, ready to return
+                }
+                else
+                {
+                    errLine = "7";
+                    // print("ActsCountb");
+                    ActionToLoad = null;
+                }
+                errLine = "8";
+                //print("load action2 " + ActionToLoad.ba.name + " " + ActionToLoad.group);
+                //print("agx check " + actsToCompare.Count + " " + ActionToLoad.group + ActionToLoad.ba.name);
+                //print("actual act " + ActionToLoad + " " + ActionToLoad.ba.name);
+                //print("BA load " + ActionToLoad.ba.name + " " + ActionToLoad.ba.listParent.part.ConstructID + " " + ActionToLoad.prt.ConstructID);
+                return ActionToLoad;
+
+            }
+            catch (Exception e)
+            {
+                Debug.Log("AGXLoadAGXAction2 FAIL " + errLine + " " + e);
+                return null;
+            }
+        }
+
+        public static ConfigNode SaveAGXActionVer2(AGXAction agxAct)
+        {
+            //print("Save called");
+            string errLine = "1";
+            try
+            {
+                ConfigNode actionNode = new ConfigNode("ACTION");
+                errLine = "2";
+                actionNode.AddValue("group", agxAct.group);
+                errLine = "2a";
+                actionNode.AddValue("groupName", agxAct.grpName);
+                errLine = "3";
+                actionNode.AddValue("activated", (agxAct.activated) ? "1" : "0");
+                errLine = "4";
+                actionNode.AddValue("partModule", agxAct.ba.listParent.module.moduleName);
+                errLine = "5";
+                actionNode.AddValue("actionGuiName", agxAct.ba.guiName);
+                errLine = "6";
+                actionNode.AddValue("actionName", agxAct.ba.name);
+                errLine = "7";
+                if (agxAct.ba.listParent.module.moduleName == "ModuleEnviroSensor") //add this to the agxactions list somehow and add to save.load serialze
+                {
+                    errLine = "8";
+                    ModuleEnviroSensor MSE = (ModuleEnviroSensor)agxAct.ba.listParent.module;
+                    errLine = "9";
+                    actionNode.AddValue("custom1", MSE.sensorType); //u2020 is envirosensor
+                    errLine = "10";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
+                {
+                    errLine = "11";
+                    ModuleScienceExperiment MSE = (ModuleScienceExperiment)agxAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "12";
+                    actionNode.AddValue("custom1", MSE.experimentID); //u2021 is sciencemodule
+                    errLine = "13";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "ModuleAnimateGeneric") //add this to the agxactions list somehow and add to save.load serialze
+                {
+                    errLine = "14";
+                    ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agxAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "15";
+                    actionNode.AddValue("custom1", MAnim.animationName); //u2021 is sciencemodule
+                    errLine = "16";
+                    //print(MAnim.animationName);
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "FSanimateGeneric") //add this to the agxactions list somehow and add to save.load serialze
+                {
+                    errLine = "14";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agxAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "15";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("animationName")); //u2021 is sciencemodule
+                    errLine = "16";
+                    //print(MAnim.animationName);
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "DMModuleScienceAnimate") //DMagic orbital science mod
+                {
+                    errLine = "17";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "18";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("startEventGUIName")); //u2021 is sciencemodule
+                    errLine = "19";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "DMSolarCollector") //DMagic orbital science mod
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("startEventGUIName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "BTSMModuleCrewReport" || agxAct.ba.listParent.module.moduleName == "BTSMModuleScienceExperiment" || agxAct.ba.listParent.module.moduleName == "BTSMModuleScienceExperimentWithTime") //DMagic orbital science mod
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("experimentActionName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "BTSMModuleResourceActionToggle") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("resourceName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "SCANsat") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("scanName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "ModuleEnginesFX") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "RealChuteModule") //
+                { //RealChute needs no extra data saved, just add this for tracking so I know it is saving as exception.
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    //actionNode.AddValue("custom1", agxAct.ba.listParent.module.Fields.GetValue("engineID")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleAnimationGroup") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("deployAnimationName") + (string)agxAct.ba.listParent.module.Fields.GetValue("activeAnimationName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleResourceHarvester") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeInputs") + (string)agxAct.ba.listParent.module.Fields.GetValue("ResourceName")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleResourceConverter") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeInputs") + (string)agxAct.ba.listParent.module.Fields.GetValue("RecipeOutputs")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+                else if (agxAct.ba.listParent.module.moduleName == "REGO_ModuleAsteroidDrill") //
+                {
+                    errLine = "20";
+                    //ModuleAnimateGeneric MAnim = (ModuleAnimateGeneric)agAct.ba.listParent.module; //all other modules use guiname
+                    errLine = "21";
+                    actionNode.AddValue("custom1", (string)agxAct.ba.listParent.module.Fields.GetValue("ImpactTransform")); //u2021 is sciencemodule
+                    errLine = "22";
+                }
+
+                //BTSMModuleReactionWheel does not need custom save, just load
+                else //if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment") //add this to the agxactions list somehow and add to save.load serialze
+                {
+                    errLine = "23";
+                    //ModuleScienceExperiment MSE = (ModuleScienceExperiment)agAct.ba.listParent.module; //all other modules use guiname
+                    actionNode.AddValue("custom1", "NA"); //u2021 is sciencemodule
+                    errLine = "24";
+                }
+
+                return actionNode;
+            }
+
+            catch (Exception e)
+            {
+                Debug.Log("AGX SaveAGXAction2 FAIL " + errLine + " " + agxAct.prt.partName + " " + agxAct.ba.name + " " + e);
+                return new ConfigNode();
+            }
+
         }
 
     }

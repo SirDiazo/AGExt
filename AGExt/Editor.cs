@@ -90,7 +90,7 @@ namespace ActionGroupsExtended
 
         private static List<BaseAction> PartActionsList;
 
-        public static ConfigNode AGXEditorNode;
+        //public static ConfigNode AGXEditorNode;
         Vector2 groupWinScroll = new Vector2();
         bool highlightPartThisFrameGroupWin = false;
         static Texture2D BtnTexRed = new Texture2D(1, 1);
@@ -219,6 +219,7 @@ namespace ActionGroupsExtended
         }
         public void Start()
         {
+            //Debug.Log("AGXEditorSTartSTart");
             ShowKeyCodeWin = false;
             ShowKeySetWin = false;
             AGXguiMod1Groups = new Dictionary<int, bool>();
@@ -459,11 +460,11 @@ namespace ActionGroupsExtended
                 EditorPanels.Instance.actions.AddValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
                 EditorLogic.fetch.crewPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Part button clicked at top of screen
                 EditorLogic.fetch.partPanelBtn.AddValueChangedDelegate(OnOtherButtonClick); //detect when Crew button clicked at top of screen
-                EditorLogic.fetch.loadBtn.AddValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
-                EditorLogic.fetch.saveBtn.AddValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
-                EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
-                EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
-                EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                //EditorLogic.fetch.loadBtn.AddValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
+                //EditorLogic.fetch.saveBtn.AddValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
+                //EditorLogic.fetch.launchBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                //EditorLogic.fetch.exitBtn.AddValueChangedDelegate(OnSaveButtonClick);
+                //EditorLogic.fetch.newBtn.AddValueChangedDelegate(OnSaveButtonClick);
 
                 //GameEvents.onGameSceneLoadRequested.Add(LeavingEditor);
                 errLine = "18";
@@ -478,7 +479,7 @@ namespace ActionGroupsExtended
                 ShowGroupInFlightNames[5] = "Group 5";
 
                 errLine = "19";
-
+                //Debug.Log("agx toggle dict set");
                 for (int i = 1; i <= 250; i++)
                 {
                     IsGroupToggle[i] = false;
@@ -548,9 +549,10 @@ namespace ActionGroupsExtended
                 GameEvents.onPartRemove.Add(PartRemove);
                 //GameEvents.onEditorShipModified.Add(VesselChanged);
                 GameEvents.onEditorLoad.Add(OnShipLoad);
+                //GameEvents.onGameStateSave.Add(OnSaveTest);
                 isDirectAction = new Dictionary<int, bool>();
                 StaticData.CurrentVesselActions.Clear();
-                EditorLoadFromFile();
+                //EditorLoadFromFile();
                 EditorLoadFromNode();
                 errLine = "21";
 
@@ -558,6 +560,7 @@ namespace ActionGroupsExtended
                 //EditorActionGroups.Instance.groupActionsList.AddValueChangedDelegate(OnGroupActionsListChange);
                 LoadFinished = true;
                 //Debug.Log("AGX Editor Start Okay" + StaticData.CurrentVesselActions.Count());
+                //Debug.Log("AGXEditorSTartEnd");
             }
             catch (Exception e)
             {
@@ -566,9 +569,14 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void OnShipLoad(ShipConstruct ship ,CraftBrowser.LoadType loadType)
+        //public void OnSaveTest(ConfigNode node)
+        //{
+        //    Debug.Log("AGX Game Save Event");
+        //}
+
+        public void OnShipLoad(ShipConstruct ship, CraftBrowser.LoadType loadType)
         {
-            
+
             DetachedPartReset.Start(); //start timer so it fires even if no parts load
             if (loadType == CraftBrowser.LoadType.Normal)
             {
@@ -730,7 +738,7 @@ namespace ActionGroupsExtended
 
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
-            //Debug.Log("Part attache fire!" + StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
+            //Debug.Log("Part attache fire!"); //+ StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
             string ErrLine = "1";
             try
             {
@@ -750,6 +758,7 @@ namespace ActionGroupsExtended
                 ErrLine = "7";
                 ModuleAGX agxMod = host_target.host.Modules.OfType<ModuleAGX>().First();
                 ErrLine = "8";
+                //Debug.Log("Part attache fire2!" + agxMod.agxActionsThisPart.Count);
                 foreach (AGXAction agAct in agxMod.agxActionsThisPart)
                 {
 
@@ -887,77 +896,77 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void CheckExistingShips()
-        {
-            List<string> existingShipsList = new List<string>();
-            string fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/Ships/VAB";
-            int fileLen = fileDir.Length;
-            string[] fileList = Directory.GetFiles(fileDir);
-            //print("sc3 " + loadShipList.Length);
-            foreach (string file in fileList)
-            {
-                existingShipsList.Add(AGextScenario.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), true));
-            }
-            fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/Ships/SPH";
+        //public void CheckExistingShips()
+        //{
+        //    List<string> existingShipsList = new List<string>();
+        //    string fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/Ships/VAB";
+        //    int fileLen = fileDir.Length;
+        //    string[] fileList = Directory.GetFiles(fileDir);
+        //    //print("sc3 " + loadShipList.Length);
+        //    foreach (string file in fileList)
+        //    {
+        //        existingShipsList.Add(StaticData.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), true));
+        //    }
+        //    fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/Ships/SPH";
 
-            fileLen = fileDir.Length;
-            fileList = Directory.GetFiles(fileDir);
-            foreach (string file in fileList)
-            {
-                existingShipsList.Add(AGextScenario.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), false));
-            }
-            fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "Ships/SPH";
-            fileLen = fileDir.Length;
-            fileList = Directory.GetFiles(fileDir);
-            foreach (string file in fileList)
-            {
-                existingShipsList.Add(AGextScenario.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), false));
-            }
-            fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "Ships/VAB";
-            fileLen = fileDir.Length;
-            fileList = Directory.GetFiles(fileDir);
-            foreach (string file in fileList)
-            {
-                existingShipsList.Add(AGextScenario.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), true));
-            }
-            //ConfigNode AGXBaseNode = AGextScenario.LoadBaseNode();
-            ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
-            AGXEditorNode.AddValue("name", "editor");
-            if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
-            {
-                AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-            }
-            foreach (ConfigNode VslNode in AGXEditorNode.nodes)
-            {
-                if (!existingShipsList.Contains(VslNode.name))
-                {
-                    AGXEditorNode.RemoveNode(VslNode.name);
-                    //AGXBaseNode.RemoveNode("EDITOR");
-                    //AGXBaseNode.AddNode(AGXEditorNode);
-                    AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                    //print("Existing ship check node save " + AGXEditorNode);
-                    goto BreakOut;
-                }
-            }
-        BreakOut:
-            fileList = null;
+        //    fileLen = fileDir.Length;
+        //    fileList = Directory.GetFiles(fileDir);
+        //    foreach (string file in fileList)
+        //    {
+        //        existingShipsList.Add(StaticData.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), false));
+        //    }
+        //    fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "Ships/SPH";
+        //    fileLen = fileDir.Length;
+        //    fileList = Directory.GetFiles(fileDir);
+        //    foreach (string file in fileList)
+        //    {
+        //        existingShipsList.Add(StaticData.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), false));
+        //    }
+        //    fileDir = new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "Ships/VAB";
+        //    fileLen = fileDir.Length;
+        //    fileList = Directory.GetFiles(fileDir);
+        //    foreach (string file in fileList)
+        //    {
+        //        existingShipsList.Add(StaticData.EditorHashShipName(file.Substring(fileLen + 1, file.Length - fileLen - 7), true));
+        //    }
+        //    //ConfigNode AGXBaseNode = AGextScenario.LoadBaseNode();
+        //    ConfigNode AGXEditorNode = new ConfigNode("EDITOR");
+        //    AGXEditorNode.AddValue("name", "editor");
+        //    if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+        //    {
+        //        AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //    }
+        //    foreach (ConfigNode VslNode in AGXEditorNode.nodes)
+        //    {
+        //        if (!existingShipsList.Contains(VslNode.name))
+        //        {
+        //            AGXEditorNode.RemoveNode(VslNode.name);
+        //            //AGXBaseNode.RemoveNode("EDITOR");
+        //            //AGXBaseNode.AddNode(AGXEditorNode);
+        //            AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //            //print("Existing ship check node save " + AGXEditorNode);
+        //            goto BreakOut;
+        //        }
+        //    }
+        //BreakOut:
+        //    fileList = null;
 
 
-        }
+        //}
 
-        public void OnSaveButtonClick(IUIObject obj)
-        {
-            EditorSaveToFile();
-        }
+        //public void OnSaveButtonClick(IUIObject obj)
+        //{
+        //    EditorSaveToFile();
+        //}
 
-        public void OnLoadButtonClick(IUIObject obj)
-        {
-            EditorSaveToFile();
-            checkShipsExist = true;
-            //print("ship count1 ");
-            //EditorStartPodDialog loadShipWin = FindObjectOfType<EditorStartPodDialog>();
-            //print("ship count " + loadShipWin.availablePods.Count);
-        }
+        //public void OnLoadButtonClick(IUIObject obj)
+        //{
+        //    EditorSaveToFile();
+        //    checkShipsExist = true;
+        //    //print("ship count1 ");
+        //    //EditorStartPodDialog loadShipWin = FindObjectOfType<EditorStartPodDialog>();
+        //    //print("ship count " + loadShipWin.availablePods.Count);
+        //}
 
         public static void LoadGroupVisibility(string LoadString)
         {
@@ -1027,12 +1036,14 @@ namespace ActionGroupsExtended
         public void OnOtherButtonClick(IUIObject obj) //reset EditorPanel if needed
         {
             //only run this if the Action Panel was hidden by other code
+            //Debug.Log("AGX other button click");
             if (AGXShow)
             {
                 EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
             }
             AGEditorSelectedParts.Clear();
             EditorSaveToNode();
+            EditorLogic.fetch.SetBackup();
 
         }
 
@@ -1098,8 +1109,8 @@ namespace ActionGroupsExtended
                 //Debug.Log("AGX DetachedPartActions " + DetachedPartActions.Count());
                 foreach (Part p in agAct.prt.symmetryCounterparts)
                 {
-                    AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p, false);
-                    if (!StaticData.CurrentVesselActions.Contains(actToAdd))
+                    AGXAction actToAdd = StaticData.LoadAGXActionVer2(StaticData.SaveAGXActionVer2(agAct), p, false);
+                    if (actToAdd != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
                     {
                         StaticData.CurrentVesselActions.Add(actToAdd);
                         //print("add act");
@@ -1133,8 +1144,8 @@ namespace ActionGroupsExtended
                         foreach (AGXAction agAct in DetachedPartActions.Where(p3 => p3.ba.listParent.part == p2))
                         {
                             //print("d5");
-                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(AGextScenario.SaveAGXActionVer2(agAct), p, false);
-                            if (actToAdd.ba != null)
+                            AGXAction actToAdd = StaticData.LoadAGXActionVer2(StaticData.SaveAGXActionVer2(agAct), p, false);
+                            if (actToAdd != null)
                             {
                                 List<AGXAction> Checking = new List<AGXAction>();
                                 Checking.AddRange(StaticData.CurrentVesselActions);
@@ -1189,7 +1200,7 @@ namespace ActionGroupsExtended
         public void OnDisable()
         {
 
-
+            LoadFinished = false;
             SaveCurrentKeyBindings();
             SaveWindowPositions();
             if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
@@ -1205,17 +1216,18 @@ namespace ActionGroupsExtended
             GameEvents.onPartRemove.Remove(PartRemove);
             //GameEvents.onEditorShipModified.Remove(VesselChanged);
             GameEvents.onEditorLoad.Remove(OnShipLoad);
+            //GameEvents.onGameStateSave.Remove(OnSaveTest);
             //GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
 
 
             EditorPanels.Instance.actions.RemoveValueChangedDelegate(OnUIChanged); //detect when EditorPanel moves. this ONLY detects editor panel, going from parts to crew will NOT trigger this
             EditorLogic.fetch.crewPanelBtn.RemoveValueChangedDelegate(OnOtherButtonClick); //detect when Part button clicked at top of screen
             EditorLogic.fetch.partPanelBtn.RemoveValueChangedDelegate(OnOtherButtonClick); //detect when Crew button clicked at top of screen
-            EditorLogic.fetch.loadBtn.RemoveValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
-            EditorLogic.fetch.saveBtn.RemoveValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
-            EditorLogic.fetch.launchBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
-            EditorLogic.fetch.exitBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
-            EditorLogic.fetch.newBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
+            //EditorLogic.fetch.loadBtn.RemoveValueChangedDelegate(OnLoadButtonClick); //load button clicked to check for deleted ships
+            //EditorLogic.fetch.saveBtn.RemoveValueChangedDelegate(OnSaveButtonClick); //run save when save button clicked. auto-save from Scenario module only runs on leaving editor! not on clicking save button
+            //EditorLogic.fetch.launchBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
+            //EditorLogic.fetch.exitBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
+            //EditorLogic.fetch.newBtn.RemoveValueChangedDelegate(OnSaveButtonClick);
 
             StaticData.CurrentVesselActions.Clear();
         }
@@ -1336,23 +1348,37 @@ namespace ActionGroupsExtended
                         {
                             foreach (AGXAction agAct in ThisGroupActions)
                             {
-                                ErrLine = "8";
-                                Vector3 partScreenPosC = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agAct.ba.listParent.part.transform.position);
-                                ErrLine = "9";
-                                Rect partCenterWinC = new Rect(partScreenPosC.x - 10, (Screen.height - partScreenPosC.y) - 10, 21, 21);
-                                ErrLine = "10";
-                                GUI.DrawTexture(partCenterWinC, PartPlus);
+                                try
+                                {
+                                    ErrLine = "8";
+                                    Vector3 partScreenPosC = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agAct.ba.listParent.part.transform.position);
+                                    ErrLine = "9";
+                                    Rect partCenterWinC = new Rect(partScreenPosC.x - 10, (Screen.height - partScreenPosC.y) - 10, 21, 21);
+                                    ErrLine = "10";
+                                    GUI.DrawTexture(partCenterWinC, PartPlus);
+                                }
+                                catch
+                                {
+                                    //silent fail, this nullrefs for one update frame when hitting the "New" button in editor.
+                                }
                             }
                         }
                         foreach (AGXPart agPrt in AGEditorSelectedParts)
                         {
-                            ErrLine = "3";
-                            Vector3 partScreenPosB = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agPrt.AGPart.transform.position);
-                            ErrLine = "4";
-                            Rect partCenterWinB = new Rect(partScreenPosB.x - 10, (Screen.height - partScreenPosB.y) - 10, 21, 21);
-                            ErrLine = "5";
-                            GUI.DrawTexture(partCenterWinB, PartCross);
-                            ErrLine = "6";
+                            try
+                            {
+                                ErrLine = "3";
+                                Vector3 partScreenPosB = EditorLogic.fetch.editorCamera.WorldToScreenPoint(agPrt.AGPart.transform.position);
+                                ErrLine = "4";
+                                Rect partCenterWinB = new Rect(partScreenPosB.x - 10, (Screen.height - partScreenPosB.y) - 10, 21, 21);
+                                ErrLine = "5";
+                                GUI.DrawTexture(partCenterWinB, PartCross);
+                                ErrLine = "6";
+                            }
+                            catch
+                            {
+                                //silent fail, this nullrefs for one update frame when hitting the "New" button in editor.
+                            }
                         }
                     }
                     ErrLine = "11";
@@ -2438,12 +2464,22 @@ namespace ActionGroupsExtended
 
 
                                     //if (Checking.Count == 0)
-                                    if (!StaticData.CurrentVesselActions.Contains(ToAdd))
+                                    if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
                                     {
 
                                         StaticData.CurrentVesselActions.Add(ToAdd);
+
+
                                         //SaveCurrentVesselActions();
                                     }
+
+
+                                    ModuleAGX thisActionModule = ToAdd.ba.listParent.part.Modules.OfType<ModuleAGX>().First(); //add action to partmodules list, yes this duplicates the action but it necessary for add/remove/symmetry stuff in editor
+                                    if (!thisActionModule.agxActionsThisPart.Contains(ToAdd))
+                                    {
+                                        thisActionModule.agxActionsThisPart.Add(ToAdd);
+                                    }
+
                                     PrtCnt = PrtCnt + 1;
                                     if (ToAdd.group < 11)
                                     {
@@ -3477,21 +3513,21 @@ namespace ActionGroupsExtended
 
         public void Update()
         {
-            
+
             //Debug.Log("AGX Editor Update" + StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
-            if (checkShipsExist)
-            {
-                if (checkShipsExistDelay >= 30)
-                {
-                    checkShipsExist = false;
-                    checkShipsExistDelay = 0;
-                    CheckExistingShips();
-                }
-                else
-                {
-                    checkShipsExistDelay = checkShipsExistDelay + 1;
-                }
-            }
+            //if (checkShipsExist)
+            //{
+            //    if (checkShipsExistDelay >= 30)
+            //    {
+            //        checkShipsExist = false;
+            //        checkShipsExistDelay = 0;
+            //        CheckExistingShips();
+            //    }
+            //    else
+            //    {
+            //        checkShipsExistDelay = checkShipsExistDelay + 1;
+            //    }
+            //}
 
 
 
@@ -3599,8 +3635,9 @@ namespace ActionGroupsExtended
 
             if (AGXRoot != EditorLogic.RootPart)
             {
-                // print("Root diff");
+                print(" AGX Root diff" +EditorLogic.RootPart.partInfo.name);
                 EditorLoadFromNode();
+                AGXRoot = EditorLogic.RootPart;
             }
             //print("detach " + DetachedPartActions.Count);
             //foreach (Part p in EditorLogic.SortedShipList)
@@ -3730,7 +3767,7 @@ namespace ActionGroupsExtended
 
                 KSPDefaultActionGroupThisFrame = (KSPActionGroup)Enum.Parse(typeof(KSPActionGroup), grpText);
                 //print("Selected group " + KSPDefaultLastActionGroup);
-                
+
             }
             catch
             {
@@ -4029,177 +4066,374 @@ namespace ActionGroupsExtended
 
         }
 
-        public static void EditorLoadFromFile()
+        //public static void EditorLoadFromFile() //removed AGX version 1.34
+        //{
+        //    //print("EDITORLoadFromFile called");
+        //    string errLine = "1";
+        //    //CurrentVesselActions.Clear();
+        //    try
+        //    {
+        //        //if (EditorLogic.SortedShipList.Count > 0)
+        //        //{
+        //        //ConfigNode AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //        errLine = "2";
+
+        //        errLine = "9";
+        //        AGXEditorNode = new ConfigNode("EDITOR");
+        //        AGXEditorNode.AddValue("name", "editor");
+
+        //        //print("Load 2");
+        //        errLine = "9a";
+        //        try
+        //        {
+        //            if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+        //            {
+        //                //print("Load 3");
+        //                errLine = "9b";
+        //                AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //                if (!AGXEditorNode.HasValue("name"))
+        //                {
+        //                    AGXEditorNode.AddValue("name", "editor");
+        //                }
+        //                //print("Load 4");
+        //            }
+        //            else
+        //            {
+        //                errLine = "9c";
+        //                AGXEditorNode = null; //flag this null for data change, if not null, agxeditor exists, if null it does not
+        //                //AGXEditorNode = new ConfigNode("EDITOR");
+        //                ///AGXEditorNode.AddValue("name", "editor");
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            errLine = "9d";
+        //            AGXEditorNode = null;
+        //            //AGXEditorNode = new ConfigNode("EDITOR");
+        //            //AGXEditorNode.AddValue("name", "editor");
+        //            print("AGX Load Editor Node FAILED, resetting it");
+        //        }
+        //        //}
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        print("AGX EditorLoadFromFile Fail " + errLine + " " + e);
+        //    }
+        //}
+
+        public static void EditorLoadDataFromPartModuleNewMethod() //new method loading from partModule
         {
-            //print("EDITORLoadFromFile called");
             string errLine = "1";
-            //CurrentVesselActions.Clear();
             try
             {
-                //if (EditorLogic.SortedShipList.Count > 0)
-                //{
-                //ConfigNode AGXBaseNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                ModuleAGX loadingPM = new ModuleAGX();
                 errLine = "2";
-
-                errLine = "9";
-                AGXEditorNode = new ConfigNode("EDITOR");
-                AGXEditorNode.AddValue("name", "editor");
-
-                //print("Load 2");
-                errLine = "9a";
                 try
                 {
-                    if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+                    if (EditorLogic.RootPart.Modules.OfType<ModuleAGX>().First().hasData)
                     {
-                        //print("Load 3");
-                        errLine = "9b";
-                        AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-                        if (!AGXEditorNode.HasValue("name"))
-                        {
-                            AGXEditorNode.AddValue("name", "editor");
-                        }
-                        //print("Load 4");
+                        errLine = "3";
+                        loadingPM = EditorLogic.RootPart.Modules.OfType<ModuleAGX>().First();
                     }
                     else
                     {
-                        errLine = "9c";
-                        AGXEditorNode = new ConfigNode("EDITOR");
-                        AGXEditorNode.AddValue("name", "editor");
+                        errLine = "4";
+                        foreach (Part p in EditorLogic.SortedShipList)
+                        {
+                            errLine = "5";
+                            if (p.Modules.OfType<ModuleAGX>().First().hasData)
+                            {
+                                errLine = "6";
+                                loadingPM = p.Modules.OfType<ModuleAGX>().First();
+                            }
+                        }
+                    }
+                    if(!loadingPM.hasData)//backwards compatibiliyt to load old seperate file storage
+                    {
+                        //Debug.Log("no data in pm");
+                        try
+                        {
+                            if (File.Exists(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg"))
+                            {
+                                ConfigNode oldStyleSaveData = null;
+                                //Debug.Log("old file found");
+                                errLine = "6b";
+                                ConfigNode AGXEditorNode = ConfigNode.Load(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+                               // Debug.Log("old file loaded");
+                                string hashedShipName = StaticData.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
+                                if (AGXEditorNode.HasNode(hashedShipName))
+                                {
+                                    errLine = "11";
+                                    oldStyleSaveData = AGXEditorNode.GetNode(hashedShipName);
+                                }
+                                if(oldStyleSaveData != null)
+                                {
+                                    //Debug.Log("old ship confignode loaded");
+                                    if (oldStyleSaveData.HasValue("currentKeyset"))
+                                    {
+                                        loadingPM.currentKeyset = Convert.ToInt32((string)oldStyleSaveData.GetValue("currentKeyset"));
+                                    }
+                                    else
+                                    {
+                                        CurrentKeySet = 1;
+                                    }
+                                    
+                                    if (oldStyleSaveData.HasValue("groupNames"))
+                                    {
+                                        loadingPM.groupNames = oldStyleSaveData.GetValue("groupNames");
+                                    }
+                                    
+                                    if (oldStyleSaveData.HasValue("groupVisibility"))
+                                    {
+                                        loadingPM.groupVisibility = oldStyleSaveData.GetValue("groupVisibility");
+                                    }
+                                    errLine = "15";
+                                    if (oldStyleSaveData.HasValue("groupVisibilityNames"))
+                                    {
+                                        loadingPM.groupVisibilityNames = oldStyleSaveData.GetValue("groupVisibilityNames");
+                                    }
+                                    if (oldStyleSaveData.HasValue("DirectActionState"))
+                                    {
+                                        loadingPM.DirectActionState = oldStyleSaveData.GetValue("DirectActionState");
+                                    }
+                                    foreach (ConfigNode prtNode in oldStyleSaveData.nodes)
+                                    {
+                                        Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+                                        float partDist = 100f;
+                                        Part gamePart = new Part();
+                                        try
+                                        {
+                                            foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                                            {
+                                                float thisPartDist = Vector3.Distance(partLoc, EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position));
+                                                if (thisPartDist < partDist)
+                                                {
+                                                    gamePart = p;
+                                                    partDist = thisPartDist;
+                                                }
+                                            }
+                                            bool ShowAmbiguousMessage = true;
+                                            if (partDist < 0.3f) //do not show it if part found is more then 0.3meters off
+                                            {
+                                                ShowAmbiguousMessage = true;
+                                            }
+                                            else
+                                            {
+                                                ShowAmbiguousMessage = false;
+                                            }
+                                            foreach (ConfigNode actNode in prtNode.nodes)
+                                            {
+                                                AGXAction actToAdd = StaticData.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage);
+                                                if (actToAdd != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
+                                                {
+                                                    StaticData.CurrentVesselActions.Add(actToAdd);
+                                                }
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            //Silently fail, if we hit this it is because EditorLogic.sorted ship list is not valid
+                                        }
+                                    }
+
+                                }
+                                //print("Load 4");
+                            }
+                        }
+                        catch
+                        {
+                            //failed to load old AGExtEdito.cfg file, silently fail
+                        }
                     }
                 }
                 catch
                 {
-                    errLine = "9d";
-                    AGXEditorNode = new ConfigNode("EDITOR");
-                    AGXEditorNode.AddValue("name", "editor");
-                    print("AGX Load Editor Node FAILED, resetting it");
+                    //silent fail on no vessel loaded so RootPart nullrefs
                 }
-                //}
+                errLine = "7";
+                CurrentKeySet = loadingPM.currentKeyset;
+                errLine = "8";
+                LoadCurrentKeyBindings();
+                errLine = "9";
+                CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+                errLine = "10";
+                LoadGroupNames(loadingPM.groupNames);
+                errLine = "11";
+                LoadGroupVisibility(loadingPM.groupVisibility);
+                errLine = "12";
+                LoadGroupVisibilityNames(loadingPM.groupVisibilityNames);
+                errLine = "13";
+                LoadDirectActionState(loadingPM.DirectActionState);
+                errLine = "14";
+                try
+                {
+                    if (EditorLogic.fetch != null && EditorLogic.SortedShipList.Count > 0)
+                    {
+                        errLine = "14a";
+                        foreach (Part p in EditorLogic.SortedShipList)
+                        {
+                            errLine = "15";
+                            foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().First().agxActionsThisPart)
+                            {
+                                errLine = "16";
+                                if (agAct.ba != null && !StaticData.CurrentVesselActions.Contains(agAct))
+                                {
+                                    errLine = "17";
+                                    StaticData.CurrentVesselActions.Add(agAct);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    //silent fail, SortedShipList nullrefs with no parts loaded
+                }
+
             }
             catch (Exception e)
             {
-                print("AGX EditorLoadFromFile Fail " + errLine + " " + e);
+                //silently fail, will hit this if no parts placed
+                Debug.Log("AGX temproary error on new loading thing " + errLine + " " + e);
             }
         }
 
-        public static void EditorLoadFromNode()
+        public static void EditorLoadFromFileOldMethod(ConfigNode thisVsl) //old load from file method, should be phased out soon
+        {
+            string errLine = "1";
+            if (thisVsl.HasValue("currentKeyset"))
+            {
+                CurrentKeySet = Convert.ToInt32((string)thisVsl.GetValue("currentKeyset"));
+                //print("curkey a " + CurrentKeySet + " " + thisVsl.GetValue("currentKeyset"));
+            }
+            else
+            {
+                CurrentKeySet = 1;
+                //print("curkey b " + CurrentKeySet);
+            }
+            if (CurrentKeySet < 1 || CurrentKeySet > 5)
+            {
+                //print("curkey c " + CurrentKeySet);
+                CurrentKeySet = 1;
+            }
+            LoadCurrentKeyBindings();
+            CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+            errLine = "13";
+            if (thisVsl.HasValue("groupNames"))
+            {
+                LoadGroupNames(thisVsl.GetValue("groupNames"));
+            }
+            else
+            {
+                LoadGroupNames("");
+            }
+            errLine = "14";
+            if (thisVsl.HasValue("groupVisibility"))
+            {
+                LoadGroupVisibility(thisVsl.GetValue("groupVisibility"));
+            }
+            else
+            {
+                LoadGroupVisibility("");
+            }
+            errLine = "15";
+            if (thisVsl.HasValue("groupVisibilityNames"))
+            {
+                LoadGroupVisibilityNames(thisVsl.GetValue("groupVisibilityNames"));
+            }
+            else
+            {
+                LoadGroupVisibilityNames("Group1" + '\u2023' + "Group2" + '\u2023' + "Group3" + '\u2023' + "Group4" + '\u2023' + "Group5");
+            }
+            if (thisVsl.HasValue("DirectActionState"))
+            {
+                LoadDirectActionState(thisVsl.GetValue("DirectActionState"));
+            }
+            else
+            {
+                LoadDirectActionState("");
+            }
+            errLine = "15a";
+            //print("adfg " + thisVsl.CountNodes);
+            foreach (ConfigNode prtNode in thisVsl.nodes)
+            {
+                Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
+                float partDist = 100f;
+                Part gamePart = new Part();
+                try
+                {
+                    foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
+                    {
+                        float thisPartDist = Vector3.Distance(partLoc, EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position));
+                        if (thisPartDist < partDist)
+                        {
+                            gamePart = p;
+                            partDist = thisPartDist;
+                        }
+                    }
+                    bool ShowAmbiguousMessage = true;
+                    if (partDist < 0.3f) //do not show it if part found is more then 0.3meters off
+                    {
+                        ShowAmbiguousMessage = true;
+                    }
+                    else
+                    {
+                        ShowAmbiguousMessage = false;
+                    }
+                    foreach (ConfigNode actNode in prtNode.nodes)
+                    {
+                        AGXAction actToAdd = StaticData.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage);
+                        if (actToAdd != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
+                        {
+                            StaticData.CurrentVesselActions.Add(actToAdd);
+                        }
+                    }
+                }
+                catch
+                {
+                    //Silently fail, if we hit this it is because EditorLogic.sorted ship list is not valid
+                }
+            }
+        }
+
+        public static void EditorLoadFromNode() //no longer loads from node as of agx 1.34, reusing the method for the basic load call now
         {
             //print("LoadFromNode Called" + StaticData.CurrentVesselActions.Count());
             string errLine = "1";
             try
             {
                 errLine = "10";
-                string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
+                //string hashedShipName = StaticData.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
                 errLine = "10a";
                 //print(hashedShipName);
-                ConfigNode thisVsl = new ConfigNode();
+                //ConfigNode thisVsl = new ConfigNode();
                 errLine = "10b";
                 // print(AGXEditorNode);
-                if (AGXEditorNode == null)
-                {
-                    EditorLoadFromFile();
-                    print("AGX EditorNode is Null, recovering....");
-                }
-                errLine = "10bc";
-                if (AGXEditorNode.HasNode(hashedShipName))
-                {
-                    errLine = "11";
-                    thisVsl = AGXEditorNode.GetNode(hashedShipName);
-                }
-                errLine = "12";
-                if (thisVsl.HasValue("currentKeyset"))
-                {
-                    CurrentKeySet = Convert.ToInt32((string)thisVsl.GetValue("currentKeyset"));
-                    //print("curkey a " + CurrentKeySet + " " + thisVsl.GetValue("currentKeyset"));
-                }
-                else
-                {
-                    CurrentKeySet = 1;
-                    //print("curkey b " + CurrentKeySet);
-                }
-                if (CurrentKeySet < 1 || CurrentKeySet > 5)
-                {
-                    //print("curkey c " + CurrentKeySet);
-                    CurrentKeySet = 1;
-                }
-                LoadCurrentKeyBindings();
-                CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
-                errLine = "13";
-                if (thisVsl.HasValue("groupNames"))
-                {
-                    LoadGroupNames(thisVsl.GetValue("groupNames"));
-                }
-                else
-                {
-                    LoadGroupNames("");
-                }
-                errLine = "14";
-                if (thisVsl.HasValue("groupVisibility"))
-                {
-                    LoadGroupVisibility(thisVsl.GetValue("groupVisibility"));
-                }
-                else
-                {
-                    LoadGroupVisibility("");
-                }
-                errLine = "15";
-                if (thisVsl.HasValue("groupVisibilityNames"))
-                {
-                    LoadGroupVisibilityNames(thisVsl.GetValue("groupVisibilityNames"));
-                }
-                else
-                {
-                    LoadGroupVisibilityNames("Group1" + '\u2023' + "Group2" + '\u2023' + "Group3" + '\u2023' + "Group4" + '\u2023' + "Group5");
-                }
-                if (thisVsl.HasValue("DirectActionState"))
-                {
-                    LoadDirectActionState(thisVsl.GetValue("DirectActionState"));
-                }
-                else
-                {
-                    LoadDirectActionState("");
-                }
-                errLine = "15a";
-                //print("adfg " + thisVsl.CountNodes);
-                foreach (ConfigNode prtNode in thisVsl.nodes)
-                {
-                    Vector3 partLoc = new Vector3((float)Convert.ToDouble(prtNode.GetValue("relLocX")), (float)Convert.ToDouble(prtNode.GetValue("relLocY")), (float)Convert.ToDouble(prtNode.GetValue("relLocZ")));
-                    float partDist = 100f;
-                    Part gamePart = new Part();
-                    try
-                    {
-                        foreach (Part p in EditorLogic.SortedShipList) //do a distance compare check, floats do not guarantee perfect decimal accuray so use part with least distance, should be zero distance in most cases
-                        {
-                            float thisPartDist = Vector3.Distance(partLoc, EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position));
-                            if (thisPartDist < partDist)
-                            {
-                                gamePart = p;
-                                partDist = thisPartDist;
-                            }
-                        }
-                        bool ShowAmbiguousMessage = true;
-                        if (partDist < 0.3f) //do not show it if part found is more then 0.3meters off
-                        {
-                            ShowAmbiguousMessage = true;
-                        }
-                        else
-                        {
-                            ShowAmbiguousMessage = false;
-                        }
-                        foreach (ConfigNode actNode in prtNode.nodes)
-                        {
-                            AGXAction actToAdd = AGextScenario.LoadAGXActionVer2(actNode, gamePart, ShowAmbiguousMessage);
-                            if (actToAdd.ba != null && !StaticData.CurrentVesselActions.Contains(actToAdd))
-                            {
-                                StaticData.CurrentVesselActions.Add(actToAdd);
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        //Silently fail, if we hit this it is because EditorLogic.sorted ship list is not valid
-                    }
-                }
+                //if (AGXEditorNode == null)
+                //{
+                //    EditorLoadFromFile();
+                //    print("AGX EditorNode is Null, recovering....");
+                //}
+                //errLine = "10bc";
+                //if (AGXEditorNode != null)
+                //{
+                //    if (AGXEditorNode.HasNode(hashedShipName))
+                //    {
+                //        errLine = "11";
+                //        thisVsl = AGXEditorNode.GetNode(hashedShipName);
+                //        EditorLoadFromFileOldMethod(thisVsl);
+                //    }
+                //    else
+                //    {
+                //        EditorLoadDataFromPartModuleNewMethod();
+                //    }
+                //    errLine = "12";
+
+                //}
+                //else
+                //{
+                EditorLoadDataFromPartModuleNewMethod();
+                //}
                 errLine = "15b";
                 List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
                 CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
@@ -4253,6 +4487,11 @@ namespace ActionGroupsExtended
 
                                     StaticData.CurrentVesselActions.Add(ToAdd);
 
+                                }
+                                ModuleAGX toAddModule = ToAdd.ba.listParent.part.Modules.OfType<ModuleAGX>().First();
+                                if (!toAddModule.agxActionsThisPart.Contains(ToAdd))
+                                {
+                                    toAddModule.agxActionsThisPart.Add(ToAdd);
                                 }
                             }
                         }
@@ -4474,7 +4713,7 @@ namespace ActionGroupsExtended
         {
             EditorSaveToNode();
             EditorSaveGlobalInfo();
-            EditorWriteNodeToFile();
+            //EditorWriteNodeToFile();
             // print("name check " + KeySetNames[1]);
 
         }
@@ -4497,20 +4736,21 @@ namespace ActionGroupsExtended
             AGXStaticData.SaveBaseConfigNode(AGExtNode);
         }
 
-        public static void EditorWriteNodeToFile()
-        {
-            try
-            {
-                AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
-            }
-            catch (Exception e)
-            {
-                print("AGX EditorWriteNodeToFileFail " + e);
-            }
+        //public static void EditorWriteNodeToFile()
+        //{
+        //    Debug.Log("AGX Editor Write Node Called, this is a bug, please report.");
+        //    try
+        //    {
+        //        AGXEditorNode.Save(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder + "/AGExtEditor.cfg");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        print("AGX EditorWriteNodeToFileFail " + e);
+        //    }
 
-        }
+        //}
 
-        public static void EditorSaveToNode()
+        public static void EditorSaveToNode() //no longer saves to node, now saves to partmodule, leaving name intact as i'm reusing the same method calls
         {
             //print("AGX EditorSaveToFile called"); 
             string errLine = "1";
@@ -4539,25 +4779,25 @@ namespace ActionGroupsExtended
 
                 if (okayToProceed)
                 {
-                    //print("let's save");
+                    //Debug.Log("let's save");
                     errLine = "6";
 
                     errLine = "10";
-                    string hashedShipName = AGextScenario.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
+                    //string hashedShipName = StaticData.EditorHashShipName(EditorLogic.fetch.shipNameField.Text, inVAB);
                     errLine = "11";
-                    ConfigNode thisVsl = new ConfigNode(hashedShipName);
+                    //ConfigNode thisVsl = new ConfigNode(hashedShipName);
                     errLine = "12";
-                    thisVsl.AddValue("name", EditorLogic.fetch.shipNameField.Text);
+                    //thisVsl.AddValue("name", EditorLogic.fetch.shipNameField.Text);
                     errLine = "13";
-                    thisVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
+                    //thisVsl.AddValue("currentKeyset", CurrentKeySet.ToString());
                     errLine = "14";
-                    thisVsl.AddValue("groupNames", SaveGroupNames(""));
+                    string groupNames = SaveGroupNames("");
                     errLine = "15";
-                    thisVsl.AddValue("groupVisibility", SaveGroupVisibility(""));
+                    string groupVisibility = SaveGroupVisibility("");
                     errLine = "16";
-                    thisVsl.AddValue("groupVisibilityNames", SaveGroupVisibilityNames(""));
+                    string groupVisibilityNames = SaveGroupVisibilityNames("");
                     errLine = "17";
-                    thisVsl.AddValue("DirectActionState", SaveDirectActionState(""));
+                    string DirectActionState = SaveDirectActionState("");
                     errLine = "17a";
                     UpdateAGXActionGroupNames();
                     try
@@ -4565,41 +4805,42 @@ namespace ActionGroupsExtended
                         errLine = "17c";
                         foreach (Part p in EditorLogic.SortedShipList)
                         {
+                            ModuleAGX thisPM = p.Modules.OfType<ModuleAGX>().First();
                             errLine = "17d";
-                            List<AGXAction> thisPartsActions = new List<AGXAction>();
-                            thisPartsActions.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.prt == p));
+                            thisPM.agxActionsThisPart.Clear();
+                            thisPM.agxActionsThisPart.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.prt == p));
                             errLine = "18";
-                            if (thisPartsActions.Count > 0)
-                            {
-                                ConfigNode partTemp = new ConfigNode("PART");
-                                errLine = "19";
-                                partTemp.AddValue("name", p.name);
-                                partTemp.AddValue("vesselID", "0");
-                                //partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.RootPart.transform.position).x);
-                                //if (!inVAB)
-                                //{
-                                //    partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.RootPart.transform.position).y) * -1f);
-                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).z);
-                                //}
-                                //else
-                                //{
-                                //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).y);
-                                //    partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.RootPart.transform.position).z);
-                                //}
-                                partTemp.AddValue("relLocX", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).x);
-                                partTemp.AddValue("relLocY", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).y);
-                                partTemp.AddValue("relLocZ", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).z);
-                                errLine = "20";
-                                foreach (AGXAction agxAct in thisPartsActions)
-                                {
-                                    errLine = "21";
-                                    partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
-                                }
-                                errLine = "22";
+                            //if (thisPartsActions.Count > 0)
+                            //{
+                            //    ConfigNode partTemp = new ConfigNode("PART");
+                            //    errLine = "19";
+                            //    partTemp.AddValue("name", p.name);
+                            //    partTemp.AddValue("vesselID", "0");
+                            //    //partTemp.AddValue("relLocX", (p.transform.position - EditorLogic.RootPart.transform.position).x);
+                            //    //if (!inVAB)
+                            //    //{
+                            //    //    partTemp.AddValue("relLocZ", ((p.transform.position - EditorLogic.RootPart.transform.position).y) * -1f);
+                            //    //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).z);
+                            //    //}
+                            //    //else
+                            //    //{
+                            //    //    partTemp.AddValue("relLocY", (p.transform.position - EditorLogic.RootPart.transform.position).y);
+                            //    //    partTemp.AddValue("relLocZ", (p.transform.position - EditorLogic.RootPart.transform.position).z);
+                            //    //}
+                            //    partTemp.AddValue("relLocX", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).x);
+                            //    partTemp.AddValue("relLocY", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).y);
+                            //    partTemp.AddValue("relLocZ", (EditorLogic.RootPart.transform.InverseTransformPoint(p.transform.position)).z);
+                            //    errLine = "20";
+                            //    foreach (AGXAction agxAct in thisPartsActions)
+                            //    {
+                            //        errLine = "21";
+                            //        partTemp.AddNode(AGextScenario.SaveAGXActionVer2(agxAct));
+                            //    }
+                            //    errLine = "22";
 
-                                thisVsl.AddNode(partTemp);
-                                errLine = "23";
-                            }
+                            //    thisVsl.AddNode(partTemp);
+                            //    errLine = "23";
+                            //}
                             // print("part OrgPart "+ p.ConstructID+" " + p.orgPos + " " + p.orgRot);
                         }
 
@@ -4610,13 +4851,13 @@ namespace ActionGroupsExtended
                         print("AGExt No parts to save " + errLine + " " + e);
                     }
                     errLine = "23";
-                    if (AGXEditorNode.HasNode(hashedShipName))
-                    {
-                        errLine = "23";
-                        AGXEditorNode.RemoveNode(hashedShipName);
-                    }
+                    //if (AGXEditorNode.HasNode(hashedShipName))
+                    //{
+                    //    errLine = "23";
+                    //    AGXEditorNode.RemoveNode(hashedShipName);
+                    //}
                     errLine = "24";
-                    AGXEditorNode.AddNode(thisVsl);
+                    //AGXEditorNode.AddNode(thisVsl);
                     errLine = "25";
                     //AGXBaseNode.RemoveNode("EDITOR");
                     errLine = "26";
