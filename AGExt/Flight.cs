@@ -163,7 +163,7 @@ namespace ActionGroupsExtended
         List<BaseAction> defaultActionsListAll; //list of all default actions on vessel, only used in non-numeric mode when going to other mode
         Vector2 groupWinScroll = new Vector2();
         bool highlightPartThisFrameGroupWin = false;
-        private bool overrideRootChange = false; //if docking event, do NOT run root change code
+        //private bool overrideRootChange = false; //if docking event, do NOT run root change code
         List<AGXAction> ThisGroupActions;
         private bool showGroupsIsGroups = true;
         public static bool useRT = true;
@@ -1495,7 +1495,9 @@ namespace ActionGroupsExtended
                     if (agAct.activated)
                     {
                         KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
-                        //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
+                        bool saveNoneState = agAct.ba.listParent.part.vessel.ActionGroups[actParam.group];
+                        agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = false;
+                        //Debug.Log("AGX action deactivate FIRE! " + agAct.ba.listParent.part.vessel.ActionGroups[actParam.group]);
                         agAct.ba.Invoke(actParam);
                         agAct.activated = false;
                         if (agAct.ba.name != "kOSVoidAction")
@@ -1512,12 +1514,14 @@ namespace ActionGroupsExtended
                         {
                             FlightGlobals.ActiveVessel.ActionGroups[CustomActions[group]] = false;
                         }
-
+                        agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = saveNoneState;
                     }
                     else
                     {
                         KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Activate);
                         //agAct.activated = true;
+                        bool saveNoneState = agAct.ba.listParent.part.vessel.ActionGroups[actParam.group];
+                        agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = true;
                         //print("AGX action activate FIRE!" + agAct.ba.guiName);
                         agAct.ba.Invoke(actParam);
                         agAct.activated = true;
@@ -1535,6 +1539,7 @@ namespace ActionGroupsExtended
                         {
                             FlightGlobals.ActiveVessel.ActionGroups[CustomActions[group]] = true;
                         }
+                        agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = saveNoneState;
 
                     }
                     if (agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "ActivateAction" || agAct.ba.listParent.module.moduleName == "ModuleEngines" && agAct.ba.name == "OnAction")
@@ -4903,7 +4908,7 @@ namespace ActionGroupsExtended
 
                         errLine = "32a";
 
-                        overrideRootChange = false;
+                        //overrideRootChange = false;
                         LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
                         AGEditorSelectedParts.Clear();
                         PartActionsList.Clear();
@@ -5340,7 +5345,7 @@ namespace ActionGroupsExtended
                     if (vsl1 != vsl2) //check to make sure this is not the same vessel docking to itself somehow, both vsl1 and vsl2 would be FG.AC then.
                     {
                         print("AGX Old Docking event!");
-                        overrideRootChange = true;
+                        //overrideRootChange = true;
                         if (vsl1 == FlightGlobals.ActiveVessel || vsl2 == FlightGlobals.ActiveVessel) //check to make sure at least one vessel is FG.AC  Not sure how a docking event could happen when neither vessel is active but make sure
                         {
                             if (AGXFlightNode.HasNode(vsl1.rootPart.flightID.ToString()))
@@ -6008,7 +6013,7 @@ namespace ActionGroupsExtended
         {
 
 
-            string errLine = "1";
+            //string errLine = "1";
 
             //start toggle checking
 
@@ -6038,7 +6043,7 @@ namespace ActionGroupsExtended
                     return actsListToCheck;
                 }
 
-                errLine = "2";
+                //errLine = "2";
                 try
                 {
 
@@ -7072,7 +7077,23 @@ namespace ActionGroupsExtended
                         {
                             agAct.activated = false;
                         }
+                    } 
+                    if (agAct.ba.listParent.module.moduleName == "ModuleControlSurface")
+                    {
+                        agAct.activated = false;
+                        ModuleControlSurface ctrlSurf = (ModuleControlSurface)agAct.ba.listParent.module;
+
+                        if (ctrlSurf.deploy)
+                        {
+                            agAct.activated = true;
+                        }
+                        else
+                        {
+                            agAct.activated = false;
+                        }
                     }
+
+
                     //Debug.Log("End calc active action!");
                 }
 

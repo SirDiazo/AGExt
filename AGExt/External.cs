@@ -911,14 +911,14 @@ namespace ActionGroupsExtended
             {
                 str = str + ":" + ba.name;
             }
-            if (group == null)
-            {
-                str = str + ":GRPnull";
-            }
-            else
-            {
+            //if (group == null)
+            //{
+            //    str = str + ":GRPnull";
+            //}
+            //else
+            //{
                 str = str + ":" + group.ToString();
-            }
+            //}
             return str;
         }
     }
