@@ -403,7 +403,20 @@ namespace ActionGroupsExtended
                     ShowAGXMod = false;
                 }
                 errLine = "17";
-                float facilityLevel = Mathf.Max(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding));
+                float facilityLevelSPH = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar);
+                float facilityLevelVAB = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding);
+                float facilityLevel;
+                bool VABmax = true;
+                if(facilityLevelSPH > facilityLevelVAB)
+                {
+                    facilityLevel = facilityLevelSPH;
+                    VABmax = false;
+                }
+                else
+                {
+                    facilityLevel = facilityLevelVAB;
+                    VABmax = true;
+                }
                 //print("AGX Career check: " + facilityLevel);
                 if (AGExtNode.HasValue("OverrideCareer")) //are action groups unlocked?
                 {
@@ -419,13 +432,13 @@ namespace ActionGroupsExtended
                     {
                         //print("d");
 
-                        if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
+                        if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel,VABmax))
                         {
                             // print("g");
                             showCareerStockAGs = true;
                             showCareerCustomAGs = true;
                         }
-                        else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel))
+                        else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel,VABmax))
                         {
                             // print("h");
                             showCareerStockAGs = true;
@@ -444,13 +457,13 @@ namespace ActionGroupsExtended
                     //print("j");
                     errLine = "19";
 
-                    if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel))
+                    if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel,VABmax))
                     {
                         // print("m");
                         showCareerStockAGs = true;
                         showCareerCustomAGs = true;
                     }
-                    else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel))
+                    else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel,VABmax))
                     {
                         // print("n");
                         showCareerStockAGs = true;
@@ -1139,7 +1152,7 @@ namespace ActionGroupsExtended
         { //actions themselves are not saved via this method, just everything else
             //populate our strings to save to each partmodule
             //currentkeyset is also saved here
-            Debug.Log("AGX Ship Data save " + vsl.id.ToString());
+            //Debug.Log("AGX Ship Data save " + vsl.id.ToString());
             string groupNamesToSave = SaveGroupNames("");
             string groupVisibilityToSave = SaveGroupVisibility("");
             string groupVisibiltyNames = SaveGroupVisibilityNames("");
@@ -1148,7 +1161,7 @@ namespace ActionGroupsExtended
 
             foreach (Part p in vsl.Parts)
             {
-                if (p.missionID == thisMissionID)
+                if (p.missionID == thisMissionID && p.Modules.Contains("ModuleAGX"))
                 {
                     ModuleAGX pmAGX = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
                     pmAGX.groupNames = groupNamesToSave;
@@ -4185,129 +4198,166 @@ namespace ActionGroupsExtended
 
                 if (RootPartExists) //we have a root part so proceed
                 {
+                    errLine = "7a";
                     if (AGXRoot != FlightGlobals.ActiveVessel.rootPart || LastPartCount != FlightGlobals.ActiveVessel.parts.Count) //root part change or part count change, refresh
                     {
+                        errLine = "7b";
                         //try saving just in case, see note below though
                         try
                         {
                             if (AGXRoot != null)
                             {
+                                errLine = "7c";
                                 SaveShipSpecificData(AGXRoot.vessel);
                             }
                             else
                             {
-                                Debug.Log("AGX Update save, root null");
+                               // Debug.Log("AGX Update save, root null");
                             }
                         }
                         catch (Exception e)
                         {
                             Debug.Log("AGX Update save fail" + e);
                         }
+                        errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
                         ModuleAGX rootAGX = null;
-                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //get our root part module
+                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")) //kerbals have no actions so...
                         {
-                            rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
+                            rootAGX = new ModuleAGX();
+                            rootAGX.hasData = true;
+
                         }
                         else
                         {
-                            rootAGX = new ModuleAGX();
-                        }
-                        if (!rootAGX.hasData)//make sure our moduleAGX has data, rare but can happen on docking ships launched before installing AGX
-                        {
-                            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                            if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //get our root part module
                             {
-                                if (p.Modules.OfType<ModuleAGX>().FirstOrDefault().hasData) //.hasData is false on Default so this works
+                                errLine = "7e";
+                                rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
+                            }
+                            else
+                            {
+                                errLine = "7f";
+                                rootAGX = new ModuleAGX();
+                            }
+
+                            if (!rootAGX.hasData)//make sure our moduleAGX has data, rare but can happen on docking ships launched before installing AGX
+                            {
+                                errLine = "7g";
+                                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                                 {
-                                    rootAGX = p.Modules.OfType<ModuleAGX>().First();
-                                }
-                                if (rootAGX.hasData)
-                                {
-                                    break; //valid data found, break the forEach
+                                    errLine = "7g1";
+                                    if (p.Modules.OfType<ModuleAGX>().FirstOrDefault().hasData) //.hasData is false on Default so this works
+                                    {
+                                        errLine = "7g2";
+                                        rootAGX = p.Modules.OfType<ModuleAGX>().First();
+                                    }
+                                    if (rootAGX.hasData)
+                                    {
+                                        errLine = "7g3";
+                                        break; //valid data found, break the forEach
+                                    }
                                 }
                             }
                         }
+                        errLine = "7h";
                         //at this point, if .hasData is still false there is no valid data on the vessel so run with the new ModuleAGX() created a bit ago to avoid nullRef errors
                         //temporary code to load old AGExt#####.cfg files follows, this is hacky, get rid of it in a few versions
-                        try
+                        if (!rootAGX.hasData)
                         {
-                            string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
-                            List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
-                            //List<int> persistentGamesNum = new List<int>(); //number in the .sfs save files
-                            int dirLength = (new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder).Length; //character length of file path
-                            foreach (string fileName in existingGames) //cycle through found files
+                            try
                             {
-                                //print("gamename " + fileName.Substring(dirLength + 1));
-                                if (fileName.Substring(dirLength + 1, 5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
+                                string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
+                                List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
+                                //List<int> persistentGamesNum = new List<int>(); //number in the .sfs save files
+                                int dirLength = (new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder).Length; //character length of file path
+                                foreach (string fileName in existingGames) //cycle through found files
                                 {
-                                    //print("gamenameb " + fileName.Substring(dirLength + 6,5));
-                                    try //this will work if file fould is an AGX flight file
+                                    //print("gamename " + fileName.Substring(dirLength + 1));
+                                    if (fileName.Substring(dirLength + 1, 5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
                                     {
-                                        int gameNum = Convert.ToInt32(fileName.Substring(dirLength + 6, 5));
-                                        existingGamesNum.Add(gameNum);
-                                        //print("gameNumb " + gameNum);
-                                    }
-                                    catch //did not work, was not an AGX flight file, but not actually an error so silently fail
-                                    {
+                                        //print("gamenameb " + fileName.Substring(dirLength + 6,5));
+                                        try //this will work if file fould is an AGX flight file
+                                        {
+                                            int gameNum = Convert.ToInt32(fileName.Substring(dirLength + 6, 5));
+                                            existingGamesNum.Add(gameNum);
+                                            //print("gameNumb " + gameNum);
+                                        }
+                                        catch //did not work, was not an AGX flight file, but not actually an error so silently fail
+                                        {
+                                        }
                                     }
                                 }
-                            }
-                            int maxSaveNum = existingGamesNum.Max();
-                            Debug.Log("Trying to load " + KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
-                            ConfigNode AGExtFile = ConfigNode.Load(KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
+                                int maxSaveNum = existingGamesNum.Max();
+                                Debug.Log("Trying to load " + KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
+                                ConfigNode AGExtFile = ConfigNode.Load(KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
 
-                            if (AGExtFile != null)
+                                if (AGExtFile != null)
+                                {
+                                    ConfigNode thisVesselOldData = AGExtFile.GetNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
+                                    rootAGX.currentKeyset = Convert.ToInt32((string)thisVesselOldData.GetValue("currentKeyset"));
+                                    rootAGX.groupNames = (string)thisVesselOldData.GetValue("groupNames");
+                                    rootAGX.groupVisibility = (string)thisVesselOldData.GetValue("groupVisibility");
+                                    rootAGX.groupVisibilityNames = (string)thisVesselOldData.GetValue("groupVisibilityNames");
+                                    rootAGX.DirectActionState = (string)thisVesselOldData.GetValue("DirectActionState");
+                                }
+
+
+
+
+
+                            }//close load old data try
+                            catch
                             {
-                                ConfigNode thisVesselOldData = AGExtFile.GetNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
-                                rootAGX.currentKeyset = Convert.ToInt32((string)thisVesselOldData.GetValue("currentKeyset"));
-                                rootAGX.groupNames = (string)thisVesselOldData.GetValue("groupNames");
-                                rootAGX.groupVisibility = (string)thisVesselOldData.GetValue("groupVisibility");
-                                rootAGX.groupVisibilityNames = (string)thisVesselOldData.GetValue("groupVisibilityNames");
-                                rootAGX.DirectActionState = (string)thisVesselOldData.GetValue("DirectActionState");
+                                //loading legacy data failed, silenty fail
                             }
-
-
-
-
-
-                        }//close load old data try
-                        catch
-                        {
-                            //loading legacy data failed, silenty fail
                         }
+                        errLine = "7i";
                         CurrentKeySetFlight = rootAGX.currentKeyset;
                         LoadCurrentKeyBindings();
                         CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
+                        errLine = "7j";
                         if (FlightGlobals.ActiveVessel.Parts.Contains(AGXRoot))
                         {
+                            errLine = "7k";
                             LoadGroupNames(rootAGX.groupNames, false); //docking maneuver, don't wipe group names
                         }
                         else
                         {
+                            errLine = "7l";
                             LoadGroupNames(rootAGX.groupNames); //not a dock, wipe group names before populating them
                         }
+                        errLine = "7m";
                         LoadGroupVisibility(rootAGX.groupVisibility);
                         LoadGroupVisibilityNames(rootAGX.groupVisibilityNames);
                         LoadDirectActionState(rootAGX.DirectActionState);
-
+                        errLine = "7n";
 
                         StaticData.CurrentVesselActions.Clear(); //refreshing list, clear old actions
                         foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                         {
-                            foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
+                            errLine = "7o";
+                            if (!p.Modules.Contains("KerbalEVA"))
                             {
-                                if (!StaticData.CurrentVesselActions.Contains(agAct))
+                                foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                                 {
-                                    StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
+                                    errLine = "7p";
+                                    if (!StaticData.CurrentVesselActions.Contains(agAct))
+                                    {
+                                        errLine = "7q";
+                                        StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
+                                    }
                                 }
                             }
                         }
+                        errLine = "7r";
                         AGXRoot = FlightGlobals.ActiveVessel.rootPart;
                         LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
                         RefreshCurrentActions();
+                        errLine = "7s";
                     }
                 } //if(RootPartExists) closing bracket
-
+                errLine = "8";
                 if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)// && InputLockManager.IsLocked(ControlTypes.All))//&& !InputLockManager.IsLocked(ControlTypes.All))
                 {
 
@@ -7077,7 +7127,7 @@ namespace ActionGroupsExtended
                         {
                             agAct.activated = false;
                         }
-                    } 
+                    }
                     if (agAct.ba.listParent.module.moduleName == "ModuleControlSurface")
                     {
                         agAct.activated = false;
