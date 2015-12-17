@@ -418,7 +418,7 @@ namespace ActionGroupsExtended
                     if (agAct != null)
                     {
                         ErrLine = "5a";
-                        
+
                         actionNode = StaticData.SaveAGXActionVer2(agAct);
                     }
                     ErrLine = "6";
@@ -535,7 +535,7 @@ namespace ActionGroupsExtended
                     //    AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
                     //}
                     errLine = "9";
-                   // Debug.Log("Step 1 " + actionNode.ToString());
+                    // Debug.Log("Step 1 " + actionNode.ToString());
                     AGXAction actToAdd = StaticData.LoadAGXActionVer2(actionNode, this.part, false);
                     //Debug.Log("Step 2 " + actToAdd.ToString());
                     if (actToAdd != null && !agxActionsThisPart.Contains(actToAdd))
@@ -1042,355 +1042,366 @@ namespace ActionGroupsExtended
                 string pmName = actNode.GetValue("partModule");//get partModule name
                 List<BaseAction> actsToCompare = new List<BaseAction>(); //create list of actions we will compare to
                 errLine = "2c";
-                if (pmName == "ModuleEnviroSensor")
+                if (actNode.HasValue("pmIndex"))
                 {
-                    string sensorType = actNode.GetValue("custom1");
-                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleEnviroSensor>())
-                    {
-                        ModuleEnviroSensor mesSensor = (ModuleEnviroSensor)pmSensor;
-                        if (mesSensor.sensorType == sensorType)
-                        {
-                            actsToCompare.AddRange(mesSensor.Actions);
-                        }
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    //actPart is part
+                    PartModule ourPM = PartModuleIndexToModule((string)actNode.GetValue("partModule"), Int32.Parse((string)actNode.GetValue("pmIndex")), actPart); //e(string pmName, int pmIndex, Part p)
+                    ActionToLoad.ba = ourPM.Actions[(string)actNode.GetValue("actionName")];
+                    Debug.Log("AGX New Load Okay " + ActionToLoad.ToString());
+                    return ActionToLoad;
                 }
-                else if (pmName == "ModuleScienceExperiment")
+                else //in theory this entire else statement is obsolete as of agx 1.34c and will never be run, leave for backwards compatibility
                 {
-                    string expID = actNode.GetValue("custom1");
-                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleScienceExperiment>())
+                    if (pmName == "ModuleEnviroSensor")
                     {
-                        ModuleScienceExperiment mesExp = (ModuleScienceExperiment)pmSensor;
-                        if (mesExp.experimentID == expID)
+                        string sensorType = actNode.GetValue("custom1");
+                        foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleEnviroSensor>())
                         {
-                            actsToCompare.AddRange(mesExp.Actions);
+                            ModuleEnviroSensor mesSensor = (ModuleEnviroSensor)pmSensor;
+                            if (mesSensor.sensorType == sensorType)
+                            {
+                                actsToCompare.AddRange(mesSensor.Actions);
+                            }
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                     }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    // actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                }
-                else if (pmName == "ModuleAnimateGeneric")
-                {
-                    string animName = actNode.GetValue("custom1");
-                    foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleAnimateGeneric>())
+                    else if (pmName == "ModuleScienceExperiment")
                     {
-                        ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
-                        if (mesExp.animationName == animName)
+                        string expID = actNode.GetValue("custom1");
+                        foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleScienceExperiment>())
                         {
-                            actsToCompare.AddRange(mesExp.Actions);
+                            ModuleScienceExperiment mesExp = (ModuleScienceExperiment)pmSensor;
+                            if (mesExp.experimentID == expID)
+                            {
+                                actsToCompare.AddRange(mesExp.Actions);
+                            }
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        // actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
                     }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                }
-                else if (pmName == "FSanimateGeneric")
-                {
-                    //print("load it");
-                    string animName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
+                    else if (pmName == "ModuleAnimateGeneric")
                     {
-                        //ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
-                        if (pm.moduleName == pmName)
+                        string animName = actNode.GetValue("custom1");
+                        foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleAnimateGeneric>())
                         {
-                            if ((string)pm.Fields.GetValue("animationName") == animName)
+                            ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
+                            if (mesExp.animationName == animName)
+                            {
+                                actsToCompare.AddRange(mesExp.Actions);
+                            }
+                        }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    }
+                    else if (pmName == "FSanimateGeneric")
+                    {
+                        //print("load it");
+                        string animName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            //ModuleAnimateGeneric mesExp = (ModuleAnimateGeneric)pmSensor;
+                            if (pm.moduleName == pmName)
+                            {
+                                if ((string)pm.Fields.GetValue("animationName") == animName)
+                                {
+                                    actsToCompare.AddRange(pm.Actions);
+                                }
+                            }
+                        }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                    }
+                    else if (pmName == "DMModuleScienceAnimate")
+                    {
+                        string startEventName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
                             {
                                 actsToCompare.AddRange(pm.Actions);
                             }
-                        }
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                }
-                else if (pmName == "DMModuleScienceAnimate")
-                {
-                    string startEventName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
 
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
-                }
-                else if (pmName == "DMSolarCollector")
-                {
-                    string startEventName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
+                    }
+                    else if (pmName == "DMSolarCollector")
+                    {
+                        string startEventName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
 
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
-                }
-                else if (pmName == "BTSMModuleReactionWheel")
-                {
-                    //string startEventName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("startEventGUIName") != (string)startEventName);
+                    }
+                    else if (pmName == "BTSMModuleReactionWheel")
+                    {
+                        //string startEventName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
 
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    //actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
-                }
-                else if (pmName == "BTSMModuleCrewReport" || pmName == "BTSMModuleScienceExperiment" || pmName == "BTSMModuleScienceExperimentWithTime")
-                {
-                    string startEventName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        //actsToCompare.RemoveAll(b3 => b3.listParent.module.Fields.GetValue("startEventGUIName") != startEventName);
+                    }
+                    else if (pmName == "BTSMModuleCrewReport" || pmName == "BTSMModuleScienceExperiment" || pmName == "BTSMModuleScienceExperimentWithTime")
+                    {
+                        string startEventName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
 
-                    }
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("experimentActionName") != (string)startEventName);
-                }
-                else if (pmName == "BTSMModuleResourceActionToggle")
-                {
-                    string startEventName = actNode.GetValue("custom1");
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                            // print("Batest " + actNode.GetValue("actionName") + " " + pm.Fields.GetValue("resourceName") + " " + startEventName); 
                         }
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("experimentActionName") != (string)startEventName);
+                    }
+                    else if (pmName == "BTSMModuleResourceActionToggle")
+                    {
+                        string startEventName = actNode.GetValue("custom1");
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                                // print("Batest " + actNode.GetValue("actionName") + " " + pm.Fields.GetValue("resourceName") + " " + startEventName); 
+                            }
 
-                    }
-                    //foreach (BaseAction ba6 in actsToCompare)
-                    //{
-                    //    print("1 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
-                    //}
-                    actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
-                    //foreach (BaseAction ba6 in actsToCompare)
-                    //{  
-                    //    print("2 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
-                    //}
-                    //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
-                    //print("2a " + startEventName);
-                    actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("resourceName") != (string)startEventName);
-                    //foreach (BaseAction ba6 in actsToCompare)
-                    //{
-                    //    print("3 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
-                    //}
-                }
-                else if (pmName == "Capacitor" || pmName == "DischargeCapacitor") //NearFutureElectrical
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == "Capacitor" || pm.moduleName == "DischargeCapacitor")
-                        {
-                            actsToCompare.AddRange(pm.Actions);
                         }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "FissionReprocessor" || pmName == "Nuclear Fuel Reprocessor") //NearFutureElectrical
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == "FissionReprocessor" || pm.moduleName == "Nuclear Fuel Reprocessor")
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "FissionGenerator" || pmName == "Fission Reactor") //NearFutureElectrical
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == "FissionGenerator" || pm.moduleName == "Fission Reactor")
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "ModuleCurvedSolarPanel" || pmName == "Curved Solar Panel") //NearFutureSolar
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == "ModuleCurvedSolarPanel" || pm.moduleName == "Curved Solar Panel")
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "VariableISPEngine" || pmName == "Variable ISP Engine") //NearFutureSolar
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == "VariableISPEngine" || pm.moduleName == "Variable ISP Engine")
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "ModuleRTAntenna") //Remotetech
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        // actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "SCANsat") //Remotetech
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "ModuleEnginesFX")
-                {
-
-                    foreach (ModuleEnginesFX pm in actPart.Modules.OfType<ModuleEnginesFX>()) //add actions to compare
-                    {
-                        //print("Fields " + (string)pm.Fields.GetValue("engineID") + "||" + (string)actNode.GetValue("custom1"));
-                        if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("custom1"))
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                            //print("Acts to compare " + actsToCompare.Count + " " + pm.Actions.Count + pm.name + pm.moduleName);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-
-                        //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "RealChuteModule")
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        //actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
-                    }
-                }
-                else if (pmName == "REGO_ModuleAnimationGroup")
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("deployAnimationName") + (string)b2.listParent.module.Fields.GetValue("activeAnimationName") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "REGO_ModuleResourceHarvester")
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("ResourceName") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "REGO_ModuleResourceConverter")
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("RecipeOutputs") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "REGO_ModuleAsteroidDrill")
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("ImpactTransform") != (string)actNode.GetValue("custom1"));
-                    }
-                }
-                else if (pmName == "ModuleModActions") //guiName is player editable so can't be used. 
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                    }
-                }
-                else if (pmName == "ModuleReactionWheel") //guiName is player editable so can't be used. 
-                {
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                    }
-                }
-                else
-                {
-                    
-                    foreach (PartModule pm in actPart.Modules) //add actions to compare
-                    {
-                        if (pm.moduleName == pmName)
-                        {
-                            actsToCompare.AddRange(pm.Actions);
-                        }
-                        //foreach(BaseAction ba in actsToCompare)
+                        //foreach (BaseAction ba6 in actsToCompare)
                         //{
-                        //    Debug.Log("BA list " + ba.name + " " + ba.guiName);
+                        //    print("1 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
                         //}
-                        actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
-                        actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        actsToCompare.RemoveAll(b => b.name != actNode.GetValue("actionName"));
+                        //foreach (BaseAction ba6 in actsToCompare)
+                        //{  
+                        //    print("2 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                        //}
+                        //actsToCompare.RemoveAll(b2 => b2.guiName != actNode.GetValue("actionGuiName"));
+                        //print("2a " + startEventName);
+                        actsToCompare.RemoveAll(b3 => (string)b3.listParent.module.Fields.GetValue("resourceName") != (string)startEventName);
+                        //foreach (BaseAction ba6 in actsToCompare)
+                        //{
+                        //    print("3 " + ba6.name + " " + ba6.listParent.module.Fields.GetValue("resourceName"));
+                        //}
                     }
+                    else if (pmName == "Capacitor" || pmName == "DischargeCapacitor") //NearFutureElectrical
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == "Capacitor" || pm.moduleName == "DischargeCapacitor")
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "FissionReprocessor" || pmName == "Nuclear Fuel Reprocessor") //NearFutureElectrical
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == "FissionReprocessor" || pm.moduleName == "Nuclear Fuel Reprocessor")
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "FissionGenerator" || pmName == "Fission Reactor") //NearFutureElectrical
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == "FissionGenerator" || pm.moduleName == "Fission Reactor")
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "ModuleCurvedSolarPanel" || pmName == "Curved Solar Panel") //NearFutureSolar
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == "ModuleCurvedSolarPanel" || pm.moduleName == "Curved Solar Panel")
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "VariableISPEngine" || pmName == "Variable ISP Engine") //NearFutureSolar
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == "VariableISPEngine" || pm.moduleName == "Variable ISP Engine")
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "ModuleRTAntenna") //Remotetech
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            // actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "SCANsat") //Remotetech
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "ModuleEnginesFX")
+                    {
 
-                }
+                        foreach (ModuleEnginesFX pm in actPart.Modules.OfType<ModuleEnginesFX>()) //add actions to compare
+                        {
+                            //print("Fields " + (string)pm.Fields.GetValue("engineID") + "||" + (string)actNode.GetValue("custom1"));
+                            if ((string)pm.Fields.GetValue("engineID") == (string)actNode.GetValue("custom1"))
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                                //print("Acts to compare " + actsToCompare.Count + " " + pm.Actions.Count + pm.name + pm.moduleName);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+
+                            //actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("scanName") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "RealChuteModule")
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            //actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+                    }
+                    else if (pmName == "REGO_ModuleAnimationGroup")
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("deployAnimationName") + (string)b2.listParent.module.Fields.GetValue("activeAnimationName") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "REGO_ModuleResourceHarvester")
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("ResourceName") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "REGO_ModuleResourceConverter")
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("RecipeInputs") + (string)b2.listParent.module.Fields.GetValue("RecipeOutputs") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "REGO_ModuleAsteroidDrill")
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => (string)b2.listParent.module.Fields.GetValue("ImpactTransform") != (string)actNode.GetValue("custom1"));
+                        }
+                    }
+                    else if (pmName == "ModuleModActions") //guiName is player editable so can't be used. 
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        }
+                    }
+                    else if (pmName == "ModuleReactionWheel") //guiName is player editable so can't be used. 
+                    {
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                        }
+                    }
+                    else
+                    {
+
+                        foreach (PartModule pm in actPart.Modules) //add actions to compare
+                        {
+                            if (pm.moduleName == pmName)
+                            {
+                                actsToCompare.AddRange(pm.Actions);
+                            }
+                            //foreach(BaseAction ba in actsToCompare)
+                            //{
+                            //    Debug.Log("BA list " + ba.name + " " + ba.guiName);
+                            //}
+                            actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
+                            actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
+                        }
+
+                    }
+                }//close new if
                 errLine = "3";
                 //print("ActsCount " + actsToCompare.Count);
                 if (actsToCompare.Count != 1)
@@ -1445,12 +1456,14 @@ namespace ActionGroupsExtended
                 errLine = "3";
                 actionNode.AddValue("activated", (agxAct.activated) ? "1" : "0");
                 errLine = "4";
-                actionNode.AddValue("partModule", agxAct.ba.listParent.module.moduleName);
+                actionNode.AddValue("partModule", agxAct.ba.listParent.module.GetType().Name);
                 errLine = "5";
                 actionNode.AddValue("actionGuiName", agxAct.ba.guiName);
                 errLine = "6";
                 actionNode.AddValue("actionName", agxAct.ba.name);
                 errLine = "7";
+                actionNode.AddValue("pmIndex", PartModuleModuleToIndex(agxAct.ba.listParent.module, agxAct.ba.listParent.part.Modules).ToString());
+
                 if (agxAct.ba.listParent.module.moduleName == "ModuleEnviroSensor") //add this to the agxactions list somehow and add to save.load serialze
                 {
                     errLine = "8";
@@ -1593,7 +1606,47 @@ namespace ActionGroupsExtended
             }
 
         }
+        public static int PartModuleModuleToIndex(PartModule pm, PartModuleList pmList) //return index count of specific partmodule type only, not of entire part.modules list. Used in save routine
+        {
+            try
+            {
+                List<PartModule> pmListThisType = new List<PartModule>();
+                foreach (PartModule pm2 in pmList)
+                {
+                    if (pm2.GetType().Name == pm.GetType().Name)
+                    {
+                        pmListThisType.Add(pm2);
+                    }
+                }
+                return pmListThisType.IndexOf(pm);
+            }
+            catch
+            {
+                Debug.Log("AGX SavePMIndex Fail, using default");
+                return 0;
+            }
+        }
+        public static PartModule PartModuleIndexToModule(string pmName, int pmIndex, Part p) //used in load routine, convert index number to partModule reference
+        {
+            try
+            {
+                List<PartModule> pmThisType = new List<PartModule>();
+                foreach (PartModule pm in p.Modules)
+                {
+                    if (pm.GetType().Name == pmName)
+                    {
+                        pmThisType.Add(pm);
+                    }
+                }
+                return pmThisType.ElementAt(pmIndex);
 
+            }
+            catch
+            {
+                Debug.Log("AGX Load Action Index fail, action probably lost");
+                return new PartModule();
+            }
+        }
     }
 
 }//name space closing bracket

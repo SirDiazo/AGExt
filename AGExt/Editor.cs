@@ -17,7 +17,7 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.EditorAny, false)]
     public class AGXEditor : PartModule
     {
-        bool agxWindowsShowing; //status bool, true if panels have been dismissed.
+        //bool agxWindowsShowing; //status bool, true if panels have been dismissed.
         //bool forceShowDefaultEditor; //should be deleteable now
         bool showCareerStockAGs = false; //support locking action groups in early career
         bool showCareerCustomAGs = false;
@@ -601,6 +601,8 @@ namespace ActionGroupsExtended
         //    }
 
         //}
+
+        
 
         public void OnShipLoad(ShipConstruct ship, CraftBrowser.LoadType loadType)
         {
@@ -3789,7 +3791,7 @@ namespace ActionGroupsExtended
             try
             {
                 //Debug.Log("Agx panels current " + EditorPanels.Instance.panelManager.CurrentPanel.ToString());
-               
+                
                if(EditorLogic.fetch.editorScreen == EditorScreen.Parts)
                {
                    if(EditorPanels.Instance.panelManager.CurrentPanel == null || !EditorPanels.Instance.panelManager.CurrentPanel.ToString().Contains("PanelPartList"))

@@ -1808,7 +1808,10 @@ namespace ActionGroupsExtended
                     {
 
                         //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
-                        ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                        if (VesselIsControlled())
+                        {
+                            ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                        }
                     }
                     AGXBtnStyle.alignment = TextAnchor.MiddleCenter;
                     //if (GUI.Button(new Rect(110, 0 + (20 * (i2 - 1)), 70, 20), AGXguiKeys[ActiveActions.ElementAt((i2 - 1))].ToString()))
@@ -1835,8 +1838,10 @@ namespace ActionGroupsExtended
                         {
 
                             //ActivateActionGroup(ActiveActions.ElementAt(i2 - 1));
-
-                            ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                            if (VesselIsControlled())
+                            {
+                                ActivateActionGroup(ActiveActionsStateToShow.ElementAt(i2 - 1).group);
+                            }
                         }
                     }
                     GUI.contentColor = TxtClr;
@@ -4158,7 +4163,7 @@ namespace ActionGroupsExtended
                         vslNode.RemoveNodes("PART");
                         if (AGXFlightNode.HasNode(vslNode.name))
                         {
-                            AGXFlightNode.RemoveNode(vslNode.name);
+                            AGXFlightNode.RemoveNode(vslNode.name); 
                         }
                         errLine = "29";
                         AGXFlightNode.AddNode(vslNode);
@@ -4171,9 +4176,27 @@ namespace ActionGroupsExtended
             }
         }
 
+        public static bool VesselIsControlled() //check if focus vessel is controllable, use lockmask as Squad sets that when a vessel isnt/.
+        {
+            if(InputLockManager.lockStack.ContainsKey("vessel_noControl_" + FlightGlobals.ActiveVessel.id.ToString()))
+            {
+                //Debug.Log("AGX Not controllable");
+                return false; //if value is present in lockstack, controls are locked so not controllable
+            }
+            else
+            {
+                //Debug.Log("AGX Ccontrollable");
+                return true; //vessel is controlled, activate action
+            }
+        }
 
         public void Update()
         {
+            //Debug.Log("AGX TEST vessel_noControl_" + FlightGlobals.ActiveVessel.id.ToString());
+            //foreach(KeyValuePair<string,ulong> strPr in InputLockManager.lockStack)
+            //{
+            //    Debug.Log("AGX Stack " + strPr.Key.ToString());
+            //}
             string errLine = "1";
             try
             {
@@ -4358,9 +4381,10 @@ namespace ActionGroupsExtended
                     }
                 } //if(RootPartExists) closing bracket
                 errLine = "8";
-                if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)// && InputLockManager.IsLocked(ControlTypes.All))//&& !InputLockManager.IsLocked(ControlTypes.All))
+                //Debug.Log("AGX Testd");
+                if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)//.KSC_ALL catches both vessel not controllable via lock Squad sets as well as if ControlLock (my other mod) is engaged
                 {
-
+                    //.Log("AGX Test");
                     foreach (KeyCode KC in ActiveKeys)
                     {
 
@@ -4372,7 +4396,10 @@ namespace ActionGroupsExtended
                             {
                                 if (AGXguiKeys[i] == KC)
                                 {
-                                    ActivateActionGroupCheckModKeys(i);
+                                    if (VesselIsControlled()) //in version 1.34c this will always be true if hit, used for mouse clicks on the GUI at this point, leave for future though
+                                    {
+                                        ActivateActionGroupCheckModKeys(i);
+                                    }
                                 }
                             }
                         }
@@ -4382,15 +4409,21 @@ namespace ActionGroupsExtended
                     {
                         if (Input.GetKey(kcPair.Value) && !DirectKeysState[kcPair.Key])
                         {
-                            ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
-                            DirectKeysState[kcPair.Key] = true;
-                            //Debug.Log("turn on");
+                            if (VesselIsControlled())
+                            {
+                                ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
+                                DirectKeysState[kcPair.Key] = true;
+                                //Debug.Log("turn on");
+                            }
                         }
                         else if (!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
                         {
-                            ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
-                            DirectKeysState[kcPair.Key] = false;
-                            //Debug.Log("turn off");
+                            if (VesselIsControlled())
+                            {
+                                ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
+                                DirectKeysState[kcPair.Key] = false;
+                                //Debug.Log("turn off");
+                            }
                         }
                     }
                     foreach (KeyValuePair<int, KeyCode> kcPair2 in DefaultTen) //toggle groups if no actions are assigned
@@ -4399,25 +4432,28 @@ namespace ActionGroupsExtended
                         {
                             if (AGXguiMod1Groups[kcPair2.Key] == Input.GetKey(AGXguiMod1Key) && AGXguiMod2Groups[kcPair2.Key] == Input.GetKey(AGXguiMod2Key))
                             {
-                                if (kcPair2.Key <= 10)
+                                if (VesselIsControlled())
                                 {
-                                    Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                                    CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                                    CustomActions.Add(2, KSPActionGroup.Custom02);
-                                    CustomActions.Add(3, KSPActionGroup.Custom03);
-                                    CustomActions.Add(4, KSPActionGroup.Custom04);
-                                    CustomActions.Add(5, KSPActionGroup.Custom05);
-                                    CustomActions.Add(6, KSPActionGroup.Custom06);
-                                    CustomActions.Add(7, KSPActionGroup.Custom07);
-                                    CustomActions.Add(8, KSPActionGroup.Custom08);
-                                    CustomActions.Add(9, KSPActionGroup.Custom09);
-                                    CustomActions.Add(10, KSPActionGroup.Custom10);
-                                    FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
-                                    groupActivatedState[kcPair2.Key] = FlightGlobals.ActiveVessel.ActionGroups[CustomActions[kcPair2.Key]];
-                                }
-                                else
-                                {
-                                    groupActivatedState[kcPair2.Key] = !groupActivatedState[kcPair2.Key];
+                                    if (kcPair2.Key <= 10)
+                                    {
+                                        Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
+                                        CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
+                                        CustomActions.Add(2, KSPActionGroup.Custom02);
+                                        CustomActions.Add(3, KSPActionGroup.Custom03);
+                                        CustomActions.Add(4, KSPActionGroup.Custom04);
+                                        CustomActions.Add(5, KSPActionGroup.Custom05);
+                                        CustomActions.Add(6, KSPActionGroup.Custom06);
+                                        CustomActions.Add(7, KSPActionGroup.Custom07);
+                                        CustomActions.Add(8, KSPActionGroup.Custom08);
+                                        CustomActions.Add(9, KSPActionGroup.Custom09);
+                                        CustomActions.Add(10, KSPActionGroup.Custom10);
+                                        FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
+                                        groupActivatedState[kcPair2.Key] = FlightGlobals.ActiveVessel.ActionGroups[CustomActions[kcPair2.Key]];
+                                    }
+                                    else
+                                    {
+                                        groupActivatedState[kcPair2.Key] = !groupActivatedState[kcPair2.Key];
+                                    }
                                 }
                             }
                         }
