@@ -1387,6 +1387,32 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
             {
                 useRT = !useRT;
+                //mechject test stuff start
+
+                //Type VSType = Type.GetType("MuMech.VesselState, MechJeb2"); //this is good, finds our VesselState type.
+                //Type MCType = Type.GetType("MuMech.MechJebCore, MechJeb2"); //this is goo, finds our MechJebCore type.
+                //foreach (Part p in FlightGlobals.ActiveVessel.Parts) //cycle all parts on our vessel, MechJeb attaches to parts with ModuleCommand
+                //{
+                //    if (p.Modules.Contains("MechJebCore"))
+                //    {
+                //        PartModule pm2 = p.Modules["MechJebCore"]; //Find our MechJeb module
+                //        if (pm2 != null) //if part does not have a mechjeb module, pm2 is null at this point
+                //        {
+                //            Debug.Log("vslstatea found");
+                //            object vslState = MCType.GetField("vesselState").GetValue(pm2); //get our reference to the vessel state object
+                //            Debug.Log("vslstate found");
+                //            foreach (PropertyInfo pinfo in VSType.GetProperties())
+                //            {
+                //                Debug.Log("ping" + pinfo.Name + " " + pinfo.PropertyType);
+                //            }
+                //            var maxThrustAvail = VSType.GetProperty("thrustAvailable").GetValue(vslState,null);
+                //            Debug.Log("found " + maxThrustAvail);
+                //            break; //pull max thrust from the vessel state object. 
+                //        }
+                //    }
+                //}
+
+                //mechjeb test stuff end
             }
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;

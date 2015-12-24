@@ -559,7 +559,7 @@ namespace ActionGroupsExtended
     {
         private uint flightID; //
         private bool vesselInstanceOK = false; //is this vessel loadable? if this is false, run nothing
-        private List<AGXAction> actionsList;
+        public List<AGXAction> actionsList;
         private Vessel thisVsl;
         private Dictionary<int, string> guiNames;
 

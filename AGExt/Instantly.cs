@@ -13,7 +13,7 @@ namespace ActionGroupsExtended
         //abandoned module, no longer needed for key rebinding
         public void Start()
         {
-            print("AGExt Ver. 1.34c loaded");
+            print("AGExt Ver. 1.34d loaded");
 
             
         }

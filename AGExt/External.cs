@@ -90,7 +90,7 @@ namespace ActionGroupsExtended
             }
             else if (HighLogic.LoadedSceneIsEditor)
             {
-                    return StaticData.CurrentVesselActions.FindAll(ag => ag.group == group);
+                return StaticData.CurrentVesselActions.FindAll(ag => ag.group == group);
             }
             else
             {
@@ -161,9 +161,9 @@ namespace ActionGroupsExtended
             }
         }
 
-        public static Dictionary<int,string> AGXGroupNamesAll() //return dictionary of group names, returns dictionary of 250 items, only groups with defined names will have strings
+        public static Dictionary<int, string> AGXGroupNamesAll() //return dictionary of group names, returns dictionary of 250 items, only groups with defined names will have strings
         {
-            if(HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight)
             {
                 return AGXFlight.AGXguiNames;
             }
@@ -175,13 +175,13 @@ namespace ActionGroupsExtended
             {
                 return new Dictionary<int, string>();
             }
-        } 
-        
-        public static Dictionary<int,string> AGX2VslGroupNamesAll(uint FlightID) //return dictionary of group names
+        }
+
+        public static Dictionary<int, string> AGX2VslGroupNamesAll(uint FlightID) //return dictionary of group names
         {
-            if(HighLogic.LoadedSceneIsFlight)
+            if (HighLogic.LoadedSceneIsFlight)
             {
-                if(FlightID == FlightGlobals.ActiveVessel.rootPart.flightID)
+                if (FlightID == FlightGlobals.ActiveVessel.rootPart.flightID)
                 {
                     return AGXFlight.AGXguiNames;
                 }
@@ -191,9 +191,9 @@ namespace ActionGroupsExtended
                     return otherVsl.GetGroupNamesAll();
                 }
             }
-            else if(HighLogic.LoadedSceneIsEditor)
+            else if (HighLogic.LoadedSceneIsEditor)
             {
-                if(FlightID == EditorLogic.RootPart.flightID)
+                if (FlightID == EditorLogic.RootPart.flightID)
                 {
                     return AGXEditor.AGXguiNames;
                 }
@@ -207,7 +207,7 @@ namespace ActionGroupsExtended
                 return new Dictionary<int, string>();
             }
         }
-        
+
         public static bool AGX2VslToggleGroup(uint FlightID, int group) //other vessel direct toggle activate
         {
             print("AGX Call: toggle action " + group + " for vessel " + FlightID);
@@ -801,6 +801,84 @@ namespace ActionGroupsExtended
             }
         }
 
+        public static Dictionary<int,string> AGXListOfAssignedGroups()
+        {
+            print("AGX Call: list of groups with assigned actions");
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                Dictionary<int,string> grpList = new Dictionary<int,string>();
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions)
+                {
+                    if(!grpList.ContainsKey(agAct.group))
+                    //if (!grpList.Concat(agAct.group))
+                    {
+                        grpList.Add(agAct.group,AGXFlight.AGXguiNames[agAct.group]);
+                    }
+                }
+                //dictionary isn't sortable, you sort the results when you access it which has to happen in the other mod. 
+                return grpList;
+            }
+            else if (HighLogic.LoadedSceneIsEditor)
+            {
+                Dictionary<int, string> grpList = new Dictionary<int, string>();
+                foreach (AGXAction agAct in StaticData.CurrentVesselActions)
+                {
+                    if (!grpList.ContainsKey(agAct.group))
+                    {
+                        grpList.Add(agAct.group, AGXEditor.AGXguiNames[agAct.group]);
+                    }
+                }
+                return grpList;
+            }
+            else
+            {
+                return new Dictionary<int, string>();
+            }
+        }
+
+        public static Dictionary<int,string> AGX2VslListOfAssignedGroups(uint flightID)
+        {
+            print("AGX Call: list of groups with assigned actions on vessel " + flightID);
+            try
+            {
+
+                if (HighLogic.LoadedSceneIsFlight) //only workes in flight
+                {
+                    if (FlightGlobals.ActiveVessel.rootPart.flightID == flightID)
+                    {
+                        return AGXListOfAssignedGroups();
+                    }
+                    else
+                    {
+                        AGXOtherVessel otherVsl = new AGXOtherVessel(flightID);
+                        Dictionary<int, string> grpList = new Dictionary<int, string>();
+                        foreach (AGXAction agAct in otherVsl.actionsList)
+                        {
+                            if (!grpList.ContainsKey(agAct.group))
+                            {
+                                grpList.Add(agAct.group, AGXEditor.AGXguiNames[agAct.group]);
+                            }
+                        }
+                        return grpList;
+
+                    }
+                }
+                else if (HighLogic.LoadedSceneIsEditor)
+                {
+                    return AGXListOfAssignedGroups();
+                }
+
+                else
+                {
+                    return new Dictionary<int, string>();
+                }
+            }
+            catch
+            {
+                return new Dictionary<int, string>();
+            }
+        }
+
 
 
     }
@@ -895,7 +973,7 @@ namespace ActionGroupsExtended
         public override string ToString()
         {
             string str = "";
-            if(prt == null)
+            if (prt == null)
             {
                 str = str + "PartNull";
             }
@@ -917,7 +995,7 @@ namespace ActionGroupsExtended
             //}
             //else
             //{
-                str = str + ":" + group.ToString();
+            str = str + ":" + group.ToString();
             //}
             return str;
         }
