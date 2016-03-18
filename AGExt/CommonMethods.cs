@@ -351,6 +351,8 @@ namespace ActionGroupsExtended
         public string DirectActionState = "";
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
         public bool hasData = false;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+        public int focusFlightID = 0;
 
         public ConfigNode toggleNode;
         public ConfigNode holdNode;
@@ -1047,7 +1049,7 @@ namespace ActionGroupsExtended
                     //actPart is part
                     PartModule ourPM = PartModuleIndexToModule((string)actNode.GetValue("partModule"), Int32.Parse((string)actNode.GetValue("pmIndex")), actPart); //e(string pmName, int pmIndex, Part p)
                     ActionToLoad.ba = ourPM.Actions[(string)actNode.GetValue("actionName")];
-                    Debug.Log("AGX New Load Okay " + ActionToLoad.ToString());
+                    //Debug.Log("AGX New Load Okay " + ActionToLoad.ToString());
                     return ActionToLoad;
                 }
                 else //in theory this entire else statement is obsolete as of agx 1.34c and will never be run, leave for backwards compatibility

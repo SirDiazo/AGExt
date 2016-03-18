@@ -60,6 +60,7 @@ namespace ActionGroupsExtended
         private static Part AGXRoot;
         public static List<AGXAction> DetachedPartActions;
         public static Timer DetachedPartReset;
+        public static Timer DisablePartAttachingReset;
 
         //private static bool NeedToSave = false;
         private static int GroupsPage = 1;
@@ -135,7 +136,7 @@ namespace ActionGroupsExtended
         bool showAllPartsList = false; //show list of all parts in group window?
         List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
         KSPActionGroup KSPDefaultLastActionGroup = KSPActionGroup.Custom01;
-        public static bool disablePartAttaching = false; //disable part attaching feature when loading so non-symmetric actions are not made symmetric
+        public static bool disablePartAttaching = true; //disable part attaching feature when loading so non-symmetric actions are not made symmetric
         //static Part partLastHighlight = null;
         ////static Color partHighlighLastColor;
         //static Part.HighlightType partHighlightLastType;
@@ -467,6 +468,12 @@ namespace ActionGroupsExtended
 
                 DetachedPartReset.Elapsed += new ElapsedEventHandler(ResetDetachedParts);
 
+                DisablePartAttachingReset = new Timer();
+                DisablePartAttachingReset.Interval = 1000;
+                DisablePartAttachingReset.Stop();
+                DisablePartAttachingReset.AutoReset = true;
+                DisablePartAttachingReset.Elapsed += new ElapsedEventHandler(ResetDisablePartAttaching);
+
                 SelectedWithSym = new List<Part>();
                 SelectedWithSymActions = new List<AGXDefaultCheck>();
                 errLine = "17";
@@ -564,6 +571,7 @@ namespace ActionGroupsExtended
                 
                 GameEvents.onPartAttach.Add(PartAttaching);// this game event only fires for part removed, not child parts
                 GameEvents.onPartRemove.Add(PartRemove);
+                GameEvents.onEditorPartEvent.Add(OnPartEvent);
                 //GameEvents.onEditorShipModified.Add(VesselChanged);
                 GameEvents.onEditorLoad.Add(OnShipLoad);
                 //GameEvents.onGameStateSave.Add(OnSaveTest);
@@ -612,7 +620,7 @@ namespace ActionGroupsExtended
             //EditorLogic.fetch.editorScreen = EditorScreen.Actions;
             if (loadType == CraftBrowser.LoadType.Normal)
             {
-                //Debug.Log("OnShipLoadFire!");
+                //Debug.Log("AGX part attaching disable");
                 disablePartAttaching = true; //disable symmetric action loading
                 DetachedPartActions.Clear(); //onPartAttach fires before this point, need to get rid of the actions that adds to this list.
                 StaticData.CurrentVesselActions.Clear();
@@ -787,6 +795,13 @@ namespace ActionGroupsExtended
 
         }
 
+        public void OnPartEvent(ConstructionEventType cType, Part p)
+        {
+            if(cType == ConstructionEventType.PartDeleted)
+            {
+                DisablePartAttachingReset.Start();
+            }
+        }
 
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
@@ -892,6 +907,8 @@ namespace ActionGroupsExtended
             string errLine = "1";
             try
             {
+                //Debug.Log("AGX Part Remove Event Fire!");
+                disablePartAttaching = false;
                 //.Log("AGX Part Remove Fire " + StaticData.CurrentVesselActions.Count());
                 errLine = "2";
                 UpdateAGXActionGroupNames();
@@ -1109,7 +1126,7 @@ namespace ActionGroupsExtended
 
         public void ImmediatePanelsMovement()
         {
-            Debug.Log("AGX immedieate");
+            //Debug.Log("AGX immedieate");
             if (EditorLogic.fetch.editorScreen == EditorScreen.Parts)
             {
                 EditorPanels.Instance.panelManager.BringInImmediate(EditorPanels.Instance.actions);
@@ -1146,7 +1163,7 @@ namespace ActionGroupsExtended
         IEnumerator DelayHidePanels()
         {
             yield return new WaitForSeconds(0.2f);
-            Debug.Log("agx delay hide");
+            //Debug.Log("agx delay hide");
             EditorPanels.Instance.panelManager.Dismiss();
             //ActualPanelsMovement();
         }
@@ -1154,7 +1171,7 @@ namespace ActionGroupsExtended
         IEnumerator DelayShowPanels()
         {
             yield return new WaitForSeconds(0.2f);
-            Debug.Log("agx delay show");
+            //Debug.Log("agx delay show");
             EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
             //ActualPanelsMovement();
         }
@@ -1162,12 +1179,12 @@ namespace ActionGroupsExtended
 
         public void ActualPanelsMovement()
         {
-            Debug.Log("agx mobe pbls" + EditorLogic.fetch.editorScreen);
+            //Debug.Log("agx mobe pbls" + EditorLogic.fetch.editorScreen);
             
                 //Debug.Log("trying2 " + EditorLogic.fetch.editorScreen.ToString());
                 if(EditorLogic.fetch.editorScreen == EditorScreen.Parts)
                 {
-                    Debug.Log("AGX hit it");
+                    //Debug.Log("AGX hit it");
                     
                     EditorLogic.fetch.SelectPanelParts();
                     EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.partsEditor); //this works
@@ -1178,7 +1195,7 @@ namespace ActionGroupsExtended
                 }
                 else if (EditorLogic.fetch.editorScreen == EditorScreen.Crew)
                 {
-                    Debug.Log("AGX hit it2");
+                    //Debug.Log("AGX hit it2");
 
                     EditorLogic.fetch.SelectPanelCrew();
                     EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.crew); //this works
@@ -1189,12 +1206,12 @@ namespace ActionGroupsExtended
                 }
                 else if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
                 {
-                    Debug.Log("AGX hit it3");
+                    //Debug.Log("AGX hit it3");
 
                     EditorLogic.fetch.SelectPanelActions();
                     if (AGXShow)
                     {
-                        Debug.Log("AGX hit it3a");
+                        //Debug.Log("AGX hit it3a");
                         //EditorPanels.Instance.panelManager.Dismiss(); //this works
                         StartCoroutine("DelayHidePanels");
                         EditorLogic.fetch.Unlock("AGXLock");
@@ -1204,7 +1221,7 @@ namespace ActionGroupsExtended
                     }
                     else
                     {
-                        Debug.Log("AGX hit it3b" + EditorLogic.fetch.editorScreen);
+                       // Debug.Log("AGX hit it3b" + EditorLogic.fetch.editorScreen);
                         //EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
                         StartCoroutine("DelayShowPanels");
                         EditorLogic.fetch.Unlock("AGXLock");
@@ -1359,11 +1376,18 @@ namespace ActionGroupsExtended
             ba.actionGroup = ba.actionGroup | KSPActs[group];
         }
 
+        public static void ResetDisablePartAttaching(object source, ElapsedEventArgs e)
+        {
+            //Debug.Log("AGX Part attaching reset");
+            DisablePartAttachingReset.Stop();
+            disablePartAttaching = true;
+        }
+
         public static void ResetDetachedParts(object source, ElapsedEventArgs e)
         {
 
             //Debug.Log("AGX Detached parts start " + StaticData.CurrentVesselActions.Count());
-            disablePartAttaching = false;
+            //disablePartAttaching = false;
             DetachedPartReset.Stop();
             foreach (AGXAction agAct in DetachedPartActions)
             {
@@ -1381,6 +1405,7 @@ namespace ActionGroupsExtended
             }
             DetachedPartActions.Clear();
             EditorSaveToNode();
+            DisablePartAttachingReset.Start();
             //Debug.Log("AGX Detached parts end " + StaticData.CurrentVesselActions.Count());
         }
 
@@ -1475,6 +1500,7 @@ namespace ActionGroupsExtended
             //EditorSaveToFile(); //some of my data has already been deleted by this point
             GameEvents.onPartAttach.Remove(PartAttaching);
             GameEvents.onPartRemove.Remove(PartRemove);
+            GameEvents.onEditorPartEvent.Remove(OnPartEvent);
             //GameEvents.onEditorShipModified.Remove(VesselChanged);
             GameEvents.onEditorLoad.Remove(OnShipLoad);
             //GameEvents.onGameStateSave.Remove(OnSaveTest);
@@ -3787,7 +3813,7 @@ namespace ActionGroupsExtended
         public void Update()
         {
             string errLine = "1";
-
+            //Debug.Log("Agx detached state " + disablePartAttaching);
             try
             {
                 //Debug.Log("Agx panels current " + EditorPanels.Instance.panelManager.CurrentPanel.ToString());
@@ -4615,7 +4641,7 @@ namespace ActionGroupsExtended
             catch (Exception e)
             {
                 //silently fail, will hit this if no parts placed
-                Debug.Log("AGX temproary error on new loading thing " + errLine + " " + e);
+                //Debug.Log("AGX temproary error on new loading thing " + errLine + " " + e);
             }
         }
 
