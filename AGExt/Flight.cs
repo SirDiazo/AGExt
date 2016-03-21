@@ -1168,20 +1168,23 @@ namespace ActionGroupsExtended
             string directActionsToSave = SaveDirectActionState("");
             //uint thisMissionID = vsl.rootPart.missionID;
 
-            foreach (Part p in vsl.Parts)
+            if(vsl != null && !vsl.isEVA)
             {
+                foreach (Part p in vsl.Parts)
+                {
 
-                ModuleAGX pmAGX = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
-                
-                pmAGX.groupNames = SaveGroupNames(pmAGX); //check against currentMissionID done inside this method
-                pmAGX.focusFlightID = (int)currentMissionId;
-                if (p.missionID == currentMissionId)
-                { //only save this stuff if they are the current vessel
-                    pmAGX.groupVisibility = groupVisibilityToSave;
-                    pmAGX.groupVisibilityNames = groupVisibiltyNames;
-                    pmAGX.currentKeyset = CurrentKeySetFlight;
-                    pmAGX.DirectActionState = directActionsToSave; //this may be an issue if docked vessels dock with the same action group in different directaction states.
+                    ModuleAGX pmAGX = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
 
+                    pmAGX.groupNames = SaveGroupNames(pmAGX); //check against currentMissionID done inside this method
+                    pmAGX.focusFlightID = (int)currentMissionId;
+                    if (p.missionID == currentMissionId)
+                    { //only save this stuff if they are the current vessel
+                        pmAGX.groupVisibility = groupVisibilityToSave;
+                        pmAGX.groupVisibilityNames = groupVisibiltyNames;
+                        pmAGX.currentKeyset = CurrentKeySetFlight;
+                        pmAGX.DirectActionState = directActionsToSave; //this may be an issue if docked vessels dock with the same action group in different directaction states.
+
+                    }
                 }
             }
 
@@ -2972,6 +2975,28 @@ namespace ActionGroupsExtended
 
         }
 
+        public void WipeVesselData() //loading screwed up, reset everything
+        {
+            //Debug.Log("AGX Error loading, resetting data this vessel to defaults. If this vessel does have saved data that should load, please file a bug report.");
+            CurrentKeySetFlight = 1;
+            LoadCurrentKeyBindings();
+            CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
+            StaticData.CurrentVesselActions.Clear();
+            for(int i = 1;i<=250;i++)
+            {
+                IsGroupToggle[i] = false;
+                isDirectAction[i] = false;
+                AGXguiNames[i] = "";
+
+            }
+            ShowGroupInFlightNames[1] = "Group1";
+            ShowGroupInFlightNames[2] = "Group2";
+            ShowGroupInFlightNames[3] = "Group3";
+            ShowGroupInFlightNames[4] = "Group4";
+            ShowGroupInFlightNames[5] = "Group5";
+            RefreshCurrentActions();
+        }
+
         public void LoadVesselDataFromPM(ModuleAGX rootAGX)
         {
             CurrentKeySetFlight = rootAGX.currentKeyset;
@@ -4575,7 +4600,7 @@ namespace ActionGroupsExtended
         //    }
         //}
 
-        public static bool VesselIsControlled() //check if focus vessel is controllable, use lockmask as Squad sets that when a vessel isnt/.
+        public static bool  VesselIsControlled() //check if focus vessel is controllable, use lockmask as Squad sets that when a vessel isnt/.
         {
             if (InputLockManager.lockStack.ContainsKey("vessel_noControl_" + FlightGlobals.ActiveVessel.id.ToString()))
             {
@@ -4687,17 +4712,22 @@ namespace ActionGroupsExtended
                         //temporary code to load old AGExt#####.cfg files follows, this is hacky, get rid of it in a few versions
                         if (!rootAGX.hasData)
                         {
+                            errLine = "7h1";
                             try
                             {
                                 string[] existingGames = Directory.GetFiles(new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder); //full path of all files in save dir
                                 List<int> existingGamesNum = new List<int>(); //existing AGExt00000.cfg files, as number
+                                errLine = "7h2";
                                 //List<int> persistentGamesNum = new List<int>(); //number in the .sfs save files
                                 int dirLength = (new DirectoryInfo(KSPUtil.ApplicationRootPath).FullName + "saves/" + HighLogic.SaveFolder).Length; //character length of file path
+                                errLine = "7h3";
                                 foreach (string fileName in existingGames) //cycle through found files
                                 {
+                                    errLine = "7h4";
                                     //print("gamename " + fileName.Substring(dirLength + 1));
                                     if (fileName.Substring(dirLength + 1, 5) == "AGExt" && fileName.Trim().EndsWith(".cfg")) //is file an AGX file?
                                     {
+                                        errLine = "7h5";
                                         //print("gamenameb " + fileName.Substring(dirLength + 6,5));
                                         try //this will work if file fould is an AGX flight file
                                         {
@@ -4710,12 +4740,14 @@ namespace ActionGroupsExtended
                                         }
                                     }
                                 }
+                                errLine = "7h6";
                                 int maxSaveNum = existingGamesNum.Max();
                                 //Debug.Log("Trying to load " + KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
                                 ConfigNode AGExtFile = ConfigNode.Load(KSPUtil.ApplicationRootPath + "saves/" + HighLogic.SaveFolder + "/AGExt" + maxSaveNum.ToString() + ".cfg");
-
+                                errLine = "7h7";
                                 if (AGExtFile != null)
                                 {
+                                    errLine = "7h8";
                                     ConfigNode thisVesselOldData = AGExtFile.GetNode(FlightGlobals.ActiveVessel.rootPart.flightID.ToString());
                                     rootAGX.currentKeyset = Convert.ToInt32((string)thisVesselOldData.GetValue("currentKeyset"));
                                     rootAGX.groupNames = (string)thisVesselOldData.GetValue("groupNames");
@@ -4731,49 +4763,76 @@ namespace ActionGroupsExtended
                             }//close load old data try
                             catch
                             {
+                                Debug.Log("AGX Flight Update Catch1 " + errLine);
                                 //loading legacy data failed, silenty fail
                             }
                         }
-
+                        errLine = "7h9";
                         //check if vessels are docked which vessel is master
-                        
-                        if(rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
+                        //Debug.Log("AGX " + FlightGlobals.ActiveVessel.isEVA);
+                        //Debug.Log("AGX2 " + rootAGX.vessel.isEVA);
+                        errLine = "7h9a";
+                        if (FlightGlobals.ActiveVessel.isEVA)
                         {
-                            rootAGX.focusFlightID = (int)rootAGX.vessel.rootPart.missionID;
-                            currentMissionId = rootAGX.vessel.rootPart.missionID;
+                            errLine = "7h9b";
+                            currentMissionId = 1; //we are a kerbal (or somethings screwy), just set this to 1 so it never matches. 0 is default so that might match something
                         }
-                        else if(rootAGX.focusFlightID == rootAGX.part.missionID)
+                        else
                         {
-                            //do nothing, rootAGX is currently set to the root part's ModuleAGX
-                        }
-                        else //check other parts for their mission id and change to that ModuleAGX if it matchs
-                        {
-                            HashSet<uint> missionIDs = new HashSet<uint>();
-                            foreach(Part p in rootAGX.vessel.parts)
+                            if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
                             {
-                                missionIDs.Add(p.missionID);
+                                errLine = "7h10";
+                                rootAGX.focusFlightID = (int)rootAGX.vessel.rootPart.missionID;
+                                currentMissionId = rootAGX.vessel.rootPart.missionID;
                             }
-                            if(missionIDs.Contains((uint)rootAGX.focusFlightID))
+                            else if (rootAGX.focusFlightID == rootAGX.part.missionID)
                             {
-                                currentMissionId = (uint)rootAGX.focusFlightID;
-                                foreach(Part p in rootAGX.vessel.parts)
+                                errLine = "7h11";
+                                //do nothing, rootAGX is currently set to the root part's ModuleAGX
+                            }
+                            else //check other parts for their mission id and change to that ModuleAGX if it matchs
+                            {
+                                errLine = "7h12";
+                                HashSet<uint> missionIDs = new HashSet<uint>();
+                                errLine = "7h13";
+                                foreach (Part p in rootAGX.vessel.parts)
                                 {
-                                    if(p.missionID == currentMissionId)
+                                    errLine = "7h14";
+                                    missionIDs.Add(p.missionID);
+                                }
+                                errLine = "7h15";
+                                if (missionIDs.Contains((uint)rootAGX.focusFlightID))
+                                {
+                                    errLine = "7h16";
+                                    currentMissionId = (uint)rootAGX.focusFlightID;
+                                    foreach (Part p in rootAGX.vessel.parts)
                                     {
-                                        rootAGX = p.Modules.OfType<ModuleAGX>().First();
-                                        break; //stop the foreach, found what we needed
+                                        errLine = "7h17";
+                                        if (p.missionID == currentMissionId)
+                                        {
+                                            errLine = "7h18";
+                                            rootAGX = p.Modules.OfType<ModuleAGX>().First();
+                                            break; //stop the foreach, found what we needed
+                                        }
                                     }
                                 }
-                            }
-                            else //vessel does not conatain the missionID in rootAGX.focusFlightID for somereason, use root part
-                            {
-                                currentMissionId = rootAGX.part.missionID;
+                                else //vessel does not conatain the missionID in rootAGX.focusFlightID for somereason, use root part
+                                {
+                                    errLine = "7h19";
+                                    currentMissionId = rootAGX.part.missionID;
+                                }
                             }
                         }
 
                         errLine = "7i";
-
-                        LoadVesselDataFromPM(rootAGX);
+                        if (currentMissionId != 1) //if currentMissionID = 1, we are either a Kerbal on EVA, or loading has screwed up and rootAGX is not valid so don't load
+                        {
+                            LoadVesselDataFromPM(rootAGX);
+                        }
+                        else
+                        {
+                            WipeVesselData();
+                        }
                         AGXRoot = FlightGlobals.ActiveVessel.rootPart;
                         LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
                         SaveShipSpecificData(FlightGlobals.ActiveVessel);
