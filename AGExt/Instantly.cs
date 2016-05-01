@@ -6,14 +6,14 @@ using UnityEngine;
 
 namespace ActionGroupsExtended
 {
-    [KSPAddon(KSPAddon.Startup.Instantly, false)]
+    [KSPAddon(KSPAddon.Startup.MainMenu, false)]
     public class AGXMainMenu :PartModule
     {
 
         //abandoned module, no longer needed for key rebinding
         public void Start()
         {
-            print("AGExt Ver. 1.35b loaded");
+            print("AGExt Ver. 2.0 loaded");
 
             
         }
