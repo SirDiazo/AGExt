@@ -15,6 +15,7 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        public bool showMyUI = true;
         public static AGXFlight thisModule;
         private bool buttonCreated = false;
         private bool showDockedSubVesselIndicators = false;
@@ -175,6 +176,16 @@ namespace ActionGroupsExtended
         // private bool showGroupsIsKeySet = false;
         public static Dictionary<int, bool> groupActivatedState; //group activated state, this does NOT save, provided for kOS script usage
         private static uint currentMissionId;
+
+        public void onMyUIShow()
+        {
+            showMyUI = true;
+        }
+
+        public void onMyUIHide()
+        {
+            showMyUI = false;
+        }
 
         IEnumerator DockedSubVesselsIconTimer()
         {
@@ -668,6 +679,8 @@ namespace ActionGroupsExtended
                 print("AGX Flight Start FAIL " + errLine + " " + e);
                 print("AGX AGExt node dump: " + AGExtNode);
             }
+            GameEvents.onShowUI.Add(onMyUIShow);
+            GameEvents.onHideUI.Add(onMyUIHide);
         }
 
         IEnumerator AddButtons()
@@ -1157,6 +1170,8 @@ namespace ActionGroupsExtended
                 AGXLockSet = false;
             }
             StaticData.CurrentVesselActions.Clear();
+            GameEvents.onShowUI.Remove(onMyUIShow);
+            GameEvents.onHideUI.Remove(onMyUIHide);
 
         }
 
@@ -1240,7 +1255,7 @@ namespace ActionGroupsExtended
             }
 
 
-            if (ShowAGXMod)
+            if (ShowAGXMod && showMyUI)
             {
                 if (!showCareerCustomAGs)
                 {
@@ -1377,7 +1392,7 @@ namespace ActionGroupsExtended
                 }
             }
 
-            if (showAGXRightClickMenu)
+            if (showAGXRightClickMenu && showMyUI)
             {
                 Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
@@ -3059,8 +3074,8 @@ namespace ActionGroupsExtended
             foreach (Part p in rootAGX.vessel.Parts)
             {
                 errLine = "7o";
-                if (!p.Modules.Contains("KerbalEVA"))
-                {
+                //if (!p.Modules.Contains("KerbalEVA"))
+                //{
                     foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                     {
                         errLine = "7p";
@@ -3070,7 +3085,7 @@ namespace ActionGroupsExtended
                             StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
                         }
                     }
-                }
+                //}
             }
             errLine = "7r";
             
@@ -4704,10 +4719,21 @@ namespace ActionGroupsExtended
                         errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
                         ModuleAGX rootAGX = null;
-                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")) //kerbals have no actions so...
+                        Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
+                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")  || FlightGlobals.ActiveVessel.vesselType==VesselType.Flag) //kerbals have no actions so...
                         {
-                            rootAGX = new ModuleAGX();
-                            rootAGX.hasData = true;
+                            Debug.Log("AGX oddball");
+                            foreach(Part p in FlightGlobals.ActiveVessel.Parts)
+                            {
+                                if(!p.Modules.Contains("ModuleAGX"))
+                                {
+                                    Debug.Log("AGX AGXModule being added");
+                                    rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
+                                }
+                            }
+                            rootAGX = (ModuleAGX)FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"];
+                            //rootAGX = new ModuleAGX();
+                            //rootAGX.hasData = true;
                             //Debug.Log("AGX EvA");
 
                         }
@@ -4815,6 +4841,7 @@ namespace ActionGroupsExtended
                         //Debug.Log("AGX " + FlightGlobals.ActiveVessel.isEVA);
                         //Debug.Log("AGX2 " + rootAGX.vessel.isEVA);
                         errLine = "7h9a";
+                        
                         if (FlightGlobals.ActiveVessel.isEVA)
                         {
                             errLine = "7h9b";
@@ -4822,6 +4849,7 @@ namespace ActionGroupsExtended
                         }
                         else
                         {
+                            errLine = "7h9c";
                             if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
                             {
                                 errLine = "7h10";
