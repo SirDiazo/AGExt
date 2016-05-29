@@ -4401,26 +4401,27 @@ namespace ActionGroupsExtended
         }
         public Part SelectPartUnderMouse()
         {
-            FlightCamera CamTest = new FlightCamera();
-            CamTest = FlightCamera.fetch;
-            Ray ray = CamTest.mainCamera.ScreenPointToRay(Input.mousePosition);
-            LayerMask RayMask = new LayerMask();
-            RayMask = 1 << 0;
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, RayMask))
-            {
-                Part hitPart = (Part)UIPartActionController.GetComponentUpwards("Part", hit.collider.gameObject); //how to find small parts that are "inside" the large part they are attached to.
-                if (FlightGlobals.ActiveVessel.parts.Contains(hitPart))
-                {
-                    return hitPart;
-                }
-                else
-                {
-                    return null;
-                }
-                //return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
-            }
-            return null;
+            //FlightCamera CamTest = new FlightCamera();
+            //CamTest = FlightCamera.fetch;
+            //Ray ray = CamTest.mainCamera.ScreenPointToRay(Input.mousePosition);
+            //LayerMask RayMask = new LayerMask();
+            //RayMask = 1 << 0;
+            //RaycastHit hit;
+            //if (Physics.Raycast(ray, out hit, Mathf.Infinity, RayMask))
+            //{
+            //    Part hitPart = (Part)UIPartActionController.GetComponentUpwards("Part", hit.collider.gameObject); //how to find small parts that are "inside" the large part they are attached to.
+            //    if (FlightGlobals.ActiveVessel.parts.Contains(hitPart))
+            //    {
+            //        return hitPart;
+            //    }
+            //    else
+            //    {
+            //        return null;
+            //    }
+            //    //return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
+            //}
+            //return null;
+            return Mouse.HoveredPart;
         }
 
         public bool CheckMouseOver()
@@ -4719,15 +4720,15 @@ namespace ActionGroupsExtended
                         errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
                         ModuleAGX rootAGX = null;
-                        Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
+                        //Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
                         if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")  || FlightGlobals.ActiveVessel.vesselType==VesselType.Flag) //kerbals have no actions so...
                         {
-                            Debug.Log("AGX oddball");
+                            //Debug.Log("AGX oddball");
                             foreach(Part p in FlightGlobals.ActiveVessel.Parts)
                             {
                                 if(!p.Modules.Contains("ModuleAGX"))
                                 {
-                                    Debug.Log("AGX AGXModule being added");
+                                    //Debug.Log("AGX AGXModule being added");
                                     rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
                                 }
                             }
@@ -5820,50 +5821,50 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void PrintPartActs()
-        {
-            try
-            {
-                //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
-                foreach (Part p in FlightGlobals.ActiveVessel.parts)
-                {
-                    foreach (ModuleEnginesFX eng in p.Modules.OfType<ModuleEnginesFX>())
-                    {
-                        foreach (BaseAction ba in eng.Actions)
-                        {
-                            print(p.name + " " + ba.name + " " + ba.guiName);
-                        }
-                    }
-                    foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
-                    {
-                        print(p.name + " " + gim.gimbalLock);
-                    }
-                }
+        //public void PrintPartActs()
+        //{
+        //    try
+        //    {
+        //        //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
+        //        foreach (Part p in FlightGlobals.ActiveVessel.parts)
+        //        {
+        //            foreach (ModuleEnginesFX eng in p.Modules.OfType<ModuleEnginesFX>())
+        //            {
+        //                foreach (BaseAction ba in eng.Actions)
+        //                {
+        //                    print(p.name + " " + ba.name + " " + ba.guiName);
+        //                }
+        //            }
+        //            foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
+        //            {
+        //                print(p.name + " " + gim.gimbalLock);
+        //            }
+        //        }
 
 
-            }
-            catch
-            {
-                print("Print fail!");
-            }
-        }
+        //    }
+        //    catch
+        //    {
+        //        print("Print fail!");
+        //    }
+        //}
 
-        public void PrintPartPos()
-        {
-            print("begin update pos " + StaticData.CurrentVesselActions.Count);
-            try
-            {
-                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-                {
-                    print(p.name);
+        //public void PrintPartPos()
+        //{
+        //    print("begin update pos " + StaticData.CurrentVesselActions.Count);
+        //    try
+        //    {
+        //        foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+        //        {
+        //            print(p.name);
 
-                }
-            }
-            catch
-            {
-                print("Print fail on pos!");
-            }
-        }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        print("Print fail on pos!");
+        //    }
+        //}
 
         public void partDead(Part p)
         {

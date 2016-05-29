@@ -60,19 +60,19 @@ namespace ActionGroupsExtended
                 {
                     ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.settings");
                     nodeLoad = tempNode.GetNode("AGExtConfig");
-                    Debug.Log("AGX case 1 " + nodeLoad.ToString());
+                    //Debug.Log("AGX case 1 " + nodeLoad.ToString());
                 }
                 else if (System.IO.File.Exists(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg"))
                 {
                     ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
                     nodeLoad = tempNode.GetNode("AGExtConfig");
                     System.IO.File.Delete(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
-                    Debug.Log("AGX case 2 " + nodeLoad.ToString());
+                    //Debug.Log("AGX case 2 " + nodeLoad.ToString());
                 }
-                else
-                {
-                    Debug.Log("AGX case 3 " + nodeLoad.ToString());
-                }
+                //else
+                //{
+                //    //Debug.Log("AGX case 3 " + nodeLoad.ToString());
+                //}
                 
                 //nodeLoad = GameDatabase.Instance.GetConfigNode("Diazo/AGExt/AGExt/AGExtConfig");
                 //if (nodeLoad == null)
