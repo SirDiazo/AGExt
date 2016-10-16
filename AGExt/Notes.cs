@@ -15,3 +15,5 @@ using System.Text;
 //        public static Dictionary<int, KeyCode> AGXguiMod1Keys;
 //        public static Dictionary<int, KeyCode> AGXguiMod2Keys;
 //        public static Dictionary<int, KeyCode> AGXguiModBothKeys;
+
+// KSP 1.2 to do: implement toggle monitoring on new brakes

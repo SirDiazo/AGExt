@@ -234,7 +234,14 @@ namespace ActionGroupsExtended
 
         public void onLeftButtonClick()
         {
-            ShowAGXMod = !ShowAGXMod;
+            if (showCareerStockAGs)
+            {
+                ShowAGXMod = !ShowAGXMod;
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+            }
         }
 
         public void RefreshDefaultActionsListType()
@@ -4871,7 +4878,11 @@ namespace ActionGroupsExtended
                                 foreach (Part p in rootAGX.vessel.parts)
                                 {
                                     errLine = "7h14";
-                                    missionIDs.Add(p.missionID);
+                                    if (!p.Modules.Contains("KerbalEVA"))
+                                    {
+                                        errLine = "7h14a";
+                                        missionIDs.Add(p.missionID);
+                                    }
                                 }
                              //   Debug.Log("agx not root " + missionIDs.Count);
                                 errLine = "7h15";
@@ -7681,22 +7692,6 @@ namespace ActionGroupsExtended
                             }
                         }
 
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleWheelActions")
-                    {
-                        agAct.activated = true;
-                        foreach (ModuleWheel mWheel in agAct.ba.listParent.part.Modules.OfType<ModuleWheel>())
-                        {
-                            BaseAction whlBrakes = mWheel.Actions.Find(ba => ba.name == "BrakesAction");
-                            if ((whlBrakes.actionGroup & KSPActionGroup.Brakes) == KSPActionGroup.Brakes)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
                     }
                     if (agAct.ba.listParent.module.moduleName == "USI_ModuleAsteroidDrill")
                     {

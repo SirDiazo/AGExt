@@ -1079,7 +1079,8 @@ namespace ActionGroupsExtended
                         foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleEnviroSensor>())
                         {
                             ModuleEnviroSensor mesSensor = (ModuleEnviroSensor)pmSensor;
-                            if (mesSensor.sensorType == sensorType)
+                            if (mesSensor.sensorType.ToString() == sensorType) //.sensorType changed from String to Enum in KSP 1.2, did not change save code as this should never run per note above
+
                             {
                                 actsToCompare.AddRange(mesSensor.Actions);
                             }

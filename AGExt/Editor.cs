@@ -339,7 +339,7 @@ namespace ActionGroupsExtended
                     //print("b");
                     if ((string)AGExtNode.GetValue("OverrideCareer") == "1")
                     {
-                        //print("c");
+                        //print("AGX 0");
                         showCareerCustomAGs = true;
                         showCareerStockAGs = true;
                     }
@@ -362,19 +362,19 @@ namespace ActionGroupsExtended
 
                         if (GameVariables.Instance.UnlockedActionGroupsCustom(facilityLevel, inVAB)) 
                         {
-                            // print("g");
+                            //print("AGX 1");
                             showCareerStockAGs = true;
                             showCareerCustomAGs = true;
                         }
                         else if (GameVariables.Instance.UnlockedActionGroupsStock(facilityLevel, inVAB))
                         {
-                            //print("h");
+                            //print("AGX 2");
                             showCareerStockAGs = true;
                             showCareerCustomAGs = false;
                         }
                         else
                         {
-                            //print("i");
+                            //print("AGX 3");
                             showCareerStockAGs = false;
                             showCareerCustomAGs = false;
                         }
@@ -765,43 +765,49 @@ namespace ActionGroupsExtended
             //Debug.Log("AGX nods editor" + EditorLogic.fetch.editorScreen);
             try
             {
-                if (EditorLogic.fetch.editorScreen != EditorScreen.Actions)
+                if (showCareerStockAGs)
                 {
-                    if (EditorLogic.SortedShipList.Count > 0)
+                    if (EditorLogic.fetch.editorScreen != EditorScreen.Actions)
                     {
-                        EditorLogic.fetch.SelectPanelActions();
-                    }
-                    //Debug.Log("AGX no editor");
-                    //if (EditorLogic.SortedShipList.Count > 0 && showCareerStockAGs)
-                    //{
+                        if (EditorLogic.SortedShipList.Count > 0)
+                        {
+                            EditorLogic.fetch.SelectPanelActions();
+                        }
+                        //Debug.Log("AGX no editor");
+                        //if (EditorLogic.SortedShipList.Count > 0 && showCareerStockAGs)
+                        //{
 
-                    //    EditorLogic.fetch.SelectPanelActions();
-                    //    StartCoroutine("DelayPanelsMovement");
-                    //}
+                        //    EditorLogic.fetch.SelectPanelActions();
+                        //    StartCoroutine("DelayPanelsMovement");
+                        //}
 
-                }
-                else
-                {
-                    //Debug.Log("AGX iseditor");
-                    if (AGXShow)
-                    {
-                        //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
-                        AGXShow = false;
-                        AGExtNode.SetValue("EditShow", "0");
-                        //EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-                        //StartCoroutine("DelayPanelsMovement");
                     }
                     else
                     {
-                        // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
-                        AGXShow = true;
-                        AGExtNode.SetValue("EditShow", "1");
-                        //EditorPanels.Instance.panelManager.Dismiss();
-                        //StartCoroutine("DelayPanelsMovement");
+                        //Debug.Log("AGX iseditor");
+                        if (AGXShow)
+                        {
+                            //UIPanelList.First().Translate(new Vector3(500f, 0, 0), UIPanelList.First().parent.transform); //hide UI panel
+                            AGXShow = false;
+                            AGExtNode.SetValue("EditShow", "0");
+                            //EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+                            //StartCoroutine("DelayPanelsMovement");
+                        }
+                        else
+                        {
+                            // UIPanelList.First().Translate(new Vector3(-500f, 0, 0), UIPanelList.First().parent.transform); //show UI panel
+                            AGXShow = true;
+                            AGExtNode.SetValue("EditShow", "1");
+                            //EditorPanels.Instance.panelManager.Dismiss();
+                            //StartCoroutine("DelayPanelsMovement");
+                        }
+                        AGXStaticData.SaveBaseConfigNode(AGExtNode);
                     }
-                    AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 }
-
+                else
+                {
+                    ScreenMessages.PostScreenMessage("Action Groups Unavailable. Facility Upgrade Required.");
+                }
             }
             catch
             {
@@ -836,7 +842,12 @@ namespace ActionGroupsExtended
                 //     ErrLine = "5";
                 // }
                 ErrLine = "6";
-
+                //Debug.Log("AGX 1 " + host_target.host.name);
+                //Debug.Log("AGX 2 " + host_target.host.Modules.Count);
+                //foreach(PartModule pm in host_target.host.Modules)
+                //{
+                //    Debug.Log("AGX 3 " + pm.moduleName);
+                //}
                 ErrLine = "7";
                 ModuleAGX agxMod = host_target.host.Modules.OfType<ModuleAGX>().First();
                 ErrLine = "8";
@@ -1133,11 +1144,11 @@ namespace ActionGroupsExtended
 
         //}
 
-        public void OnActionButtonClick(IUIObject obj) //reset EditorPanel if needed, note AGX button on toolbar hooks this method as well
-        {
-            //Debug.Log("act button click");
-            StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnActionButtonClick(IUIObject obj) //reset EditorPanel if needed, note AGX button on toolbar hooks this method as well
+        //{
+        //    //Debug.Log("act button click");
+        //    StartCoroutine("DelayPanelsMovement");
+        //}
 
         public void ImmediatePanelsMovement()
         {
@@ -1250,11 +1261,11 @@ namespace ActionGroupsExtended
         }
 
 
-        public void OnPartButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            //Debug.Log("Part button click");
-            StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnPartButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    //Debug.Log("Part button click");
+        //    StartCoroutine("DelayPanelsMovement");
+        //}
         //public void OnPartButtonClick(IUIObject obj) //reset EditorPanel if needed
         //{
         //    if(agxWindowsShowing)
@@ -1268,57 +1279,57 @@ namespace ActionGroupsExtended
         //    EditorLogic.fetch.SetBackup();
         //}
 
-        public void OnCrewButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnCrewButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    StartCoroutine("DelayPanelsMovement");
+        //}
 
-        public void OnLoadClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
-            {
-                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-            }
-            //StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnLoadClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+        //    {
+        //        EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+        //    }
+        //    //StartCoroutine("DelayPanelsMovement");
+        //}
 
-        public void OnSaveButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            //save button actually doesn't affect the visible UI, do nothing
-        }
+        //public void OnSaveButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    //save button actually doesn't affect the visible UI, do nothing
+        //}
 
-        public void OnLaunchButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
-            {
-                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-            }
-            //StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnLaunchButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+        //    {
+        //        EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+        //    }
+        //    //StartCoroutine("DelayPanelsMovement");
+        //}
 
-        public void OnExitButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
-            {
-                EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-            }
-           // StartCoroutine("DelayPanelsMovement");
+        //public void OnExitButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    if (EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+        //    {
+        //        EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+        //    }
+        //   // StartCoroutine("DelayPanelsMovement");
 
-        }
+        //}
 
-        public void OnNewButtonClick(IUIObject obj) //reset EditorPanel if needed
-        {
-           if(EditorLogic.fetch.editorScreen == EditorScreen.Actions)
-           {
-               EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
-           }
-           //StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnNewButtonClick(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //   if(EditorLogic.fetch.editorScreen == EditorScreen.Actions)
+        //   {
+        //       EditorPanels.Instance.panelManager.BringIn(EditorPanels.Instance.actions);
+        //   }
+        //   //StartCoroutine("DelayPanelsMovement");
+        //}
 
-        public void OnActionPanelsUIChanged(IUIObject obj) //reset EditorPanel if needed
-        {
-            //StartCoroutine("DelayPanelsMovement");
-        }
+        //public void OnActionPanelsUIChanged(IUIObject obj) //reset EditorPanel if needed
+        //{
+        //    //StartCoroutine("DelayPanelsMovement");
+        //}
 
         //public void OnOtherButtonClick(IUIObject obj) //reset EditorPanel if needed
         //{
@@ -1500,24 +1511,36 @@ namespace ActionGroupsExtended
 
         public void OnDisable()
         {
-
+            string errLine = "1";
+            try
+            {
             LoadFinished = false;
+            errLine = "2";
             SaveCurrentKeyBindings();
+            errLine = "3";
             SaveWindowPositions();
+            errLine = "4";
             if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
             {
+                errLine = "5";
                 AGXBtn.Destroy();
             }
             else
             {
+                errLine = "6";
                 ApplicationLauncher.Instance.RemoveModApplication(AGXAppEditorButton);
             }
             //EditorSaveToFile(); //some of my data has already been deleted by this point
+            errLine = "7";
             GameEvents.onPartAttach.Remove(PartAttaching);
+            errLine = "8";
             GameEvents.onPartRemove.Remove(PartRemove);
+            errLine = "9";
             GameEvents.onEditorPartEvent.Remove(OnPartEvent);
+            errLine = "10";
             //GameEvents.onEditorShipModified.Remove(VesselChanged);
             GameEvents.onEditorLoad.Remove(OnShipLoad);
+            errLine = "11";
             //GameEvents.onGameStateSave.Remove(OnSaveTest);
             //GameEvents.onGameSceneLoadRequested.Remove(LeavingEditor);
             //GameEvents.onEditorLoad(OnEditorLoadCall);
@@ -1541,8 +1564,16 @@ namespace ActionGroupsExtended
             //EditorLogic.fetch.launchBtn.RemoveValueChangedDelegate(OnLaunchButtonClick);
             //EditorLogic.fetch.exitBtn.RemoveValueChangedDelegate(OnExitButtonClick);
             //EditorLogic.fetch.newBtn.RemoveValueChangedDelegate(OnNewButtonClick);
-            EditorLogic.fetch.Unlock("AGXLock");
+            //EditorLogic.fetch.Unlock("AGXLock");
+            InputLockManager.RemoveControlLock("AGXLock");
+            errLine = "12";
             StaticData.CurrentVesselActions.Clear();
+            errLine = "13";
+            }
+             catch(Exception e)
+            {
+                Debug.Log("AGX Editor.OnDestroy " + errLine + "|" + e);
+            }
 
         }
 
