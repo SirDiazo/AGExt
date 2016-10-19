@@ -47,6 +47,7 @@ namespace ActionGroupsExtended
         public static ConfigNode AGExtConfig;
         public static bool nodeLoaded = false;
         public static ConfigNode LoadBaseConfigNode()
+
         {
             if (nodeLoaded)
             {
@@ -54,12 +55,30 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ConfigNode nodeLoad = new ConfigNode("AGExtConfig");
-                nodeLoad = GameDatabase.Instance.GetConfigNode("Diazo/AGExt/AGExt/AGExtConfig");
-                if (nodeLoad == null)
+                ConfigNode nodeLoad =new ConfigNode("AGExtConfig");
+                if(System.IO.File.Exists(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.settings"))
                 {
-                    nodeLoad = new ConfigNode("AGExtConfig");
+                    ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.settings");
+                    nodeLoad = tempNode.GetNode("AGExtConfig");
+                    //Debug.Log("AGX case 1 " + nodeLoad.ToString());
                 }
+                else if (System.IO.File.Exists(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg"))
+                {
+                    ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
+                    nodeLoad = tempNode.GetNode("AGExtConfig");
+                    System.IO.File.Delete(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
+                    //Debug.Log("AGX case 2 " + nodeLoad.ToString());
+                }
+                //else
+                //{
+                //    //Debug.Log("AGX case 3 " + nodeLoad.ToString());
+                //}
+                
+                //nodeLoad = GameDatabase.Instance.GetConfigNode("Diazo/AGExt/AGExt/AGExtConfig");
+                //if (nodeLoad == null)
+                //{
+                //    nodeLoad = new ConfigNode("AGExtConfig");
+                //}
                 if (!nodeLoad.HasValue("name"))
                 {
                     nodeLoad.AddValue("name", "AGExtConfig");
@@ -327,7 +346,7 @@ namespace ActionGroupsExtended
         {
             ConfigNode toSave = new ConfigNode("AGExtConfig");
             toSave.AddNode(cNode);
-            toSave.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
+            toSave.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.settings");
 
         }
     }
@@ -1060,7 +1079,8 @@ namespace ActionGroupsExtended
                         foreach (PartModule pmSensor in actPart.Modules.OfType<ModuleEnviroSensor>())
                         {
                             ModuleEnviroSensor mesSensor = (ModuleEnviroSensor)pmSensor;
-                            if (mesSensor.sensorType == sensorType)
+                            if (mesSensor.sensorType.ToString() == sensorType) //.sensorType changed from String to Enum in KSP 1.2, did not change save code as this should never run per note above
+
                             {
                                 actsToCompare.AddRange(mesSensor.Actions);
                             }

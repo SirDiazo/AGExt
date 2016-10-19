@@ -15,6 +15,7 @@ namespace ActionGroupsExtended
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class AGXFlight : PartModule
     {
+        public bool showMyUI = true;
         public static AGXFlight thisModule;
         private bool buttonCreated = false;
         private bool showDockedSubVesselIndicators = false;
@@ -176,6 +177,16 @@ namespace ActionGroupsExtended
         public static Dictionary<int, bool> groupActivatedState; //group activated state, this does NOT save, provided for kOS script usage
         private static uint currentMissionId;
 
+        public void onMyUIShow()
+        {
+            showMyUI = true;
+        }
+
+        public void onMyUIHide()
+        {
+            showMyUI = false;
+        }
+
         IEnumerator DockedSubVesselsIconTimer()
         {
             for(int i =1;i<30;i++)
@@ -223,7 +234,14 @@ namespace ActionGroupsExtended
 
         public void onLeftButtonClick()
         {
-            ShowAGXMod = !ShowAGXMod;
+            if (showCareerStockAGs)
+            {
+                ShowAGXMod = !ShowAGXMod;
+            }
+            else
+            {
+                ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+            }
         }
 
         public void RefreshDefaultActionsListType()
@@ -668,6 +686,8 @@ namespace ActionGroupsExtended
                 print("AGX Flight Start FAIL " + errLine + " " + e);
                 print("AGX AGExt node dump: " + AGExtNode);
             }
+            GameEvents.onShowUI.Add(onMyUIShow);
+            GameEvents.onHideUI.Add(onMyUIHide);
         }
 
         IEnumerator AddButtons()
@@ -1157,6 +1177,8 @@ namespace ActionGroupsExtended
                 AGXLockSet = false;
             }
             StaticData.CurrentVesselActions.Clear();
+            GameEvents.onShowUI.Remove(onMyUIShow);
+            GameEvents.onHideUI.Remove(onMyUIHide);
 
         }
 
@@ -1240,7 +1262,7 @@ namespace ActionGroupsExtended
             }
 
 
-            if (ShowAGXMod)
+            if (ShowAGXMod && showMyUI)
             {
                 if (!showCareerCustomAGs)
                 {
@@ -1377,7 +1399,7 @@ namespace ActionGroupsExtended
                 }
             }
 
-            if (showAGXRightClickMenu)
+            if (showAGXRightClickMenu && showMyUI)
             {
                 Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
@@ -3059,8 +3081,8 @@ namespace ActionGroupsExtended
             foreach (Part p in rootAGX.vessel.Parts)
             {
                 errLine = "7o";
-                if (!p.Modules.Contains("KerbalEVA"))
-                {
+                //if (!p.Modules.Contains("KerbalEVA"))
+                //{
                     foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                     {
                         errLine = "7p";
@@ -3070,7 +3092,7 @@ namespace ActionGroupsExtended
                             StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
                         }
                     }
-                }
+                //}
             }
             errLine = "7r";
             
@@ -4386,26 +4408,27 @@ namespace ActionGroupsExtended
         }
         public Part SelectPartUnderMouse()
         {
-            FlightCamera CamTest = new FlightCamera();
-            CamTest = FlightCamera.fetch;
-            Ray ray = CamTest.mainCamera.ScreenPointToRay(Input.mousePosition);
-            LayerMask RayMask = new LayerMask();
-            RayMask = 1 << 0;
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, RayMask))
-            {
-                Part hitPart = (Part)UIPartActionController.GetComponentUpwards("Part", hit.collider.gameObject); //how to find small parts that are "inside" the large part they are attached to.
-                if (FlightGlobals.ActiveVessel.parts.Contains(hitPart))
-                {
-                    return hitPart;
-                }
-                else
-                {
-                    return null;
-                }
-                //return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
-            }
-            return null;
+            //FlightCamera CamTest = new FlightCamera();
+            //CamTest = FlightCamera.fetch;
+            //Ray ray = CamTest.mainCamera.ScreenPointToRay(Input.mousePosition);
+            //LayerMask RayMask = new LayerMask();
+            //RayMask = 1 << 0;
+            //RaycastHit hit;
+            //if (Physics.Raycast(ray, out hit, Mathf.Infinity, RayMask))
+            //{
+            //    Part hitPart = (Part)UIPartActionController.GetComponentUpwards("Part", hit.collider.gameObject); //how to find small parts that are "inside" the large part they are attached to.
+            //    if (FlightGlobals.ActiveVessel.parts.Contains(hitPart))
+            //    {
+            //        return hitPart;
+            //    }
+            //    else
+            //    {
+            //        return null;
+            //    }
+            //    //return FlightGlobals.ActiveVessel.Parts.Find(p => p.gameObject == hit.transform.gameObject);
+            //}
+            //return null;
+            return Mouse.HoveredPart;
         }
 
         public bool CheckMouseOver()
@@ -4704,10 +4727,21 @@ namespace ActionGroupsExtended
                         errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
                         ModuleAGX rootAGX = null;
-                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")) //kerbals have no actions so...
+                        //Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
+                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA")  || FlightGlobals.ActiveVessel.vesselType==VesselType.Flag) //kerbals have no actions so...
                         {
-                            rootAGX = new ModuleAGX();
-                            rootAGX.hasData = true;
+                            //Debug.Log("AGX oddball");
+                            foreach(Part p in FlightGlobals.ActiveVessel.Parts)
+                            {
+                                if(!p.Modules.Contains("ModuleAGX"))
+                                {
+                                    //Debug.Log("AGX AGXModule being added");
+                                    rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
+                                }
+                            }
+                            rootAGX = (ModuleAGX)FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"];
+                            //rootAGX = new ModuleAGX();
+                            //rootAGX.hasData = true;
                             //Debug.Log("AGX EvA");
 
                         }
@@ -4815,6 +4849,7 @@ namespace ActionGroupsExtended
                         //Debug.Log("AGX " + FlightGlobals.ActiveVessel.isEVA);
                         //Debug.Log("AGX2 " + rootAGX.vessel.isEVA);
                         errLine = "7h9a";
+                        
                         if (FlightGlobals.ActiveVessel.isEVA)
                         {
                             errLine = "7h9b";
@@ -4822,6 +4857,7 @@ namespace ActionGroupsExtended
                         }
                         else
                         {
+                            errLine = "7h9c";
                             if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
                             {
                                 errLine = "7h10";
@@ -4842,7 +4878,11 @@ namespace ActionGroupsExtended
                                 foreach (Part p in rootAGX.vessel.parts)
                                 {
                                     errLine = "7h14";
-                                    missionIDs.Add(p.missionID);
+                                    if (!p.Modules.Contains("KerbalEVA"))
+                                    {
+                                        errLine = "7h14a";
+                                        missionIDs.Add(p.missionID);
+                                    }
                                 }
                              //   Debug.Log("agx not root " + missionIDs.Count);
                                 errLine = "7h15";
@@ -5792,50 +5832,50 @@ namespace ActionGroupsExtended
             }
         }
 
-        public void PrintPartActs()
-        {
-            try
-            {
-                //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
-                foreach (Part p in FlightGlobals.ActiveVessel.parts)
-                {
-                    foreach (ModuleEnginesFX eng in p.Modules.OfType<ModuleEnginesFX>())
-                    {
-                        foreach (BaseAction ba in eng.Actions)
-                        {
-                            print(p.name + " " + ba.name + " " + ba.guiName);
-                        }
-                    }
-                    foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
-                    {
-                        print(p.name + " " + gim.gimbalLock);
-                    }
-                }
+        //public void PrintPartActs()
+        //{
+        //    try
+        //    {
+        //        //print("crew " + FlightGlobals.ActiveVessel.GetVesselCrew().Count);
+        //        foreach (Part p in FlightGlobals.ActiveVessel.parts)
+        //        {
+        //            foreach (ModuleEnginesFX eng in p.Modules.OfType<ModuleEnginesFX>())
+        //            {
+        //                foreach (BaseAction ba in eng.Actions)
+        //                {
+        //                    print(p.name + " " + ba.name + " " + ba.guiName);
+        //                }
+        //            }
+        //            foreach (ModuleGimbal gim in p.Modules.OfType<ModuleGimbal>())
+        //            {
+        //                print(p.name + " " + gim.gimbalLock);
+        //            }
+        //        }
 
 
-            }
-            catch
-            {
-                print("Print fail!");
-            }
-        }
+        //    }
+        //    catch
+        //    {
+        //        print("Print fail!");
+        //    }
+        //}
 
-        public void PrintPartPos()
-        {
-            print("begin update pos " + StaticData.CurrentVesselActions.Count);
-            try
-            {
-                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-                {
-                    print(p.name);
+        //public void PrintPartPos()
+        //{
+        //    print("begin update pos " + StaticData.CurrentVesselActions.Count);
+        //    try
+        //    {
+        //        foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+        //        {
+        //            print(p.name);
 
-                }
-            }
-            catch
-            {
-                print("Print fail on pos!");
-            }
-        }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        print("Print fail on pos!");
+        //    }
+        //}
 
         public void partDead(Part p)
         {
@@ -7652,22 +7692,6 @@ namespace ActionGroupsExtended
                             }
                         }
 
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleWheelActions")
-                    {
-                        agAct.activated = true;
-                        foreach (ModuleWheel mWheel in agAct.ba.listParent.part.Modules.OfType<ModuleWheel>())
-                        {
-                            BaseAction whlBrakes = mWheel.Actions.Find(ba => ba.name == "BrakesAction");
-                            if ((whlBrakes.actionGroup & KSPActionGroup.Brakes) == KSPActionGroup.Brakes)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
                     }
                     if (agAct.ba.listParent.module.moduleName == "USI_ModuleAsteroidDrill")
                     {
