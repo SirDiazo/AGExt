@@ -3418,7 +3418,7 @@ namespace ActionGroupsExtended
 
                     Color TxtClr = GUI.contentColor;
                     GUI.contentColor = Color.green;
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 80, 22), "Toggle:Yes", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:Yes", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = false;
@@ -3427,7 +3427,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 80, 22), "Toggle:No", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:No", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = true;
@@ -3439,7 +3439,7 @@ namespace ActionGroupsExtended
                     Color btnClr = AGXBtnStyle.normal.textColor;
                     AGXBtnStyle.normal.textColor = Color.red;
                     AGXBtnStyle.hover.textColor = Color.red;
-                    if (GUI.Button(new Rect(SelPartsLeft + 315, 160, 55, 22), "Hold", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Hold", AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = false;
                     }
@@ -3448,7 +3448,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 315, 160, 55, 22), "Tap", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Tap", AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = true;
                     }
@@ -6692,7 +6692,7 @@ namespace ActionGroupsExtended
 
                     if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
                     {
-                        if ((string)agAct.ba.listParent.module.Fields.GetValue("stateString") == "EXTENDED")
+                        if (agAct.ba.listParent.module.Fields.GetValue("deployState").ToString() == "EXTENDED")
                         {
                             agAct.activated = true;
                         }
