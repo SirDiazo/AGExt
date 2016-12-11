@@ -599,31 +599,44 @@ namespace ActionGroupsExtended
                 //ScreenMessages.PostScreenMessage("AGX cannot activate actions on unloaded vessels.", 10F, ScreenMessageStyle.UPPER_CENTER);
                 return;
             }
-            ConfigNode nodeLoad = new ConfigNode();
+            //ConfigNode nodeLoad = new ConfigNode();
 
-            if (AGXFlight.AGXFlightNode != null)
+            //if (AGXFlight.AGXFlightNode != null)
+            //{
+            //    if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
+            //    {
+            //        nodeLoad = AGXFlight.AGXFlightNode.GetNode(flightID.ToString());
+            //        guiNames = LoadGuiNames(nodeLoad.GetValue("groupNames"));
+            //        ConfigNode[] partNodes = nodeLoad.GetNodes("PART");
+            //        foreach (ConfigNode prtNode in partNodes)
+            //        {
+            //            Part thisPrt = thisVsl.Parts.Find(p => p.flightID == Convert.ToUInt32(prtNode.GetValue("flightID")));
+            //            ConfigNode[] actionNodes = prtNode.GetNodes("ACTION");
+            //            foreach (ConfigNode aNode in actionNodes)
+            //            {
+            //                AGXAction newAct = StaticData.LoadAGXActionVer2(aNode, thisPrt, false);
+            //                if (newAct != null)
+            //                {
+            //                    actionsList.Add(newAct);
+            //                }
+            //            }
+            //        }
+            //    }
+
+            foreach(Part p in thisVsl.Parts)
             {
-                if (AGXFlight.AGXFlightNode.HasNode(flightID.ToString()))
-                {
-                    nodeLoad = AGXFlight.AGXFlightNode.GetNode(flightID.ToString());
-                    guiNames = LoadGuiNames(nodeLoad.GetValue("groupNames"));
-                    ConfigNode[] partNodes = nodeLoad.GetNodes("PART");
-                    foreach (ConfigNode prtNode in partNodes)
-                    {
-                        Part thisPrt = thisVsl.Parts.Find(p => p.flightID == Convert.ToUInt32(prtNode.GetValue("flightID")));
-                        ConfigNode[] actionNodes = prtNode.GetNodes("ACTION");
-                        foreach (ConfigNode aNode in actionNodes)
-                        {
-                            AGXAction newAct = StaticData.LoadAGXActionVer2(aNode, thisPrt, false);
-                            if (newAct != null)
-                            {
-                                actionsList.Add(newAct);
-                            }
-                        }
-                    }
-                }
-                vesselInstanceOK = true;
+                ModuleAGX AGXpm = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
+                actionsList.AddRange(AGXpm.agxActionsThisPart);
             }
+            foreach(AGXAction AGXact in actionsList)
+            {
+                if (!guiNames.ContainsKey(AGXact.group))
+                {
+                    guiNames.Add(AGXact.group, AGXact.grpName);
+                }
+            }
+                vesselInstanceOK = true;
+            //}
         }
 
         private Dictionary<int, string> LoadGuiNames(string loadNames)

@@ -762,7 +762,7 @@ namespace ActionGroupsExtended
 
         public void onLeftButtonClick()
         {
-            //Debug.Log("AGX nods editor" + EditorLogic.fetch.editorScreen);
+            //Debug.Log("Agx btn click " + Time.realtimeSinceStartup);
             try
             {
                 if (showCareerStockAGs)
@@ -818,15 +818,133 @@ namespace ActionGroupsExtended
 
         public void OnPartEvent(ConstructionEventType cType, Part p)
         {
-            if(cType == ConstructionEventType.PartDeleted)
+            //Debug.Log("AGX Part event fire!");
+            if (cType == ConstructionEventType.PartAttached || cType == ConstructionEventType.PartCreated)
+            {
+                StartCoroutine(CheckStockCustomActions(p)); //check stock actions on delay
+            }
+            if (cType == ConstructionEventType.PartDeleted) //stop timer if part is deleted to prevent nullrefs
             {
                 DisablePartAttachingReset.Start();
             }
         }
 
+        IEnumerator CheckStockCustomActions(Part p) //check a part for custom actions to add to AGX (support for Default Action Groups Mod requies the delay)
+        {
+           // Debug.Log("AGX stock check start");
+            //int i = 0;
+            //while(i < 10) //delay check by 10 update frames
+            //{
+            //    i = i + 1;
+            //    yield return null;
+            //}
+            yield return new WaitForSeconds(0.1f); 
+            foreach(PartModule pm in p.Modules) 
+            {
+                foreach(BaseAction ba2 in pm.Actions) 
+                {
+                    if (!(ba2.actionGroup == KSPActionGroup.None))//will cause false positives on actions with Default Groups assigned, but still worth it
+                    {
+                        if ((ba2.actionGroup & KSPActionGroup.Custom01) == KSPActionGroup.Custom01)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 1, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                            //do NOT break; this, action could be in multiple action groups (although unlikely)
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom02) == KSPActionGroup.Custom02)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 2, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom03) == KSPActionGroup.Custom03)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 3, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom04) == KSPActionGroup.Custom04)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 4, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom05) == KSPActionGroup.Custom05)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 5, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom06) == KSPActionGroup.Custom06)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 6, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom07) == KSPActionGroup.Custom07)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 7, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom08) == KSPActionGroup.Custom08)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 8, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom09) == KSPActionGroup.Custom09)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 9, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                        if ((ba2.actionGroup & KSPActionGroup.Custom10) == KSPActionGroup.Custom10)
+                        {
+                            AGXAction ToAdd = new AGXAction();
+                            ToAdd = new AGXAction() { prt = ba2.listParent.part, ba = ba2, group = 10, activated = false };
+                            if (!StaticData.CurrentVesselActions.Contains(ToAdd)) //add action to main list
+                            {
+                                StaticData.CurrentVesselActions.Add(ToAdd);
+                            }
+                        }
+                    }
+                }
+            }
+           // Debug.Log("AGX stock check end");
+        }
+
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
-            //Debug.Log("Part attache fire!"); //+ StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
+            //Debug.Log("AGX Part attache fire!"); //+ StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
             string ErrLine = "1";
             try
             {
@@ -1415,6 +1533,7 @@ namespace ActionGroupsExtended
             //Debug.Log("AGX Detached parts start " + StaticData.CurrentVesselActions.Count());
             //disablePartAttaching = false;
             DetachedPartReset.Stop();
+            //check stock custim actions here
             foreach (AGXAction agAct in DetachedPartActions)
             {
                 //Debug.Log("AGX DetachedPartActions " + DetachedPartActions.Count());
@@ -2912,7 +3031,7 @@ namespace ActionGroupsExtended
 
                     Color TxtClr = GUI.contentColor;
                     GUI.contentColor = Color.green;
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 155, 80, 22), "Toggle:Yes", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 230, 160, 90, 22), "StateVis:Yes", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = false;
@@ -2921,7 +3040,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 155, 80, 22), "Toggle:No", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 230, 160, 90, 22), "StateVis:No", AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = true;
@@ -2933,7 +3052,7 @@ namespace ActionGroupsExtended
                     Color btnClr = AGXBtnStyle.normal.textColor;
                     AGXBtnStyle.normal.textColor = Color.red;
                     AGXBtnStyle.hover.textColor = Color.red;
-                    if (GUI.Button(new Rect(SelPartsLeft + 315, 155, 55, 22), "Hold", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Hold", AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = false;
                     }
@@ -2942,7 +3061,7 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 315, 155, 55, 22), "Tap", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Tap", AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = true;
                     }
@@ -3876,7 +3995,7 @@ namespace ActionGroupsExtended
         public void Update()
         {
             string errLine = "1";
-            //Debug.Log("Agx detached state " + disablePartAttaching);
+            //Debug.Log("Agx update start " +Time.realtimeSinceStartup);
             try
             {
                 //Debug.Log("Agx panels current " + EditorPanels.Instance.panelManager.CurrentPanel.ToString());
@@ -3966,7 +4085,7 @@ namespace ActionGroupsExtended
 
                 if (ShowSelectedWin)
                 {
-
+                   // Debug.Log("Agx time start " + "|" + Time.realtimeSinceStartup);
                     errLine = "13";
 
                     if (EditorActionGroups.Instance.GetSelectedParts() != null) //on first run, list is null
@@ -4051,6 +4170,7 @@ namespace ActionGroupsExtended
                 //Debug.Log("AGX Editor Update end" + StaticData.CurrentVesselActions.Count());
                 // print("test " + FindObjectsOfType<EditorSubassemblyItem>().Count());
                 errLine = "30";
+                //Debug.Log("Agx update end " + Time.realtimeSinceStartup);
             }
             catch (Exception e)
             {
@@ -5276,6 +5396,7 @@ namespace ActionGroupsExtended
                             errLine = "17d";
                             thisPM.agxActionsThisPart.Clear();
                             thisPM.agxActionsThisPart.AddRange(StaticData.CurrentVesselActions.FindAll(p2 => p2.prt == p));
+                            thisPM.currentKeyset = CurrentKeySet;
                             errLine = "18";
                             //if (thisPartsActions.Count > 0)
                             //{
