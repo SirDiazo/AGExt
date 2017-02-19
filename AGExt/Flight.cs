@@ -90,7 +90,19 @@ namespace ActionGroupsExtended
         private string RTGroup = "1";
         private static bool RTWinShow = false;
 
-
+        public static readonly Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>
+                    {
+                        {1, KSPActionGroup.Custom01},
+                        {2, KSPActionGroup.Custom02},
+                        {3, KSPActionGroup.Custom03},
+                        {4, KSPActionGroup.Custom04},
+                        {5, KSPActionGroup.Custom05},
+                        {6, KSPActionGroup.Custom06},
+                        {7, KSPActionGroup.Custom07},
+                        {8, KSPActionGroup.Custom08},
+                        {9, KSPActionGroup.Custom09},
+                        {10, KSPActionGroup.Custom10}
+                    };
 
 
         public static Rect GroupsWin;
@@ -1584,18 +1596,6 @@ namespace ActionGroupsExtended
         public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
             //Debug.Log("activating group " + group);
-            Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-            CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-            CustomActions.Add(2, KSPActionGroup.Custom02);
-            CustomActions.Add(3, KSPActionGroup.Custom03);
-            CustomActions.Add(4, KSPActionGroup.Custom04);
-            CustomActions.Add(5, KSPActionGroup.Custom05);
-            CustomActions.Add(6, KSPActionGroup.Custom06);
-            CustomActions.Add(7, KSPActionGroup.Custom07);
-            CustomActions.Add(8, KSPActionGroup.Custom08);
-            CustomActions.Add(9, KSPActionGroup.Custom09);
-            CustomActions.Add(10, KSPActionGroup.Custom10);
-
             foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == group))
             {
                 //print("ActactA" + forceDir + " " + agAct.ba.name);
@@ -4393,17 +4393,7 @@ namespace ActionGroupsExtended
         public void LoadDefaultActionGroups()
         {
 
-            List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
-            CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
-            CustomActions.Add(KSPActionGroup.Custom02);
-            CustomActions.Add(KSPActionGroup.Custom03);
-            CustomActions.Add(KSPActionGroup.Custom04);
-            CustomActions.Add(KSPActionGroup.Custom05);
-            CustomActions.Add(KSPActionGroup.Custom06);
-            CustomActions.Add(KSPActionGroup.Custom07);
-            CustomActions.Add(KSPActionGroup.Custom08);
-            CustomActions.Add(KSPActionGroup.Custom09);
-            CustomActions.Add(KSPActionGroup.Custom10);
+            List<KSPActionGroup> CustomActions = AGXFlight.CustomActions.Values.ToList();
 
             foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             {
@@ -4819,17 +4809,6 @@ namespace ActionGroupsExtended
                                 {
                                     if (kcPair2.Key <= 10)
                                     {
-                                        Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                                        CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                                        CustomActions.Add(2, KSPActionGroup.Custom02);
-                                        CustomActions.Add(3, KSPActionGroup.Custom03);
-                                        CustomActions.Add(4, KSPActionGroup.Custom04);
-                                        CustomActions.Add(5, KSPActionGroup.Custom05);
-                                        CustomActions.Add(6, KSPActionGroup.Custom06);
-                                        CustomActions.Add(7, KSPActionGroup.Custom07);
-                                        CustomActions.Add(8, KSPActionGroup.Custom08);
-                                        CustomActions.Add(9, KSPActionGroup.Custom09);
-                                        CustomActions.Add(10, KSPActionGroup.Custom10);
                                         FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
                                         groupActivatedState[kcPair2.Key] = FlightGlobals.ActiveVessel.ActionGroups[CustomActions[kcPair2.Key]];
                                     }
@@ -6495,17 +6474,7 @@ namespace ActionGroupsExtended
                     errLine = "10";
                     if (actState.group <= 10)
                     {
-                        //Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                        //CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                        //CustomActions.Add(2, KSPActionGroup.Custom02);
-                        //CustomActions.Add(3, KSPActionGroup.Custom03);
-                        //CustomActions.Add(4, KSPActionGroup.Custom04);
-                        //CustomActions.Add(5, KSPActionGroup.Custom05);
-                        //CustomActions.Add(6, KSPActionGroup.Custom06);
-                        //CustomActions.Add(7, KSPActionGroup.Custom07);
-                        //CustomActions.Add(8, KSPActionGroup.Custom08);
-                        //CustomActions.Add(9, KSPActionGroup.Custom09);
-                        //CustomActions.Add(10, KSPActionGroup.Custom10);
+                        
                         if (actState.actionOn && !actState.actionOff)
                         {
                             FlightGlobals.ActiveVessel.ActionGroups.groups[actState.group + 6] = true;
@@ -6661,27 +6630,13 @@ namespace ActionGroupsExtended
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
         {
-
-
             //string errLine = "1";
 
             //start toggle checking
-
             foreach (AGXAction agAct in actsListToCheck)
             {
                 try
                 {
-                    Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                    CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                    CustomActions.Add(2, KSPActionGroup.Custom02);
-                    CustomActions.Add(3, KSPActionGroup.Custom03);
-                    CustomActions.Add(4, KSPActionGroup.Custom04);
-                    CustomActions.Add(5, KSPActionGroup.Custom05);
-                    CustomActions.Add(6, KSPActionGroup.Custom06);
-                    CustomActions.Add(7, KSPActionGroup.Custom07);
-                    CustomActions.Add(8, KSPActionGroup.Custom08);
-                    CustomActions.Add(9, KSPActionGroup.Custom09);
-                    CustomActions.Add(10, KSPActionGroup.Custom10);
                     if (agAct.group <= 10 && agAct.ba.listParent.part.vessel == FlightGlobals.ActiveVessel)
                     {
                         agAct.activated = agAct.ba.listParent.part.vessel.ActionGroups[CustomActions[agAct.group]];
@@ -6696,563 +6651,6 @@ namespace ActionGroupsExtended
                 //errLine = "2";
                 try
                 {
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
-                    {
-                        if (agAct.ba.listParent.module.Fields.GetValue("deployState").ToString() == "EXTENDED")
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLandingLeg") //all acts
-                    {
-                        if (agAct.ba.name == "OnAction" || agAct.ba.name == "RaiseAction" || agAct.ba.name == "LowerAction")
-                        {
-                            if ((int)agAct.ba.listParent.module.Fields.GetValue("savedLegState") == 3)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleSuspensionLockAction") //only act
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("suspensionLocked") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEngines") //all acts not needed, checks bool directly
-                    {
-                        ModuleEngines agEng = (ModuleEngines)agAct.ba.listParent.module;
-                        agAct.activated = agEng.getIgnitionState;
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEnginesFX")//all acts not needed, checks bool directly
-                    {
-                        ModuleEnginesFX agEng = (ModuleEnginesFX)agAct.ba.listParent.module;
-                        agAct.activated = agEng.getIgnitionState;
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEnviroSensor")
-                    {
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("sensorActive") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGenerator")
-                    {
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("generatorIsActive") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGimbal") //other acts not needed, bool check
-                    {
-
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("gimbalLock") == false)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGimbalActions") //other acts not needed, bool check
-                    {
-                        agAct.activated = true;
-                        foreach (ModuleGimbal pm in agAct.ba.listParent.part.Modules.OfType<ModuleGimbal>())
-                        {
-                            if (pm.gimbalLock == true)
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleDockingNodeActions" || agAct.ba.listParent.module.moduleName == "ModuleCommandActions" && agAct.ba.name == "ControlFromHere") //other acts not needed, bool check
-                    {
-                        agAct.activated = false;
-                        if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
-                        {
-                            agAct.activated = true;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLandingGear") //all acts
-                    {
-                        if (agAct.ba.name == "OnAction")
-                        {
-                            //print((string)agAct.ba.listParent.module.Fields.GetValue("gearState") + " gear test");
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("storedGearState") == "DEPLOYED")
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleSteering") //all acts
-                    {
-                        if (agAct.ba.name == "InvertSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLight") //all acts
-                    {
-                        if (agAct.ba.name == "ToggleLightAction" || agAct.ba.name == "LightOnAction" || agAct.ba.name == "LightOffAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isOn") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleRCS") //all ats
-                    {
-
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            ModuleRCS rcsMdl = (ModuleRCS)agAct.ba.listParent.module;
-                            if (rcsMdl.rcsEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleReactionWheel") //all acts
-                    {
-                        //print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
-                        if (agAct.ba.name == "Toggle" || agAct.ba.name == "Activate" || agAct.ba.name == "Deactivate")
-                        {
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("stateString") == "Disabled")
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment")
-                    {
-                        if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Deployed") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleResourceIntake")
-                    {
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("intakeEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleWheel")
-                    {
-                        if (agAct.ba.name == "InvertSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "ToggleMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleAnimateGeneric")
-                    {
-
-                        ModuleAnimateGeneric animPM = (ModuleAnimateGeneric)agAct.ba.listParent.module;
-                        //print(ba.name + " " + ba.guiName + " " + animPM.animationName + " " + animPM.animTime);
-
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            if (animPM.animTime == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "SCANsat") //scansat mod
-                    {
-                        if (agAct.ba.name == "startScanAction" || agAct.ba.name == "stopScanAction" || agAct.ba.name == "toggleScanAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("scanning") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneConverter")
-                    {
-                        if (agAct.ba.name == "ActivateConverterAction" || agAct.ba.name == "DeactivateConverterAction" || agAct.ba.name == "ToggleConverterAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneGenerator")
-                    {
-                        if (agAct.ba.name == "EnableAction" || agAct.ba.name == "DisableAction" || agAct.ba.name == "ToggleAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Enabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneDetector")
-                    {
-                        if (agAct.ba.name == "EnableDetectionAction" || agAct.ba.name == "DisableDetectionAction" || agAct.ba.name == "ToggleDetectionAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsDetecting") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneExtractor")
-                    {
-                        if (agAct.ba.name == "DeployDrillAction" || agAct.ba.name == "RetractDrillAction" || agAct.ba.name == "ToggleDrillAction")
-                        {
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("Status") == "Deployed")
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSswitchEngineThrustTransform")
-                    {
-                        if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSairBrake")
-                    {
-                        if (agAct.ba.name == "toggleAirBrakeAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == 0)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwing")
-                    {
-                        if (agAct.ba.name == "toggleLeadingEdgeAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("leadingEdgeExtended") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "extendFlapAction" || agAct.ba.name == "retractFlapAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("flapMin") == (float)agAct.ba.listParent.module.Fields.GetValue("flapTarget"))
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwingletRangeAdjustment")
-                    {
-                        if (agAct.ba.name == "lockRangeAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("locked") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSanimateGeneric")
-                    {
-
-
-                        if (agAct.ba.name == "toggleAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FARControllableSurface")
-                    {
-
-
-                        if (agAct.ba.name == "IncreaseDeflect" || agAct.ba.name == "DecreaseDeflect")
-                        {
-                            if ((int)agAct.ba.listParent.module.Fields.GetValue("flapDeflectionLevel") == 0)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-
-                        if (agAct.ba.name == "ActivateSpoiler")   //THIS CODE WORKS, just need to wait for brake to become public on the next version of FAR
-                        {
-
-
-                            Assembly FarAsm = null;
-                            foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
-                            {
-                                if (Asm.dllName == "FerramAerospaceResearch")
-                                {
-                                    //Debug.Log("far found");
-                                    FarAsm = Asm.assembly;
-                                }
-                            }
-                            //Debug.Log("far found2");
-                            if (FarAsm != null)
-                            {
-                                Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
-                                //Debug.Log("far found3");
-                                if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
-                                {
-                                    agAct.activated = true;
-                                }
-                                else
-                                {
-                                    agAct.activated = false;
-                                }
-                            }
-
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim")
-                    {
-
-
-                        if (agAct.ba.name == "toggleSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSswitchEngineThrustTransform")
-                    {
-
-
-                        if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSVTOLrotator")
-                    {
-                        if (agAct.ba.name == "toggleVTOLAction" || agAct.ba.name == "raiseVTOLAction" || agAct.ba.name == "lowerVTOLAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == Mathf.Abs((float)agAct.ba.listParent.module.Fields.GetValue("deployedAngle")))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "toggleVTOLsteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("VTOLsteeringActive"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
                     //if (agAct.ba.listParent.module.moduleName == "FScopterThrottle")
                     //{
                     //    if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseHeightAction" || agAct.ba.name == "decreaseHeightAction")
@@ -7267,468 +6665,605 @@ namespace ActionGroupsExtended
                     //        }
                     //    }
                     //}
-                    if (agAct.ba.listParent.module.moduleName == "FSengineHover")
+
+                    switch (agAct.ba.listParent.module.moduleName)
                     {
-                        if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseVerticalSpeed" || agAct.ba.name == "decreaseVerticalSpeed")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
+                        case "ModuleDeployableSolarPanel":
+                            agAct.activated = agAct.ba.listParent.module.Fields.GetValue("deployState").ToString() == "EXTENDED";
+                            break;
+                        case "ModuleLandingLeg":
+                            if (agAct.ba.name == "OnAction" || agAct.ba.name == "RaiseAction" || agAct.ba.name == "LowerAction")
                             {
-                                agAct.activated = true;
+                                agAct.activated =
+                                    (int)agAct.ba.listParent.module.Fields.GetValue("savedLegState") == 3;
                             }
-                            else
+                            if (agAct.ba.name == "ToggleSuspensionLockAction") //only act
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("suspensionLocked");
+                            }
+                            break;
+                        case "ModuleEngines":
+                            agAct.activated =
+                                ((ModuleEngines)agAct.ba.listParent.module).getIgnitionState;
+                            break;
+                        case "ModuleEnginesFX":
+                            agAct.activated = 
+                                ((ModuleEnginesFX)agAct.ba.listParent.module).getIgnitionState;
+                            break;
+                        case "ModuleEnviroSensor":
+                            agAct.activated = 
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("sensorActive");
+                            break;
+                        case "ModuleGenerator":
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("generatorIsActive");
+                            break;
+                        case "ModuleGimbal":
+                            agAct.activated = 
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("gimbalLock") == false;
+                            break;
+                        case "ModuleCommandActions":
+                            if (agAct.ba.name == "ControlFromHere")
                             {
                                 agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FShoverThrottle")
-                    {
-                        if (agAct.ba.name == "toggleHoverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSpartTurner")
-                    {
-                        if (agAct.ba.name == "toggleSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "toggleInvertAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("reversedInput"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwheel")
-                    {
-                        if (agAct.ba.name == "ToggleGearAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ReverseMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("reverseMotor"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MuMechToggle")
-                    {
-                        if (agAct.ba.name == "LockToggle")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isMotionLock"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "DTMagnetometer")
-                    {
-                        if (agAct.ba.name == "ActivateMagnetometerAction" || agAct.ba.name == "DeactivateMagnetometerAction" || agAct.ba.name == "ToggleMagnetometerAction")
-                        {
-                            if (agAct.ba.listParent.module.isEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNThermalHeatExchanger")
-                    {
-                        if (agAct.ba.name == "ActivateHeatExchangerAction" || agAct.ba.name == "DeactivateHeatExchangerAction" || agAct.ba.name == "ToggleHeatExchangerAction")
-                        {
-                            if (agAct.ba.listParent.module.isEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ISRUScoop")
-                    {
-                        if (agAct.ba.name == "ActivateScoopAction" || agAct.ba.name == "DisableScoopAction" || agAct.ba.name == "ToggleScoopAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("scoopIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitter")
-                    {
-                        if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ActivateRelayAction" || agAct.ba.name == "DeactivateRelayAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("relay"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitterBackup")
-                    {
-                        if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleModableScienceGenerator")
-                    {
-                        if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Deployed"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "AlcubierreDrive")
-                    {
-                        if (agAct.ba.name == "StartChargingAction" || agAct.ba.name == "StopChargingAction" || agAct.ba.name == "ToggleChargingAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsCharging"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiverBackup")
-                    {
-                        if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNGenerator")
-                    {
-                        if (agAct.ba.name == "ActivateGeneratorAction" || agAct.ba.name == "DeactivateGeneratorAction" || agAct.ba.name == "ToggleGeneratorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNRadiator")
-                    {
-                        if (agAct.ba.name == "DeployRadiatorAction" || agAct.ba.name == "RetractRadiatorAction" || agAct.ba.name == "ToggleRadiatorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("radiatorIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNReactor")
-                    {
-                        if (agAct.ba.name == "ActivateReactorAction" || agAct.ba.name == "DeactivateReactorAction" || agAct.ba.name == "ToggleReactorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiver")
-                    {
-                        if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("receiverIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "TacGenericConverter")
-                    {
-                        if (agAct.ba.name == "ToggleConverter")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleControlSurfaceActions") //other acts not needed, bool check
-                    {
-                        //Debug.Log("surface found");
-                        agAct.activated = true;
-                        foreach (PartModule pm in agAct.ba.listParent.part.Modules)
-                        //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
-                        {
-                            if (pm is ModuleControlSurface)
-                            {
-                                //Debug.Log("surface found2");
-                                ModuleControlSurface CS = (ModuleControlSurface)pm;
-                                if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
+                                if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
                                 {
-                                    //Debug.Log("surface found3");
-                                    if (CS.ignorePitch == true)
-                                    {
-                                        //Debug.Log("surface found4");
-                                        agAct.activated = false;
-                                    }
-                                }
-                                else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                {
-                                    if (CS.ignoreYaw == true)
-                                    {
-                                        agAct.activated = false;
-                                    }
-                                }
-                                else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                {
-                                    if (CS.ignoreRoll == true)
-                                    {
-                                        agAct.activated = false;
-                                    }
+                                    agAct.activated =
+                                        agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId;
                                 }
                             }
-                            else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
-                            {
-                                //Debug.Log("Start FAR Module");
-                                int i;
-                                if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
-                                {
-                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("yawaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("rollaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                }
-                                else //NEAR installed
-                                {
-                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("pitchaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("yawaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("rollaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                }
-                                //Debug.Log("end FAR Module");
-                            }
-                        }
-                    }
-
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleFuelCrossfeedActions")
-                    {
-                        agAct.activated = agAct.ba.listParent.part.fuelCrossFeed;
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleResourceActions") //scansat mod
-                    {
-
-                        if (agAct.ba.name == "ToggleResource" || agAct.ba.name == "EnableResource" || agAct.ba.name == "DisableResource")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockResource") == true)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-                        if (agAct.ba.name == "ToggleElec" || agAct.ba.name == "EnableElec" || agAct.ba.name == "DisableElec")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockEC") == true)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "USI_ModuleAsteroidDrill")
-                    {
-                        agAct.activated = false;
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsActivated") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
+                            break;
+                        case "ModuleDockingNodeActions":
                             agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleControlSurface")
-                    {
-                        agAct.activated = false;
-                        ModuleControlSurface ctrlSurf = (ModuleControlSurface)agAct.ba.listParent.module;
-
-                        if (ctrlSurf.deploy)
-                        {
+                            if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
+                            {
+                                agAct.activated = true;
+                            }
+                            break;
+                        case "ModuleGimbalActions":
                             agAct.activated = true;
-                        }
-                        else
-                        {
+                            foreach (ModuleGimbal pm in agAct.ba.listParent.part.Modules.OfType<ModuleGimbal>())
+                            {
+                                if (pm.gimbalLock)
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                            break;
+                        case "ModuleLandingGear":
+                            if (agAct.ba.name == "OnAction")
+                            {
+                                agAct.activated =
+                                   (string)agAct.ba.listParent.module.Fields.GetValue("storedGearState") == "DEPLOYED";
+                            }
+                            else if (agAct.ba.name == "BrakesAction")
+                            {
+                                agAct.activated = 
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                            }
+                            break;
+                        case "ModuleSteering":
+                            if (agAct.ba.name == "InvertSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering");
+                            }
+                            if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false;
+                            }
+                            break;
+                        case "ModuleLight":
+                            if (agAct.ba.name == "ToggleLightAction" || agAct.ba.name == "LightOnAction" || agAct.ba.name == "LightOffAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isOn");
+                            }
+                            break;
+                        case "ModuleRCS":
+
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated = 
+                                    ((ModuleRCS)agAct.ba.listParent.module).rcsEnabled;
+                            }
+                            break;
+                        case "ModuleReactionWheel":
+                            //print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
+                            if (agAct.ba.name == "Toggle" || agAct.ba.name == "Activate" || agAct.ba.name == "Deactivate")
+                            {
+                                    agAct.activated =
+                                        !((string) agAct.ba.listParent.module.Fields.GetValue("stateString") ==
+                                          "Disabled");
+                            }
+                            break;
+                        case "ModuleScienceExperiment":
+                            if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Deployed");
+                            }
+                            break;
+                        case "ModuleResourceIntake":
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("intakeEnabled");
+                            }
+                            break;
+                        case "ModuleWheel":
+                            switch (agAct.ba.name)
+                            {
+                                case "InvertSteeringAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering");
+                                    break;
+                                case "ToggleSteeringAction":
+                                case "LockSteeringAction":
+                                case "UnlockSteeringAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false;
+                                    break;
+                                case "BrakesAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                                    break;
+                                case "ToggleMotorAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled");
+                                    break;
+                            }
+                            break;
+                        case "ModuleAnimateGeneric":
+
+                            //ModuleAnimateGeneric animPM = (ModuleAnimateGeneric)agAct.ba.listParent.module;
+                            //print(ba.name + " " + ba.guiName + " " + animPM.animationName + " " + animPM.animTime);
+
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated = 
+                                    ((ModuleAnimateGeneric)agAct.ba.listParent.module).animTime == 1f;
+                            }
+                            break;
+                        case "SCANsat":
+                            if (agAct.ba.name == "startScanAction" || agAct.ba.name == "stopScanAction" || agAct.ba.name == "toggleScanAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("scanning");
+                            }
+                            break;
+                        case "KethaneConverter":
+                            if (agAct.ba.name == "ActivateConverterAction" || agAct.ba.name == "DeactivateConverterAction" || agAct.ba.name == "ToggleConverterAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "KethaneGenerator":
+                            if (agAct.ba.name == "EnableAction" || agAct.ba.name == "DisableAction" || agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Enabled");
+                            }
+                            break;
+                        case "KethaneDetector":
+                            if (agAct.ba.name == "EnableDetectionAction" || agAct.ba.name == "DisableDetectionAction" || agAct.ba.name == "ToggleDetectionAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsDetecting");
+                            }
+                            break;
+                        case "KethaneExtractor":
+                            if (agAct.ba.name == "DeployDrillAction" || agAct.ba.name == "RetractDrillAction" || agAct.ba.name == "ToggleDrillAction")
+                            {
+                                agAct.activated =
+                                    (string)agAct.ba.listParent.module.Fields.GetValue("Status") == "Deployed";
+                            }
+                            break;
+                        case "FSswitchEngineThrustTransform":
+                            if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isReversed");
+                            }
+                            break;
+                        //case "FSswitchEngineThrustTransform":
+                        //    if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
+                        //    {
+                        //        if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed") == false)
+                        //        {
+                        //            agAct.activated = true;
+                        //        }
+                        //        else
+                        //        {
+                        //            agAct.activated = false;
+                        //        }
+                        //    }
+                        //    break;???
+                        case "FSairBrake":
+                            if (agAct.ba.name == "toggleAirBrakeAction")
+                            {
+                                agAct.activated =
+                                    !((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == 0);
+                            }
+                            break;
+                        case "FSwing":
+                            if (agAct.ba.name == "toggleLeadingEdgeAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("leadingEdgeExtended");
+                            }
+                            if (agAct.ba.name == "extendFlapAction" || agAct.ba.name == "retractFlapAction")
+                            {
+                                agAct.activated =
+                                    !((float)agAct.ba.listParent.module.Fields.GetValue("flapMin") == (float)agAct.ba.listParent.module.Fields.GetValue("flapTarget"));
+                            }
+                            break;
+                        case "FSwingletRangeAdjustment":
+                            if (agAct.ba.name == "lockRangeAction")
+                            {
+                                    agAct.activated = 
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("locked");
+                            }
+                            break;
+                        case "FSanimateGeneric":
+                            if (agAct.ba.name == "toggleAction")
+                            {
+                                agAct.activated =
+                                     (float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f;
+                            }
+                            break;
+                        case "FARControllableSurface":
+                            if (agAct.ba.name == "IncreaseDeflect" || agAct.ba.name == "DecreaseDeflect")
+                            {
+                                agAct.activated = 
+                                    !((int)agAct.ba.listParent.module.Fields.GetValue("flapDeflectionLevel") == 0);
+                            }
+
+                            if (agAct.ba.name == "ActivateSpoiler")   //THIS CODE WORKS, just need to wait for brake to become public on the next version of FAR
+                            {
+                                Assembly FarAsm = null;
+                                foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
+                                {
+                                    if (Asm.dllName == "FerramAerospaceResearch")
+                                    {
+                                        //Debug.Log("far found");
+                                        FarAsm = Asm.assembly;
+                                    }
+                                }
+                                //Debug.Log("far found2");
+                                if (FarAsm != null)
+                                {
+                                    Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
+                                    //Debug.Log("far found3");
+                                    if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
+                                    {
+                                        agAct.activated = true;
+                                    }
+                                    else
+                                    {
+                                        agAct.activated = false;
+                                    }
+                                }
+
+                            }
+                            break;
+                        case "FSrotorTrim":
+                            if (agAct.ba.name == "toggleSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled");
+                            }
+                            break;
+
+                        case "FSVTOLrotator":
+                            if (agAct.ba.name == "toggleVTOLAction" || agAct.ba.name == "raiseVTOLAction" || agAct.ba.name == "lowerVTOLAction")
+                            {
+                                agAct.activated =
+                                    (float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == Mathf.Abs((float)agAct.ba.listParent.module.Fields.GetValue("deployedAngle"));
+                            }
+                            if (agAct.ba.name == "toggleVTOLsteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("VTOLsteeringActive");
+                            }
+                            break;
+                        case "FSengineHover":
+                            if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseVerticalSpeed" || agAct.ba.name == "decreaseVerticalSpeed")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive");
+                            }
+                            break;
+                        case "FShoverThrottle":
+                            if (agAct.ba.name == "toggleHoverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive");
+                            }
+                            break;
+                        case "FSpartTurner":
+                            if (agAct.ba.name == "toggleSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled");
+                            }
+                            if (agAct.ba.name == "toggleInvertAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("reversedInput");
+                            }
+                            break;
+                        case "FSwheel":
+                            if (agAct.ba.name == "ToggleGearAction")
+                            {
+                                agAct.activated =
+                                    (float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f;
+                            }
+                            if (agAct.ba.name == "ReverseMotorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("reverseMotor");
+
+                            }
+                            if (agAct.ba.name == "ToggleMotorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled");
+                            }
+                            if (agAct.ba.name == "BrakesAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                            }
+                            break;
+                        case "MuMechToggle":
+                            if (agAct.ba.name == "LockToggle")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isMotionLock");
+                            }
+                            break;
+                        case "DTMagnetometer":
+                            if (agAct.ba.name == "ActivateMagnetometerAction" || agAct.ba.name == "DeactivateMagnetometerAction" || agAct.ba.name == "ToggleMagnetometerAction")
+                            {
+                                agAct.activated =
+                                   agAct.ba.listParent.module.isEnabled;
+                            }
+                            break;
+                        case "FNThermalHeatExchanger":
+                            if (agAct.ba.name == "ActivateHeatExchangerAction" || agAct.ba.name == "DeactivateHeatExchangerAction" || agAct.ba.name == "ToggleHeatExchangerAction")
+                            {
+                                agAct.activated =
+                                    agAct.ba.listParent.module.isEnabled;
+                            }
+                            break;
+                        case "ISRUScoop":
+                            if (agAct.ba.name == "ActivateScoopAction" || agAct.ba.name == "DisableScoopAction" || agAct.ba.name == "ToggleScoopAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("scoopIsEnabled");
+                            }
+                            break;
+                        case "MicrowavePowerTransmitter":
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                agAct.activated = 
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            if (agAct.ba.name == "ActivateRelayAction" || agAct.ba.name == "DeactivateRelayAction")
+                            {
+                                agAct.activated = 
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("relay");
+                            }
+                            break;
+                        case "MicrowavePowerTransmitterBackup":
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "ModuleModableScienceGenerator":
+                            if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Deployed");
+                            }
+                            break;
+                        case "AlcubierreDrive":
+                            if (agAct.ba.name == "StartChargingAction" || agAct.ba.name == "StopChargingAction" || agAct.ba.name == "ToggleChargingAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsCharging");
+                            }
+                            break;
+                        case "MicrowavePowerReceiverBackup":
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+
+                        case "FNGenerator":
+                            if (agAct.ba.name == "ActivateGeneratorAction" || agAct.ba.name == "DeactivateGeneratorAction" || agAct.ba.name == "ToggleGeneratorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "FNRadiator":
+                            if (agAct.ba.name == "DeployRadiatorAction" || agAct.ba.name == "RetractRadiatorAction" || agAct.ba.name == "ToggleRadiatorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("radiatorIsEnabled");
+                            }
+                            break;
+                        case "FNReactor":
+                            if (agAct.ba.name == "ActivateReactorAction" || agAct.ba.name == "DeactivateReactorAction" || agAct.ba.name == "ToggleReactorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "MicrowavePowerReceiver":
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("receiverIsEnabled");
+                            }
+                            break;
+                        case "TacGenericConverter":
+                            if (agAct.ba.name == "ToggleConverter")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled");
+                            }
+                            break;
+                        case "ModuleControlSurfaceActions":
+                            //Debug.Log("surface found");
+                            agAct.activated = true;
+                            //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
+                            foreach (PartModule pm in agAct.ba.listParent.part.Modules)
+                            {
+                                if (pm is ModuleControlSurface)
+                                {
+                                    //Debug.Log("surface found2");
+                                    ModuleControlSurface CS = (ModuleControlSurface)pm;
+                                    switch (agAct.ba.name)
+                                    {
+                                        case "TogglePitchAction":
+                                        case "EnablePitchAction":
+                                        case "DisablePitchAction":
+                                            //Debug.Log("surface found3");
+                                            if (CS.ignorePitch)
+                                            {
+                                                //Debug.Log("surface found4");
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                        case "ToggleYawAction":
+                                        case "EnableYawAction":
+                                        case "DisableYawAction":
+                                            if (CS.ignoreYaw)
+                                            {
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                        case "ToggleRollAction":
+                                        case "EnableRollAction":
+                                        case "DisableRollAction":
+                                            if (CS.ignoreRoll)
+                                            {
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                    }
+                                }
+                                else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
+                                {
+                                    //Debug.Log("Start FAR Module");
+                                    int i;
+                                    if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
+                                    {
+                                        switch (agAct.ba.name)
+                                        {
+                                            case "TogglePitchAction":
+                                            case "EnablePitchAction":
+                                            case "DisablePitchAction":
+                                                if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleYawAction":
+                                            case "EnableYawAction":
+                                            case "DisableYawAction":
+                                                if ((float)pm.Fields.GetValue("yawaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleRollAction":
+                                            case "EnableRollAction":
+                                            case "DisableRollAction":
+                                                if ((float)pm.Fields.GetValue("rollaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                        }
+                                    }
+                                    else //NEAR installed
+                                    {
+                                        switch (agAct.ba.name)
+                                        {
+                                            case "TogglePitchAction":
+                                            case "EnablePitchAction":
+                                            case "DisablePitchAction":
+                                                if ((bool)pm.Fields.GetValue("pitchaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleYawAction":
+                                            case "EnableYawAction":
+                                            case "DisableYawAction":
+                                                if ((bool)pm.Fields.GetValue("yawaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleRollAction":
+                                            case "EnableRollAction":
+                                            case "DisableRollAction":
+                                                if ((bool)pm.Fields.GetValue("rollaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                        }
+                                    }
+                                    //Debug.Log("end FAR Module");
+                                }
+                            }
+                            break;
+                        case "ModuleFuelCrossfeedActions":
+                            agAct.activated = 
+                                agAct.ba.listParent.part.fuelCrossFeed;
+                            break;
+                        case "ModuleResourceActions":
+
+                            if (agAct.ba.name == "ToggleResource" || agAct.ba.name == "EnableResource" || agAct.ba.name == "DisableResource")
+                            {
+                                agAct.activated = 
+                                    !(bool)agAct.ba.listParent.module.Fields.GetValue("lockResource");
+                            }
+
+                            if (agAct.ba.name == "ToggleElec" || agAct.ba.name == "EnableElec" || agAct.ba.name == "DisableElec")
+                            {
+                                agAct.activated = 
+                                    !(bool)agAct.ba.listParent.module.Fields.GetValue("lockEC");
+                            }
+                            break;
+                        case "USI_ModuleAsteroidDrill":
                             agAct.activated = false;
-                        }
+
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("IsActivated");
+
+                            break;
+                        case "ModuleControlSurface":
+                            agAct.activated = false;
+                            ModuleControlSurface ctrlSurf = (ModuleControlSurface)agAct.ba.listParent.module;
+
+                            agAct.activated =
+                                ctrlSurf.deploy;
+                            break;
                     }
-
-
-                    //Debug.Log("End calc active action!");
                 }
 
                 catch (Exception e)
@@ -7737,14 +7272,12 @@ namespace ActionGroupsExtended
                 }
 
 
-
                 //else //all other modules, check the isEnabled bool
                 //{
                 //    agAct.activated = agAct.ba.listParent.module.isEnabled;
                 //}
             }
             return actsListToCheck;
-
         }
     }
 
