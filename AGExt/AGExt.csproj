@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Button.cs" />
     <Compile Include="CommonMethods.cs" />
+    <Compile Include="EventHandler.cs" />
     <Compile Include="Instantly.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="External.cs" />
