@@ -17,15 +17,15 @@
 #
 
 # 1:GAMEDIR, VERSIONFILE
-1:KerbalHotSeat, KerbalHotSeat.version
+1:AGExt, AGExt.version
 
 # 2:PROJNAME, PROJFILE, VERSIONFILE, PLUGINSFOLDER
-2:KerbalHotSeat,KerbalHotSeat/KerbalHotSeat.csproj,KerbalHotSeat.version,GameData/KerbalHotSeat/Plugins
+2:AGExt,AGExt/AGExt.csproj,AGExt.version,GameData/Diazo/AGExt/Plugins
 
 # 3:SOURCEFILE, DESTDIR
-3:KerbalHotSeat.version,GameData/KerbalHotSeat
-#3:LICENSE.md,GameData/KerbalHotSeat
-#3:README.md,GameData/KerbalHotSeat
+3:AGExt.version,GameData/Diazo/AGExt
+#3:LICENSE.md,GameData/Diazo/AGExt
+#3:README.md,GameData/Diazo/AGExt
 
 # 4:SOURCDIR, DESTDIR
 #4:Textures,GameData/ManeuverQueue/Textures
@@ -34,13 +34,13 @@
 # 5:ModuleManager
 
 # 6:mod_id
-6:1272
+#6:
 
 # 7: AdditionalFolders in the GameData, 1 per line
 #7:ConnectedLivingSpace
 
 # 8: AdditionalMods to include
-8:ConnectedLivingSpace
+# 8:ConnectedLivingSpace
 
 #
 # End of file
