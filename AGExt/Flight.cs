@@ -3082,7 +3082,9 @@ namespace ActionGroupsExtended
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
             //currentMissionId = (uint)rootAGX.focusFlightID; //set before this method is called!
+#if DEBUG
             string errLine = "7j";
+#endif
             //if (FlightGlobals.ActiveVessel.Parts.Contains(AGXRoot))
             //{
             //    errLine = "7k";
@@ -3096,30 +3098,42 @@ namespace ActionGroupsExtended
             //}
             //ResetGroupNames(); //always clear names now, we reload everything from ModuleAGX
             LoadGroupNames(); //group names check every part now based on currentMissionID, pass no values
+#if DEBUG
             errLine = "7m";
+#endif
             LoadGroupVisibility(rootAGX.groupVisibility);
             LoadGroupVisibilityNames(rootAGX.groupVisibilityNames);
             LoadDirectActionState(rootAGX.DirectActionState);
+#if DEBUG
             errLine = "7n";
+#endif
 
             StaticData.CurrentVesselActions.Clear(); //refreshing list, clear old actions
             foreach (Part p in rootAGX.vessel.Parts)
             {
+#if DEBUG
                 errLine = "7o";
+#endif
                 //if (!p.Modules.Contains("KerbalEVA"))
                 //{
                 foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                 {
+#if DEBUG
                     errLine = "7p";
+#endif
                     if (!StaticData.CurrentVesselActions.Contains(agAct))
                     {
+#if DEBUG
                         errLine = "7q";
+#endif
                         StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
                     }
                 }
                 //}
             }
+#if DEBUG
             errLine = "7r";
+#endif
 
             RefreshCurrentActions();
         }
@@ -4197,7 +4211,9 @@ namespace ActionGroupsExtended
 
         public static Dictionary<int, string> GroupNamesStringToDict(string str)
         {
+#if DEBUG
             string errLine = "1";
+#endif
             Dictionary<int, string> DictToReturn = new Dictionary<int, string>();
             for (int i = 1; i <= 250; i++)
             {
@@ -4207,28 +4223,46 @@ namespace ActionGroupsExtended
 
             if (LoadNames.Length > 0)
             {
+#if DEBUG
+
                 errLine = "4";
+#endif
                 while (LoadNames[0] == '\u2023')
                 {
+#if DEBUG
+
                     errLine = "5";
+#endif
                     int groupNum = new int();
                     string groupName = "";
                     LoadNames = LoadNames.Substring(1);
                     groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
                     LoadNames = LoadNames.Substring(3);
+#if DEBUG
+
                     errLine = "6";
+#endif
                     if (LoadNames.IndexOf('\u2023') == -1)
                     {
+#if DEBUG
+
                         errLine = "7";
+#endif
                         groupName = LoadNames;
                     }
                     else
                     {
+#if DEBUG
+
                         errLine = "8";
+#endif
                         groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
                         LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
                     }
+#if DEBUG
+
                     errLine = "9";
+#endif
                     //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
                     //if (p.missionID == currentMissionId) //missionID matchs, group names on this part have priority
                     //{

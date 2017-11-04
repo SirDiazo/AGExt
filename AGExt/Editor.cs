@@ -4710,27 +4710,39 @@ namespace ActionGroupsExtended
 
         public static void EditorLoadDataFromPartModuleNewMethod() //new method loading from partModule
         {
+#if DEBUG
             string errLine = "1";
+#endif
             try
             {
                 ModuleAGX loadingPM = new ModuleAGX();
+#if DEBUG
                 errLine = "2";
+#endif
                 try
                 {
                     if (EditorLogic.RootPart.Modules.OfType<ModuleAGX>().First().hasData)
                     {
+#if DEBUG
                         errLine = "3";
+#endif
                         loadingPM = EditorLogic.RootPart.Modules.OfType<ModuleAGX>().First();
                     }
                     else
                     {
+#if DEBUG
                         errLine = "4";
+#endif
                         foreach (Part p in EditorLogic.SortedShipList)
                         {
+#if DEBUG
                             errLine = "5";
+#endif
                             if (p.Modules.OfType<ModuleAGX>().First().hasData)
                             {
+#if DEBUG
                                 errLine = "6";
+#endif
                                 loadingPM = p.Modules.OfType<ModuleAGX>().First();
                             }
                         }
@@ -4837,35 +4849,59 @@ namespace ActionGroupsExtended
                 {
                     //silent fail on no vessel loaded so RootPart nullrefs
                 }
+#if DEBUG
                 errLine = "7";
+#endif
                 CurrentKeySet = loadingPM.currentKeyset;
+#if DEBUG
                 errLine = "8";
+#endif
                 LoadCurrentKeyBindings();
+#if DEBUG
                 errLine = "9";
+#endif
                 CurrentKeySetName = KeySetNames[CurrentKeySet - 1];
+#if DEBUG
                 errLine = "10";
+#endif
                 LoadGroupNames(loadingPM.groupNames);
+#if DEBUG
                 errLine = "11";
+#endif
                 LoadGroupVisibility(loadingPM.groupVisibility);
+#if DEBUG
                 errLine = "12";
+#endif
                 LoadGroupVisibilityNames(loadingPM.groupVisibilityNames);
+#if DEBUG
                 errLine = "13";
+#endif
                 LoadDirectActionState(loadingPM.DirectActionState);
+#if DEBUG
                 errLine = "14";
+#endif
                 try
                 {
                     if (EditorLogic.fetch != null && EditorLogic.SortedShipList.Count > 0)
                     {
+#if DEBUG
                         errLine = "14a";
+#endif
                         foreach (Part p in EditorLogic.SortedShipList)
                         {
+#if DEBUG
                             errLine = "15";
+#endif
                             foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().First().agxActionsThisPart)
                             {
+#if DEBUG
                                 errLine = "16";
+#endif
                                 if (agAct.ba != null && !StaticData.CurrentVesselActions.Contains(agAct))
                                 {
+#if DEBUG
                                     errLine = "17";
+#endif
                                     StaticData.CurrentVesselActions.Add(agAct);
                                 }
                             }
@@ -4878,7 +4914,7 @@ namespace ActionGroupsExtended
                 }
 
             }
-            catch (Exception e)
+            catch (Exception /* e */)
             {
                 //silently fail, will hit this if no parts placed
                 //Debug.Log("AGX temproary error on new loading thing " + errLine + " " + e);
