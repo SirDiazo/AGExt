@@ -17,7 +17,7 @@
 #
 
 # 1:GAMEDIR, VERSIONFILE
-1:AGExt, AGExt.version
+1:Diazo/AGExt, AGExt.version
 
 # 2:PROJNAME, PROJFILE, VERSIONFILE, PLUGINSFOLDER
 2:AGExt,AGExt/AGExt.csproj,AGExt.version,GameData/Diazo/AGExt/Plugins
