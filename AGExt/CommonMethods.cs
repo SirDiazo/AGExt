@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using KSP.Localization;
 using UnityEngine;
 using AGExt;
 
@@ -730,7 +731,8 @@ namespace ActionGroupsExtended
         {
             if (thisVsl.HoldPhysics)
             {
-                ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("#AGEXT_UI_SCREEN_MESSAGE_1"), 10F, ScreenMessageStyle.UPPER_CENTER);
             }
             else if (vesselInstanceOK)
             {
@@ -744,7 +746,8 @@ namespace ActionGroupsExtended
         {
             if (thisVsl.HoldPhysics)
             {
-                ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("#AGEXT_UI_SCREEN_MESSAGE_1"), 10F, ScreenMessageStyle.UPPER_CENTER);
             }
             else if (vesselInstanceOK)
             {
@@ -801,7 +804,8 @@ namespace ActionGroupsExtended
             {
                 if (thisVsl.HoldPhysics)
                 {
-                    ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    // ScreenMessages.PostScreenMessage("AGX cannot activate actions while under timewarp.", 10F, ScreenMessageStyle.UPPER_CENTER);
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#AGEXT_UI_SCREEN_MESSAGE_1"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 }
                 else if (vesselInstanceOK)
                 {

@@ -5,6 +5,7 @@ using System.Text;
 using KSP.IO;
 using System.Reflection;
 using AGExt;
+using KSP.Localization;
 using UnityEngine;
 
 namespace ActionGroupsExtended
@@ -250,7 +251,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_3"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 return false;
             }
         }
@@ -273,7 +275,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action not checked, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX Action not checked, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_4"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 return false;
             }
         }
@@ -301,7 +304,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_3"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 return false;
             }
         }
@@ -329,7 +333,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                // ScreenMessages.PostScreenMessage("AGX Action Not Activated, not in flight", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_3"), 10F, ScreenMessageStyle.UPPER_CENTER);
                 return false;
             }
         }
@@ -1084,8 +1089,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER);
-
+                // ScreenMessages.PostScreenMessage("AGX Action Not Activated, Remotetech passed invalid vessel", 10F, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_5"), 10F, ScreenMessageStyle.UPPER_CENTER);
             }
             return false;
         }

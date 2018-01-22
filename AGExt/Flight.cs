@@ -253,7 +253,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+                // ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+                ScreenMessages.PostScreenMessage(Localizer.Format("AGEXT_UI_SCREEN_MESSAGE_6"));
             }
         }
 
