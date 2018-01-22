@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-
 using UnityEngine;
-
+using AGExt;
 
 namespace ActionGroupsExtended
 {
@@ -60,18 +59,18 @@ namespace ActionGroupsExtended
                 {
                     ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.settings");
                     nodeLoad = tempNode.GetNode("AGExtConfig");
-                    //Debug.Log("AGX case 1 " + nodeLoad.ToString());
+                    Log.Info("Case 1 " + nodeLoad.ToString());
                 }
                 else if (System.IO.File.Exists(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg"))
                 {
                     ConfigNode tempNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
                     nodeLoad = tempNode.GetNode("AGExtConfig");
                     System.IO.File.Delete(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGext.cfg");
-                    //Debug.Log("AGX case 2 " + nodeLoad.ToString());
+                    Log.Info("Case 2 " + nodeLoad.ToString());
                 }
                 //else
                 //{
-                //    //Debug.Log("AGX case 3 " + nodeLoad.ToString());
+                //    Log.Info("case 3 " + nodeLoad.ToString());
                 //}
                 
                 //nodeLoad = GameDatabase.Instance.GetConfigNode("Diazo/AGExt/AGExt/AGExtConfig");
@@ -391,7 +390,7 @@ namespace ActionGroupsExtended
         public override void OnSave(ConfigNode node)
         {
             string ErrLine = "1";
-            //Debug.Log("AGX Saving Module start");
+            Log.Info("Saving Module start");
             try
             {
                 node.RemoveNodes("ACTION");
@@ -404,7 +403,7 @@ namespace ActionGroupsExtended
                 ErrLine = "2b";
                 if (HighLogic.LoadedSceneIsEditor)
                 {
-                    //Debug.Log("AGX Editor save called by partmodule!");
+                    Log.Info("Editor save called by partmodule!");
 
                     ErrLine = "2c";
 
@@ -427,7 +426,7 @@ namespace ActionGroupsExtended
                             actsToSave.Add(agActSD);
                         }
                     }
-                    //Debug.Log("AGX Partmodule Save action saved okay");
+                    Log.Info("Partmodule Save action saved okay");
                 }
 
                 ErrLine = "3";
@@ -504,18 +503,18 @@ namespace ActionGroupsExtended
 
 
 
-                //Debug.Log("AGX PartModule Save Okay"); //temporary
-                //Debug.Log("AGX Saving Module end" + StaticData.CurrentVesselActions.Count());
+                Log.Info("PartModule Save Okay"); //temporary
+                Log.Info("Saving Module end" + StaticData.CurrentVesselActions.Count());
             }
             catch (Exception e)
             {
-                print("AGX partModule OnSave fail: " + ErrLine + " " + e);
+                print("partModule OnSave fail: " + ErrLine + " " + e);
             }
         }
 
         public override void OnLoad(ConfigNode node)
         {
-            //Debug.Log("AGX Load Module" + node.ToString()); 
+            Log.Info("Load Module" + node.ToString()); 
             string errLine = "1";
             try
             {
@@ -556,20 +555,20 @@ namespace ActionGroupsExtended
                     //    AGXEditor.isDirectAction[int.Parse(actionNode.GetValue("group"))] = true;
                     //}
                     errLine = "9";
-                    // Debug.Log("Step 1 " + actionNode.ToString());
+                    // Log.Info("Step 1 " + actionNode.ToString());
                     AGXAction actToAdd = StaticData.LoadAGXActionVer2(actionNode, this.part, false);
-                    //Debug.Log("Step 2 " + actToAdd.ToString());
+                    Log.Info("Step 2 " + actToAdd.ToString());
                     if (actToAdd != null && !agxActionsThisPart.Contains(actToAdd))
                     {
                         agxActionsThisPart.Add(actToAdd);
                     }
                 }
                 //.Log("AGX PartModule Load Okay"); //temporary
-                //Debug.Log("AGX Load Module End" + agxActionsThisPart.Count()); 
+                Log.Info("Load Module End" + agxActionsThisPart.Count()); 
             }
             catch (Exception e)
             {
-                Debug.Log("AGX Module OnLoad Error " + errLine + " " + e);
+                Log.Info("Module OnLoad Error " + errLine + " " + e);
             }
             //print("Load called " + agxActionsThisPart.Count);
         }
@@ -587,10 +586,10 @@ namespace ActionGroupsExtended
         public AGXOtherVessel(uint FlightID)
         {
             flightID = FlightID;
-            //Debug.Log("Before");
+            Log.Info("Before");
             List<Vessel> loadedVessels = FlightGlobals.Vessels.FindAll(vsl => vsl.loaded == true);
             thisVsl = loadedVessels.Find(ves => ves.rootPart.flightID == flightID);
-            //Debug.Log("After");
+            Log.Info("After");
             actionsList = new List<AGXAction>();
             guiNames = new Dictionary<int, string>();
             if (thisVsl == null) //check vessel is loaded
@@ -760,24 +759,24 @@ namespace ActionGroupsExtended
 
             if (AGXFlight.RTFound)
             {
-                // Debug.Log("RemoteTech found");
-                //Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                //Debug.Log("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
+                // Log.Info("RemoteTech found");
+                Log.Info("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                Log.Info("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
                 //double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
                 //print("cur delay" + curDelay);
                 if (thisVsl.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                 {
-                    Debug.Log("AGX: RemoteTech local action");
+                    Log.Info("RemoteTech local action");
                     AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                 }
                 else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(thisVsl))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
                 {
-                    Debug.Log("AGX: RemoteTech infinity");
+                    Log.Info("RemoteTech infinity");
                     AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                 }
                 else
                 {
-                    Debug.Log("AGX: RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(thisVsl));
+                    Log.Info("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(thisVsl));
                     if (AGXFlight.useRT)
                     {
                         AGXFlight.AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, actionsList.Find(act => act.group == group).grpName, thisVsl, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(thisVsl), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
@@ -842,7 +841,7 @@ namespace ActionGroupsExtended
                             KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                             //print("AGX action deactivate FIRE! " + agAct.ba.guiName);
                             ErrLine = "8";
-                            // Debug.Log("act it " + agAct.ba.active);
+                            // Log.Info("act it " + agAct.ba.active);
                             agAct.ba.Invoke(actParam);
                             agAct.activated = false;
                             ErrLine = "9";
@@ -860,7 +859,7 @@ namespace ActionGroupsExtended
                             //agAct.activated = true;
                             //print("AGX action activate FIRE!" + agAct.ba.guiName);
                             ErrLine = "13";
-                            //Debug.Log("act it2 " + agAct.ba.active);
+                            Log.Info("act it2 " + agAct.ba.active);
                             agAct.ba.Invoke(actParam);
                             agAct.activated = true;
                             ErrLine = "14";
@@ -905,7 +904,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX OtherVsl ActivateActionGroup fail " + ErrLine + " " + e);
+                Log.Info("OtherVsl ActivateActionGroup fail " + ErrLine + " " + e);
 
             }
 
@@ -935,7 +934,7 @@ namespace ActionGroupsExtended
             }
             else
             {
-                // Debug.Log("AGX Group State FALSE due to vessel not loaded.");
+                // Log.Info("Group State FALSE due to vessel not loaded.");
                 return false;
             }
         }
@@ -1010,7 +1009,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX OtherVslSaveNode Fail " + errLine + " " + e);
+                Log.Info("OtherVslSaveNode Fail " + errLine + " " + e);
             }
 
         }
@@ -1081,7 +1080,7 @@ namespace ActionGroupsExtended
                     //actPart is part
                     PartModule ourPM = PartModuleIndexToModule((string)actNode.GetValue("partModule"), Int32.Parse((string)actNode.GetValue("pmIndex")), actPart); //e(string pmName, int pmIndex, Part p)
                     ActionToLoad.ba = ourPM.Actions[(string)actNode.GetValue("actionName")];
-                    //Debug.Log("AGX New Load Okay " + ActionToLoad.ToString());
+                    Log.Info("New Load Okay " + ActionToLoad.ToString());
                     return ActionToLoad;
                 }
                 else //in theory this entire else statement is obsolete as of agx 1.34c and will never be run, leave for backwards compatibility
@@ -1429,7 +1428,7 @@ namespace ActionGroupsExtended
                             }
                             //foreach(BaseAction ba in actsToCompare)
                             //{
-                            //    Debug.Log("BA list " + ba.name + " " + ba.guiName);
+                            //    Log.Info("BA list " + ba.name + " " + ba.guiName);
                             //}
                             actsToCompare.RemoveAll(b => b.name != (string)actNode.GetValue("actionName"));
                             actsToCompare.RemoveAll(b2 => b2.guiName != (string)actNode.GetValue("actionGuiName"));
@@ -1442,7 +1441,7 @@ namespace ActionGroupsExtended
                 if (actsToCompare.Count != 1)
                 {
                     errLine = "4";
-                    Debug.Log("AGX actsToCompare.count != 1 " + actsToCompare.Count + " Part: " + actPart.name + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName") + " " + actNode.GetValue("actionGuiName"));
+                    Log.Info("actsToCompare.count != 1 " + actsToCompare.Count + " Part: " + actPart.name + " Module: " + actNode.GetValue("partModule") + " " + actNode.GetValue("actionName") + " " + actNode.GetValue("actionGuiName"));
                     //if (showAmbiguousMessage)
                     //{
                     //    ScreenMessages.PostScreenMessage("AGX Load Action ambiguous. Count: " + actsToCompare.Count, 10F, ScreenMessageStyle.UPPER_CENTER);
@@ -1472,7 +1471,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGXLoadAGXAction2 FAIL " + errLine + " " + e);
+                Log.Info("AGXLoadAGXAction2 FAIL " + errLine + " " + e);
                 return null;
             }
         }
@@ -1636,7 +1635,7 @@ namespace ActionGroupsExtended
 
             catch (Exception e)
             {
-                Debug.Log("AGX SaveAGXAction2 FAIL " + errLine + " " + agxAct.prt.partName + " " + agxAct.ba.name + " " + e);
+                Log.Info("SaveAGXAction2 FAIL " + errLine + " " + agxAct.prt.partName + " " + agxAct.ba.name + " " + e);
                 return new ConfigNode();
             }
 
@@ -1657,7 +1656,7 @@ namespace ActionGroupsExtended
             }
             catch
             {
-                Debug.Log("AGX SavePMIndex Fail, using default");
+                Log.Info("SavePMIndex Fail, using default");
                 return 0;
             }
         }
@@ -1678,7 +1677,7 @@ namespace ActionGroupsExtended
             }
             catch
             {
-                Debug.Log("AGX Load Action Index fail, action probably lost");
+                Log.Info("Load Action Index fail, action probably lost");
                 return new PartModule();
             }
         }

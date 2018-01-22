@@ -8,6 +8,7 @@ using System.Collections;
 using KSP.UI.Screens;
 using KSP.Localization;
 using UnityEngine;
+using AGExt;
 
 
 namespace ActionGroupsExtended
@@ -606,12 +607,12 @@ namespace ActionGroupsExtended
 
                 //foreach(Font fnt in fonts)
                 //{
-                //    Debug.Log("fnt " + fnt.name);
+                //    Log.Info("fnt " + fnt.name);
                 //}
                 AGXBtnStyle.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
                 AGXLblStyle.font = AGXBtnStyle.font;
                 AGXFldStyle.font = AGXBtnStyle.font;
-                //Debug.Log(AGXBtnStyle.font.name);
+                Log.Info(AGXBtnStyle.font.name);
 
                 //AGXScrollStyle = new GUIStyle(AGXSkin.verticalScrollbar);
 
@@ -671,7 +672,7 @@ namespace ActionGroupsExtended
                 {
                     if (Asm.dllName == "RemoteTech")
                     {
-                        //Debug.Log("RemoteTech found");
+                        Log.Info("RemoteTech found");
                         //AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, FlightGlobals.ActiveVessel.rootPart.flightID, Planetarium.GetUniversalTime() + 10, force, forceDir));
                         RTFound = true;
                     }
@@ -686,14 +687,14 @@ namespace ActionGroupsExtended
                 {
                     RTWinShow = false;
                 }
-                //Debug.Log("RemoteTech " + RTWinShow);
+                Log.Info("RemoteTech " + RTWinShow);
                 isDirectAction = new Dictionary<int, bool>();
                 for (int i = 1; i <= 250; i++)
                 {
                     isDirectAction[i] = false;
                 }
 
-                // Debug.Log("AGX Flight Started Okay"); //temporary
+                // Log.Info("Flight Started Okay"); //temporary
             }
             catch (Exception e)
             {
@@ -723,7 +724,7 @@ namespace ActionGroupsExtended
 
         public static void LoadDirectActionState(string DirectActions)
         {
-            //Debug.Log("load state " + DirectActions);
+            Log.Info("load state " + DirectActions);
             try
             {
                 isDirectAction = new Dictionary<int, bool>();
@@ -752,7 +753,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadDirectActions Fail " + e);
+                Log.Info("LoadDirectActions Fail " + e);
                 for (int i = 1; i <= 251; i++)
                 {
                     isDirectAction[i] = false;
@@ -1137,7 +1138,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupVisiblityNames Fail " + errLine + " " + e);
+                Log.Info("LoadGroupVisiblityNames Fail " + errLine + " " + e);
                 ShowGroupInFlightNames[1] = "Group 1";
                 ShowGroupInFlightNames[2] = "Group 2";
                 ShowGroupInFlightNames[3] = "Group 3";
@@ -1236,7 +1237,7 @@ namespace ActionGroupsExtended
         { //actions themselves are not saved via this method, just everything else
             //populate our strings to save to each partmodule
             //currentkeyset is also saved here
-            //Debug.Log("AGX Ship Data save " + vsl.id.ToString());
+            Log.Info("Ship Data save " + vsl.id.ToString());
             //string groupNamesToSave = SaveGroupNames("");  //this changes based on part now, moved to foreach below
             string groupVisibilityToSave = SaveGroupVisibility("");
             string groupVisibiltyNames = SaveGroupVisibilityNames("");
@@ -1247,7 +1248,7 @@ namespace ActionGroupsExtended
             {
                 foreach (Part p in vsl.Parts)
                 {
-                    //Debug.Log("AGX Saveing date");
+                    Log.Info("Saveing date");
                     ModuleAGX pmAGX = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
 
                     pmAGX.groupNames = SaveGroupNames(pmAGX); //check against currentMissionID done inside this method
@@ -1435,9 +1436,10 @@ namespace ActionGroupsExtended
                 GUI.Window(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("AGEXT_UI_agx_settings"), AGXWinStyle);
             }
             //print("guis " + HighLogic.Skin.font.name + " " + GUI.skin.font.name); 
-
-            //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
-            //Debug.Log("fntc " + fonts.Count());
+#if DEBUG
+            Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
+            Log.Info("fntc " + fonts.Count());
+#endif
             //// GUI.skin = defaults;
 
         }
@@ -1518,15 +1520,15 @@ namespace ActionGroupsExtended
                 //        PartModule pm2 = p.Modules["MechJebCore"]; //Find our MechJeb module
                 //        if (pm2 != null) //if part does not have a mechjeb module, pm2 is null at this point
                 //        {
-                //            Debug.Log("vslstatea found");
+                //            Log.Info("vslstatea found");
                 //            object vslState = MCType.GetField("vesselState").GetValue(pm2); //get our reference to the vessel state object
-                //            Debug.Log("vslstate found");
+                //            Log.Info("vslstate found");
                 //            foreach (PropertyInfo pinfo in VSType.GetProperties())
                 //            {
-                //                Debug.Log("ping" + pinfo.Name + " " + pinfo.PropertyType);
+                //                Log.Info("ping" + pinfo.Name + " " + pinfo.PropertyType);
                 //            }
                 //            var maxThrustAvail = VSType.GetProperty("thrustAvailable").GetValue(vslState,null);
-                //            Debug.Log("found " + maxThrustAvail);
+                //            Log.Info("found " + maxThrustAvail);
                 //            break; //pull max thrust from the vessel state object. 
                 //        }
                 //    }
@@ -1576,26 +1578,26 @@ namespace ActionGroupsExtended
 
             if (RTFound)
             {
-                // Debug.Log("RemoteTech found");
-                //Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                //Debug.Log("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
+                // Log.Info("RemoteTech found");
+                Log.Info("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                Log.Info("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
                 //double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
                 //print("cur delay" + curDelay);
                 if (useRT)
                 {
                     if (FlightGlobals.ActiveVessel.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                     {
-                        // Debug.Log("AGX RemoteTech local");
+                        // Log.Info("RemoteTech local");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                     }
                     else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
                     {
-                        // Debug.Log("AGX RemoteTech infinity");
+                        // Log.Info("RemoteTech infinity");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                     }
                     else
                     {
-                        //Debug.Log("AGX RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                        Log.Info("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
 
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
 
@@ -1616,7 +1618,7 @@ namespace ActionGroupsExtended
 
         public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
-            //Debug.Log("activating group " + group);
+            Log.Info("activating group " + group);
             foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == group))
             {
                 //print("ActactA" + forceDir + " " + agAct.ba.name);
@@ -1644,7 +1646,7 @@ namespace ActionGroupsExtended
                         KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                         bool saveNoneState = agAct.ba.listParent.part.vessel.ActionGroups[actParam.group];
                         agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = false;
-                        //Debug.Log("AGX action deactivate FIRE! " + agAct.ba.listParent.part.vessel.ActionGroups[actParam.group]);
+                        Log.Info("action deactivate FIRE! " + agAct.ba.listParent.part.vessel.ActionGroups[actParam.group]);
                         agAct.ba.Invoke(actParam);
                         agAct.activated = false;
                         if (agAct.ba.name != "kOSVoidAction")
@@ -1723,10 +1725,10 @@ namespace ActionGroupsExtended
             {
                 groupActivatedState[group] = !groupActivatedState[group];
             }
-            //Debug.Log("Endactivation");
+            Log.Info("Endactivation");
             groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
-            //Debug.Log("Endactivation2");
+            Log.Info("Endactivation2");
         }
 
         public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
@@ -1853,7 +1855,7 @@ namespace ActionGroupsExtended
         public void FlightWindow(int WindowID)
         {
 
-            //Debug.Log("flight win");
+            Log.Info("flight win");
             //AGXScrollStyle.normal.background = null;
             GUI.skin.scrollView.normal.background = null;
             //HighLogic.Skin.scrollView.normal.background = ButtonTextureRed;
@@ -2160,7 +2162,7 @@ namespace ActionGroupsExtended
 
                 catch (Exception e)
                 {
-                    Debug.Log("AGX: Reflection to RT fail " + e);
+                    Log.Info("Reflection to RT fail " + e);
                 }
             }
         }
@@ -2330,10 +2332,10 @@ namespace ActionGroupsExtended
             {
                 if (p.Modules.Contains<ModuleAGX>())
                 {
-                    //Debug.Log("AGX 1");
+                    Log.Info("1");
                     if (p.Modules.OfType<ModuleAGX>().First().focusFlightID == (int)currentMissionId)
                     {
-                        // Debug.Log("AGX 2");
+                        // Log.Info("2");
                         p.Modules.OfType<ModuleAGX>().First().currentKeyset = CurrentKeySetFlight;
                         p.Modules.OfType<ModuleAGX>().First().hasData = true;
                     }
@@ -3093,7 +3095,7 @@ namespace ActionGroupsExtended
 
         public void WipeVesselData() //loading screwed up, reset everything
         {
-            //Debug.Log("AGX Error loading, resetting data this vessel to defaults. If this vessel does have saved data that should load, please file a bug report.");
+            Log.Info("Error loading, resetting data this vessel to defaults. If this vessel does have saved data that should load, please file a bug report.");
             CurrentKeySetFlight = 1;
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
@@ -3119,7 +3121,7 @@ namespace ActionGroupsExtended
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
             //currentMissionId = (uint)rootAGX.focusFlightID; //set before this method is called!
-            string errLine = "7j";
+            //string errLine = "7j";
             //if (FlightGlobals.ActiveVessel.Parts.Contains(AGXRoot))
             //{
             //    errLine = "7k";
@@ -3133,30 +3135,30 @@ namespace ActionGroupsExtended
             //}
             //ResetGroupNames(); //always clear names now, we reload everything from ModuleAGX
             LoadGroupNames(); //group names check every part now based on currentMissionID, pass no values
-            errLine = "7m";
+            //errLine = "7m";
             LoadGroupVisibility(rootAGX.groupVisibility);
             LoadGroupVisibilityNames(rootAGX.groupVisibilityNames);
             LoadDirectActionState(rootAGX.DirectActionState);
-            errLine = "7n";
+            //errLine = "7n";
 
             StaticData.CurrentVesselActions.Clear(); //refreshing list, clear old actions
             foreach (Part p in rootAGX.vessel.Parts)
             {
-                errLine = "7o";
+                //errLine = "7o";
                 //if (!p.Modules.Contains("KerbalEVA"))
                 //{
                 foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                 {
-                    errLine = "7p";
+                    //errLine = "7p";
                     if (!StaticData.CurrentVesselActions.Contains(agAct))
                     {
-                        errLine = "7q";
+                        //errLine = "7q";
                         StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
                     }
                 }
                 //}
             }
-            errLine = "7r";
+            //errLine = "7r";
 
             RefreshCurrentActions();
         }
@@ -3196,7 +3198,7 @@ namespace ActionGroupsExtended
 
                 showDockedSubVesselIndicators = true;
                 StartCoroutine(DockedSubVesselsIconTimer());
-                Debug.Log("AGX dd " + missionIDs.Count + "|" + currentMissionId);
+                Log.Info("dd " + missionIDs.Count + "|" + currentMissionId);
                 LoadVesselDataFromPM(missionIDsPM[currentMissionId]);
             }
             if (GUI.Button(new Rect(272, 1, 90, 20), "Next Docked", AGXBtnStyle))
@@ -3213,7 +3215,7 @@ namespace ActionGroupsExtended
                     }
                 }
                 int tempIndex = missionIDs.IndexOf(currentMissionId);
-                //Debug.Log("AGX test " + tempIndex + " " + missionIDs.Count + " " + missionIDs[tempIndex] + " " + currentMissionId);
+                Log.Info("test " + tempIndex + " " + missionIDs.Count + " " + missionIDs[tempIndex] + " " + currentMissionId);
 
                 if (tempIndex == missionIDs.Count - 1)
                 {
@@ -3223,7 +3225,7 @@ namespace ActionGroupsExtended
                 {
                     currentMissionId = missionIDs[tempIndex + 1];
                 }
-                //Debug.Log("AGX test2 " + currentMissionId);
+                Log.Info("test2 " + currentMissionId);
 
                 showDockedSubVesselIndicators = true;
                 StartCoroutine(DockedSubVesselsIconTimer());
@@ -4247,14 +4249,14 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX GroupsNamesToString FAIL " + errStep + " " + e);
+                Log.Info("GroupsNamesToString FAIL " + errStep + " " + e);
                 return "";
             }
         }
 
         public static Dictionary<int, string> GroupNamesStringToDict(string str)
         {
-            string errLine = "1";
+            //string errLine = "1";
             Dictionary<int, string> DictToReturn = new Dictionary<int, string>();
             for (int i = 1; i <= 250; i++)
             {
@@ -4264,28 +4266,28 @@ namespace ActionGroupsExtended
 
             if (LoadNames.Length > 0)
             {
-                errLine = "4";
+                //errLine = "4";
                 while (LoadNames[0] == '\u2023')
                 {
-                    errLine = "5";
+                    //errLine = "5";
                     int groupNum = new int();
                     string groupName = "";
                     LoadNames = LoadNames.Substring(1);
                     groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
                     LoadNames = LoadNames.Substring(3);
-                    errLine = "6";
+                    //errLine = "6";
                     if (LoadNames.IndexOf('\u2023') == -1)
                     {
-                        errLine = "7";
+                        //errLine = "7";
                         groupName = LoadNames;
                     }
                     else
                     {
-                        errLine = "8";
+                        //errLine = "8";
                         groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
                         LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
                     }
-                    errLine = "9";
+                    //errLine = "9";
                     //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
                     //if (p.missionID == currentMissionId) //missionID matchs, group names on this part have priority
                     //{
@@ -4382,7 +4384,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupNamesFail " + errLine + " " + e);
+                Log.Info("LoadGroupNamesFail " + errLine + " " + e);
             }
         }
 
@@ -4442,7 +4444,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupNamesFail " + errLine + " " + e);
+                Log.Info("LoadGroupNamesFail " + errLine + " " + e);
             }
         }
 
@@ -4561,7 +4563,7 @@ namespace ActionGroupsExtended
         {
 
             //if(() &&  &&  &&  &&  &&  &&  &&  && )
-            //Debug.Log("AGX Mouse " + CurrentMousePosition + " " + FlightWin);
+            //Log.Info("Mouse " + CurrentMousePosition + " " + FlightWin);
             if (!CheckMouseOver())
             {
                 if (!AGEditorSelectedParts.Any(prt => prt.AGPart == p))
@@ -4734,15 +4736,15 @@ namespace ActionGroupsExtended
 
         public static bool VesselIsControlled() //check if focus vessel is controllable, use lockmask as Squad sets that when a vessel isnt/.
         {
-            //Debug.Log("AGX TEST " + InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS));
+            Log.Info("TEST " + InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS));
             if (InputLockManager.lockStack.ContainsKey("vessel_noControl_" + FlightGlobals.ActiveVessel.id.ToString()) && InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS))
             {
-                //Debug.Log("AGX Not controllable");
+                Log.Info("Not controllable");
                 return false; //if value is present in lockstack, controls are locked so not controllable
             }
             else
             {
-                //Debug.Log("AGX Ccontrollable");
+                Log.Info("Ccontrollable");
                 return true; //vessel is controlled, activate action
             }
         }
@@ -4754,7 +4756,7 @@ namespace ActionGroupsExtended
             //{
             //    foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             //    {
-            //        Debug.Log("AGX " + p.Modules.OfType<ModuleAGX>().First().currentKeyset + "|" + p.Modules.OfType<ModuleAGX>().First().focusFlightID + "|" + p.Modules.OfType<ModuleAGX>().First().hasData +"|" + p.missionID);
+            //        Log.Info("" + p.Modules.OfType<ModuleAGX>().First().currentKeyset + "|" + p.Modules.OfType<ModuleAGX>().First().focusFlightID + "|" + p.Modules.OfType<ModuleAGX>().First().hasData +"|" + p.missionID);
             //    }
             //}
             //catch
@@ -4797,12 +4799,12 @@ namespace ActionGroupsExtended
                             }
                             else
                             {
-                                // Debug.Log("AGX Update save, root null");
+                                // Log.Info("Update save, root null");
                             }
                         }
                         catch (Exception e)
                         {
-                            Debug.Log("AGX Update save fail" + e);
+                            Log.Info("Update save fail" + e);
                         }
                         errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
@@ -4810,7 +4812,7 @@ namespace ActionGroupsExtended
                     }
                 } //if(RootPartExists) closing bracket
                 errLine = "8";
-                //Debug.Log("AGX Testd");
+                Log.Info("Testd");
                 if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)//.KSC_ALL catches both vessel not controllable via lock Squad sets as well as if ControlLock (my other mod) is engaged
                 {
                     //.Log("AGX Test");
@@ -4843,7 +4845,7 @@ namespace ActionGroupsExtended
                             {
                                 ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
                                 DirectKeysState[kcPair.Key] = true;
-                                //Debug.Log("turn on");
+                                Log.Info("turn on");
                             }
                         }
                         else if (!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
@@ -4852,7 +4854,7 @@ namespace ActionGroupsExtended
                             {
                                 ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
                                 DirectKeysState[kcPair.Key] = false;
-                                //Debug.Log("turn off");
+                                Log.Info("turn off");
                             }
                         }
                     }
@@ -4946,18 +4948,18 @@ namespace ActionGroupsExtended
                 {
                     CheckRTQueue();
                 }
-                //Debug.Log("AGX TEst " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS) + "|" + InputLockManager.IsUnlocked(ControlTypes.ALL_SHIP_CONTROLS)+ "|" + InputLockManager.IsAllLocked(ControlTypes.ALL_SHIP_CONTROLS) );
+                Log.Info("TEst " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS) + "|" + InputLockManager.IsUnlocked(ControlTypes.ALL_SHIP_CONTROLS)+ "|" + InputLockManager.IsAllLocked(ControlTypes.ALL_SHIP_CONTROLS) );
             } //public void Update() try close bracket
             catch (Exception e)
             {
-                Debug.Log("AGX Flight Update Error " + errLine + " " + e);
+                Log.Info("Flight Update Error " + errLine + " " + e);
             }
         }
 
         //public void UpdateOld() //not used, left for copying purposes
         //{
 
-        //    //Debug.Log("Start AGEXT update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
+        //    Log.Info("Start AGEXT update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
         //    //if ((ControlTypes.ALL_SHIP_CONTROLS & (ControlTypes)InputLockManager.lockMask) == 0)
         //    //{
         //    //    print("not Locked");
@@ -5270,15 +5272,15 @@ namespace ActionGroupsExtended
         //                    LoadGroupNames(vslNode.GetValue("groupNames"));
         //                    LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
         //                    LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
-        //                    //Debug.Log(vslNode);
+        //                    Log.Info(vslNode);
         //                    if (vslNode.HasValue("DirectActionState"))
         //                    {
-        //                        //Debug.Log("has state");
+        //                        Log.Info("has state");
         //                        LoadDirectActionState(vslNode.GetValue("DirectActionState"));
         //                    }
         //                    else
         //                    {
-        //                        //Debug.Log("no state");
+        //                        Log.Info("no state");
         //                        LoadDirectActionState("");
         //                    }
         //                    errLine = "24fg";
@@ -5480,13 +5482,13 @@ namespace ActionGroupsExtended
         //                {
         //                    ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
         //                    DirectKeysState[kcPair.Key] = true;
-        //                    //Debug.Log("turn on");
+        //                    Log.Info("turn on");
         //                }
         //                else if (!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
         //                {
         //                    ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
         //                    DirectKeysState[kcPair.Key] = false;
-        //                    //Debug.Log("turn off");
+        //                    Log.Info("turn off");
         //                }
         //            }
         //            foreach (KeyValuePair<int, KeyCode> kcPair2 in DefaultTen) //toggle groups if no actions are assigned
@@ -5523,7 +5525,7 @@ namespace ActionGroupsExtended
         //        //if (!ActiveActionsCalculated)
         //        //{
         //        //    CalculateActiveActions();
-        //        // Debug.Log("AGX update middel A");
+        //        // Log.Info("update middel A");
         //        //}
         //        if (Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
         //        {
@@ -5536,7 +5538,7 @@ namespace ActionGroupsExtended
         //            }
         //            errLine = "40";
         //        }
-        //        //Debug.Log("AGX update middel b");
+        //        Log.Info("update middel b");
         //        errLine = "41";
         //        if (RightClickDelay < 3)
         //        {
@@ -5568,7 +5570,7 @@ namespace ActionGroupsExtended
 
         //            errLine = "44";
         //        }
-        //        //Debug.Log("AGX update middel c");
+        //        Log.Info("update middel c");
         //        errLine = "45";
 
         //        if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
@@ -5578,7 +5580,7 @@ namespace ActionGroupsExtended
 
         //        }
         //        errLine = "46";
-        //        // Debug.Log("AGX update middel d");
+        //        // Log.Info("update middel d");
         //        //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
         //        //{
         //        //    foreach (PartModule pm in p.Modules)
@@ -5604,7 +5606,7 @@ namespace ActionGroupsExtended
         //        //}
         //        //print("delta time " + actionsCheckFrameCount);
         //        errLine = "47";
-        //        //Debug.Log("AGX update middel e2");
+        //        Log.Info("update middel e2");
         //        //count down action cool downs
         //        groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
         //        foreach (AGXCooldown agCD in groupCooldowns)
@@ -5612,27 +5614,27 @@ namespace ActionGroupsExtended
         //            agCD.delayLeft = agCD.delayLeft + 1;
 
         //        }
-        //        //Debug.Log("AGX update middel e");
+        //        Log.Info("update middel e");
         //        errLine = "48";
         //        if (RTFound)
         //        {
         //            CheckRTQueue();
         //        }
-        //        //Debug.Log("AGX update middel f");
+        //        Log.Info("update middel f");
         //        errLine = "49";
         //        //PrintPartActs();
         //        //print("landed " + FlightGlobals.ActiveVessel.landedAt);
 
         //        //if (test == null)
         //        //{
-        //        //    Debug.Log("NULL");
+        //        //    Log.Info("NULL");
         //        //}
         //        //else
         //        //{
-        //        //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
+        //        //    Log.Info("found " + test.nodes.Count + " " + test.values.Count);
         //        //}
-        //        //Debug.Log("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
-        //        //Debug.Log("End update!");
+        //        Log.Info("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
+        //        Log.Info("End update!");
         //    }
         //    catch (Exception e)
         //    {
@@ -5642,7 +5644,7 @@ namespace ActionGroupsExtended
 
         IEnumerator GUIDelayCoroutine()
         {
-            //Debug.Log("AGX Coroutine fire");
+            Log.Info("Coroutine fire");
             int i = 0;
             while (i < 4)
             {
@@ -5654,28 +5656,28 @@ namespace ActionGroupsExtended
 
         public void LoadGUIDataAfterDelay()
         {
-            //Debug.Log("AGX LoadUI call");
+            Log.Info("LoadUI call");
             string errLine = "1";
             try
             {
                 ModuleAGX rootAGX = null;
 
-                //Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
+                Log.Info("" + FlightGlobals.ActiveVessel.vesselType.ToString());
                 if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA") || FlightGlobals.ActiveVessel.vesselType == VesselType.Flag) //kerbals have no actions so...
                 {
-                    //Debug.Log("AGX oddball");
+                    Log.Info("oddball");
                     foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                     {
                         if (!p.Modules.Contains("ModuleAGX"))
                         {
-                            //Debug.Log("AGX AGXModule being added");
+                            Log.Info("AGXModule being added");
                             rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
                         }
                     }
                     rootAGX = (ModuleAGX)FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"];
                     //rootAGX = new ModuleAGX();
                     //rootAGX.hasData = true;
-                    //Debug.Log("AGX EvA");
+                    Log.Info("EvA");
 
                 }
                 else
@@ -5684,27 +5686,27 @@ namespace ActionGroupsExtended
                     {
                         errLine = "7e";
                         rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
-                        // Debug.Log("AGX root module found");
+                        // Log.Info("root module found");
                     }
                     else
                     {
                         errLine = "7f";
                         rootAGX = new ModuleAGX();
-                        //  Debug.Log("AGX trap new root module");
+                        //  Log.Info("trap new root module");
                     }
 
                     if (!rootAGX.hasData)//make sure our moduleAGX has data, rare but can happen on docking ships launched before installing AGX
                     {
-                        // Debug.Log("AGX no datat");
+                        // Log.Info("no datat");
                         errLine = "7g";
-                        // Debug.Log("AGX active vessel part count " + FlightGlobals.ActiveVessel.Parts.Count);
+                        // Log.Info("active vessel part count " + FlightGlobals.ActiveVessel.Parts.Count);
                         foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                         {
-                            // Debug.Log("AGX active vessel part count2 " + FlightGlobals.ActiveVessel.Parts.Count);
+                            // Log.Info("active vessel part count2 " + FlightGlobals.ActiveVessel.Parts.Count);
                             errLine = "7g1";
                             if (p.Modules.OfType<ModuleAGX>().FirstOrDefault().hasData) //.hasData is false on Default so this works
                             {
-                                //   Debug.Log("AGX active vessel part count3 " + FlightGlobals.ActiveVessel.Parts.Count);
+                                //   Log.Info("active vessel part count3 " + FlightGlobals.ActiveVessel.Parts.Count);
                                 errLine = "7g2";
                                 rootAGX = p.Modules.OfType<ModuleAGX>().First();
                             }
@@ -5718,7 +5720,7 @@ namespace ActionGroupsExtended
                         {
                             errLine = "7g4";
                             rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
-                            // Debug.Log("AGX root module found");
+                            // Log.Info("root module found");
                         }
                     }
                 }
@@ -5742,7 +5744,7 @@ namespace ActionGroupsExtended
                     else if (rootAGX.focusFlightID == rootAGX.part.missionID)
                     {
                         errLine = "7h11";
-                        //  Debug.Log("agx root found");
+                        //  Log.Info("agx root found");
                         //do nothing, rootAGX is currently set to the root part's ModuleAGX
                     }
                     else //check other parts for their mission id and change to that ModuleAGX if it matchs
@@ -5761,7 +5763,7 @@ namespace ActionGroupsExtended
                                 missionIDs.Add(p.missionID);
                             }
                         }
-                        //   Debug.Log("agx not root " + missionIDs.Count);
+                        //   Log.Info("agx not root " + missionIDs.Count);
                         errLine = "7h15";
                         if (missionIDs.Contains((uint)rootAGX.focusFlightID))
                         {
@@ -5810,13 +5812,13 @@ namespace ActionGroupsExtended
                 }
                 //if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX"))
                 //{
-                //    Debug.Log("AGX root flight id " + FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"].Fields.GetValue("focusFlightID"));
+                //    Log.Info("root flight id " + FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"].Fields.GetValue("focusFlightID"));
                 //}
                 errLine = "7s";
             }
             catch (Exception e)
             {
-                Debug.Log("AGX Flight Load Vessel GUI Delay error " + errLine + " " + e);
+                Log.Info("Flight Load Vessel GUI Delay error " + errLine + " " + e);
             }
 
         }
@@ -5854,7 +5856,7 @@ namespace ActionGroupsExtended
                     }
                     catch (Exception e)
                     {
-                        Debug.Log("AGX RTQueue Fail&Recover " + errLine + " " + e);
+                        Log.Info("RTQueue Fail&Recover " + errLine + " " + e);
                         rtItem.state = AGXRemoteTechItemState.FAILED;
                     }
                 }
@@ -5862,7 +5864,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX RTQueue Fail " + errLine + " " + e);
+                Log.Info("RTQueue Fail " + errLine + " " + e);
             }
         }
 
@@ -6411,7 +6413,7 @@ namespace ActionGroupsExtended
 
         public void CalculateActiveActions()
         {
-            //Debug.Log("calculateActiveActions Start" + StaticData.CurrentVesselActions.Count);
+            Log.Info("calculateActiveActions Start" + StaticData.CurrentVesselActions.Count);
             //ActiveActions.Clear();
             ActiveActionsState.Clear();
             for (int i = 1; i <= 250; i = i + 1)
@@ -6465,7 +6467,7 @@ namespace ActionGroupsExtended
             //print("Def 10 count " + DefaultTen.Count + " " + ActiveKeys.Count + " " + ActiveKeysDirect.Count);
 
 
-            //Debug.Log("calculateActiveActions22 end");
+            Log.Info("calculateActiveActions22 end");
             //if (ActiveActionsState.Count > 0)
             //{
             CalculateActionsState();
@@ -6479,11 +6481,11 @@ namespace ActionGroupsExtended
         public static void CalculateActionsState() //flag each actiongroup as activated or not
         {
             // print("Calculate start");
-            //Debug.Log("CalclateActionsState33 start!");
+            Log.Info("CalclateActionsState33 start!");
             //foreach(bool b in FlightGlobals.ActiveVessel.ActionGroups.groups)
             //{
 
-            //    Debug.Log("bool state " + b.ToString());
+            //    Log.Info("bool state " + b.ToString());
             //}
             string errLine = "1";
             try
@@ -6502,7 +6504,7 @@ namespace ActionGroupsExtended
                     foreach (AGXAction agxAct in StaticData.CurrentVesselActions)
                     {
                         //print("actions " + agxAct.ToString());
-                        //Debug.Log("cnt " + ActiveActionsState.Count);
+                        Log.Info("cnt " + ActiveActionsState.Count);
                         errLine = "5";
                         if (agxAct.activated)
                         {
@@ -6553,7 +6555,7 @@ namespace ActionGroupsExtended
                         groupActivatedState[actState.group] = false;
                     }
                 }
-                //Debug.Log("CalclateActionsState33 end!");
+                Log.Info("CalclateActionsState33 end!");
             }
             catch (Exception e)
             {
@@ -6619,12 +6621,12 @@ namespace ActionGroupsExtended
                 {
 
                     errStep = "2";
-                    //Debug.Log("AGX test mission id match");
+                    Log.Info("test mission id match");
                     return GroupNamesDictToString(AGXguiNames);
                 }
                 else
                 {
-                    //Debug.Log("AGX test mission id no match");
+                    Log.Info("test mission id no match");
                     Dictionary<int, string> curPMNames = GroupNamesStringToDict(agxPM.groupNames);
                     Dictionary<int, string> tempNames = new Dictionary<int, string>();
                     for (int i = 1; i <= 250; i++)
@@ -6678,11 +6680,11 @@ namespace ActionGroupsExtended
 
         public static void CheckActionsActive()
         {
-            //Debug.Log("CheckActionsActice Start");
+            Log.Info("CheckActionsActice Start");
             StaticData.CurrentVesselActions = CheckActionsActiveActualCode(StaticData.CurrentVesselActions);
-            // Debug.Log("CheckActionsActice Mid");
+            // Log.Info("CheckActionsActice Mid");
             CalculateActionsState();
-            // Debug.Log("CheckActionsActice End");
+            // Log.Info("CheckActionsActice End");
         }
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
@@ -6986,15 +6988,15 @@ namespace ActionGroupsExtended
                                 {
                                     if (Asm.dllName == "FerramAerospaceResearch")
                                     {
-                                        //Debug.Log("far found");
+                                        Log.Info("far found");
                                         FarAsm = Asm.assembly;
                                     }
                                 }
-                                //Debug.Log("far found2");
+                                Log.Info("far found2");
                                 if (FarAsm != null)
                                 {
                                     Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
-                                    //Debug.Log("far found3");
+                                    Log.Info("far found3");
                                     if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
                                     {
                                         agAct.activated = true;
@@ -7181,24 +7183,24 @@ namespace ActionGroupsExtended
                             }
                             break;
                         case "ModuleControlSurfaceActions":
-                            //Debug.Log("surface found");
+                            Log.Info("surface found");
                             agAct.activated = true;
                             //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
                             foreach (PartModule pm in agAct.ba.listParent.part.Modules)
                             {
                                 if (pm is ModuleControlSurface)
                                 {
-                                    //Debug.Log("surface found2");
+                                    Log.Info("surface found2");
                                     ModuleControlSurface CS = (ModuleControlSurface)pm;
                                     switch (agAct.ba.name)
                                     {
                                         case "TogglePitchAction":
                                         case "EnablePitchAction":
                                         case "DisablePitchAction":
-                                            //Debug.Log("surface found3");
+                                            Log.Info("surface found3");
                                             if (CS.ignorePitch)
                                             {
-                                                //Debug.Log("surface found4");
+                                                Log.Info("surface found4");
                                                 agAct.activated = false;
                                             }
                                             break;
@@ -7222,7 +7224,7 @@ namespace ActionGroupsExtended
                                 }
                                 else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
                                 {
-                                    //Debug.Log("Start FAR Module");
+                                    Log.Info("Start FAR Module");
                                     int i;
                                     if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
                                     {
@@ -7284,7 +7286,7 @@ namespace ActionGroupsExtended
                                                 break;
                                         }
                                     }
-                                    //Debug.Log("end FAR Module");
+                                    Log.Info("end FAR Module");
                                 }
                             }
                             break;

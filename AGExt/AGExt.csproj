@@ -42,6 +42,7 @@
     <Compile Include="Instantly.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="External.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="Notes.cs" />
     <Compile Include="OtherVessel.cs" />
     <Compile Include="PartModule.cs" />

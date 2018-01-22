@@ -276,7 +276,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnClick += (e) => {
-        /// Debug.Log("button clicked, mouseButton: " + e.MouseButton);
+        /// Log.Info("button clicked, mouseButton: " + e.MouseButton);
         /// };
         /// </code>
         /// </example>
@@ -289,7 +289,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnMouseEnter += (e) => {
-        /// Debug.Log("mouse entered button");
+        /// Log.Info("mouse entered button");
         /// };
         /// </code>
         /// </example>
@@ -302,7 +302,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnMouseLeave += (e) => {
-        /// Debug.Log("mouse left button");
+        /// Log.Info("mouse left button");
         /// };
         /// </code>
         /// </example>

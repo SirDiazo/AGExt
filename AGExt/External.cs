@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using KSP.IO;
 using System.Reflection;
-
+using AGExt;
 using UnityEngine;
 
 namespace ActionGroupsExtended
@@ -894,15 +894,15 @@ namespace ActionGroupsExtended
 
         public override bool Equals(object o)
         {
-            //Debug.Log("Obj compare");
+            Log.Info("Obj compare");
             if (o == null)
             {
-                //Debug.Log("Obj compare null");
+                Log.Info("Obj compare null");
                 return false;
             }
             AGXAction agxCheck = o as AGXAction;
-            //Debug.Log("compare1a" + this.prt.partInfo.name + " " + this.ba.guiName + " " + this.group);
-            // Debug.Log("compare2a" + agxCheck.prt.partInfo.name + " " + agxCheck.ba.guiName + " " + agxCheck.group);
+            Log.Info("compare1a" + this.prt.partInfo.name + " " + this.ba.guiName + " " + this.group);
+            // Log.Info("compare2a" + agxCheck.prt.partInfo.name + " " + agxCheck.ba.guiName + " " + agxCheck.group);
             if ((object)agxCheck == null)
             {
                 return false;
@@ -916,8 +916,8 @@ namespace ActionGroupsExtended
         public bool Equals(AGXAction obj)
         {
             //print("AGX Compare");
-            //Debug.Log("compare1" + this.prt.partInfo.name + this.prt.GetHashCode() + " " + this.ba.guiName + this.ba.GetHashCode() + " " + this.group);
-            //Debug.Log("compare2" + obj.prt.partInfo.name +  obj.prt.GetHashCode() + " " + obj.ba.guiName +  obj.ba.GetHashCode() + " " + obj.group);
+            Log.Info("compare1" + this.prt.partInfo.name + this.prt.GetHashCode() + " " + this.ba.guiName + this.ba.GetHashCode() + " " + this.group);
+            Log.Info("compare2" + obj.prt.partInfo.name +  obj.prt.GetHashCode() + " " + obj.ba.guiName +  obj.ba.GetHashCode() + " " + obj.group);
             if (obj == null)
             {
                 return false;
@@ -937,8 +937,8 @@ namespace ActionGroupsExtended
         public bool Equals(AGXAction obj1, AGXAction obj2)
         {
             //print("AGX Compare");
-            //Debug.Log("compare1c" + obj1.prt.partInfo.name + " " + obj1.ba.guiName + " " + obj1.group);
-            //Debug.Log("compare2c" + obj2.prt.partInfo.name + " " + obj2.ba.guiName + " " + obj2.group);
+            Log.Info("compare1c" + obj1.prt.partInfo.name + " " + obj1.ba.guiName + " " + obj1.group);
+            Log.Info("compare2c" + obj2.prt.partInfo.name + " " + obj2.ba.guiName + " " + obj2.group);
             if (obj1 == null)
             {
                 return false;
@@ -961,12 +961,12 @@ namespace ActionGroupsExtended
         }
         public override int GetHashCode()
         {
-            //Debug.Log("get hash local");
+            Log.Info("get hash local");
             return ((int)ba.GetHashCode() + (int)prt.GetHashCode()) ^ group;
         }
         public int GetHashCode(AGXAction obj)
         {
-            //Debug.Log("get has remote");
+            Log.Info("get has remote");
             return ((int)obj.ba.GetHashCode() + (int)obj.prt.GetHashCode()) ^ obj.group;
         }
 
@@ -1067,7 +1067,7 @@ namespace ActionGroupsExtended
 
         public static bool RTDataReceive(ConfigNode node) //receive data back from RT
         {
-            Debug.Log("AGX Call: RemoteTechCallback");
+            Log.Info("Call: RemoteTechCallback");
             if (HighLogic.LoadedSceneIsFlight)
             {
                 if (FlightGlobals.ActiveVessel.rootPart.flightID == Convert.ToUInt32(node.GetValue("FlightID")))
