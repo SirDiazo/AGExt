@@ -1,3 +1,6 @@
+2.3.2.1
+	Moved Localization folder into AGExt (was being missed by Jenkins)
+
 2.3.2
 	Added Log module
 	Changed all Debug.Log to Log.Info
