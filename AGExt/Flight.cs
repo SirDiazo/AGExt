@@ -1262,7 +1262,7 @@ namespace ActionGroupsExtended
                         pmAGX.DirectActionState = directActionsToSave; //this may be an issue if docked vessels dock with the same action group in different directaction states.
 
                     }
-                    pmAGX.focusFlightID = (int)currentMissionId;
+                    pmAGX.focusFlightID = currentMissionId;
                     pmAGX.hasData = true;
                 }
             }
@@ -2334,7 +2334,7 @@ namespace ActionGroupsExtended
                 if (p.Modules.Contains<ModuleAGX>())
                 {
                     Log.Info("1");
-                    if (p.Modules.OfType<ModuleAGX>().First().focusFlightID == (int)currentMissionId)
+                    if (p.Modules.OfType<ModuleAGX>().First().focusFlightID == currentMissionId)
                     {
                         // Log.Info("2");
                         p.Modules.OfType<ModuleAGX>().First().currentKeyset = CurrentKeySetFlight;
@@ -3121,7 +3121,7 @@ namespace ActionGroupsExtended
             CurrentKeySetFlight = rootAGX.currentKeyset;
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
-            //currentMissionId = (uint)rootAGX.focusFlightID; //set before this method is called!
+            //currentMissionId = rootAGX.focusFlightID; //set before this method is called!
             //string errLine = "7j";
             //if (FlightGlobals.ActiveVessel.Parts.Contains(AGXRoot))
             //{
@@ -4326,7 +4326,7 @@ namespace ActionGroupsExtended
                         ModuleAGX agxPM = (ModuleAGX)p.Modules["ModuleAGX"];
                         if (agxPM.focusFlightID == 0)
                         {
-                            agxPM.focusFlightID = (int)FlightGlobals.ActiveVessel.rootPart.missionID; //error trap first load in flight mode, this will still be 0 so set it to the root part of the ship. 99% of the time this will be on launchpad
+                            agxPM.focusFlightID = FlightGlobals.ActiveVessel.rootPart.missionID; //error trap first load in flight mode, this will still be 0 so set it to the root part of the ship. 99% of the time this will be on launchpad
                         }
 
                         //string LoadNames = agxPM.groupNames;
@@ -5739,7 +5739,7 @@ namespace ActionGroupsExtended
                     if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
                     {
                         errLine = "7h10";
-                        rootAGX.focusFlightID = (int)rootAGX.vessel.rootPart.missionID;
+                        rootAGX.focusFlightID = rootAGX.vessel.rootPart.missionID;
                         currentMissionId = rootAGX.vessel.rootPart.missionID;
                     }
                     else if (rootAGX.focusFlightID == rootAGX.part.missionID)
@@ -5766,10 +5766,10 @@ namespace ActionGroupsExtended
                         }
                         //   Log.Info("agx not root " + missionIDs.Count);
                         errLine = "7h15";
-                        if (missionIDs.Contains((uint)rootAGX.focusFlightID))
+                        if (missionIDs.Contains(rootAGX.focusFlightID))
                         {
                             errLine = "7h16";
-                            currentMissionId = (uint)rootAGX.focusFlightID;
+                            currentMissionId = rootAGX.focusFlightID;
                             foreach (Part p in rootAGX.vessel.parts)
                             {
                                 errLine = "7h17";

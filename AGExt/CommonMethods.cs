@@ -371,7 +371,7 @@ namespace ActionGroupsExtended
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
         public bool hasData = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-        public int focusFlightID = 0;
+        public uint focusFlightID = 0;
 
         public ConfigNode toggleNode;
         public ConfigNode holdNode;
