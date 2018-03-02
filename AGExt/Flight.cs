@@ -9,7 +9,7 @@ using KSP.UI.Screens;
 using KSP.Localization;
 using UnityEngine;
 using AGExt;
-
+using ClickThroughFix;
 
 namespace ActionGroupsExtended
 {
@@ -891,9 +891,9 @@ namespace ActionGroupsExtended
                 SettingsWin.x = position.x;
                 SettingsWin.y = position.y;
 
-                // GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
-                GUI.Window(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
-                //RCSlaWin = GUILayout.Window(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
+                // ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
+                //RCSlaWin = ClickThruBlocker.GUILayoutWindow(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
                 //GUI.skin = oldSkin;
 
                 return new Vector2(SettingsWin.width, SettingsWin.height);
@@ -1297,29 +1297,29 @@ namespace ActionGroupsExtended
                 {
                     GroupsInFlightWin.x = FlightWin.x + 235;
                     GroupsInFlightWin.y = FlightWin.y;
-                    // FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
-                    FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, Localizer.Format("#AGEXT_UI_actions"), AGXWinStyle);
+                    // FlightWin = ClickThruBlocker.GUIWindow(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
+                    FlightWin = ClickThruBlocker.GUIWindow(673467788, FlightWin, FlightWindow, Localizer.Format("#AGEXT_UI_actions"), AGXWinStyle);
                     if (RTWinShow)
                     {
-                        RemoteTechQueueWin = GUI.Window(673462798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
+                        RemoteTechQueueWin = ClickThruBlocker.GUIWindow(673462798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
                     }
                     //TrapMouse |= FlightWin.Contains(RealMousePos);
 
                 }
                 if (ShowGroupsInFlightWindow)
                 {
-                    GroupsInFlightWin = GUI.Window(673461788, GroupsInFlightWin, GroupsInFlightWindow, "", AGXWinStyle);
+                    GroupsInFlightWin = ClickThruBlocker.GUIWindow(673461788, GroupsInFlightWin, GroupsInFlightWindow, "", AGXWinStyle);
 
                 }
                 if (ShowKeySetWin)
                 {
-                    // KeySetWin = GUI.Window(673467792, KeySetWin, KeySetWindow, "Keysets", AGXWinStyle);
-                    KeySetWin = GUI.Window(673467792, KeySetWin, KeySetWindow, Localizer.Format("#AGEXT_UI_key_sets"), AGXWinStyle);
+                    // KeySetWin = ClickThruBlocker.GUIWindow(673467792, KeySetWin, KeySetWindow, "Keysets", AGXWinStyle);
+                    KeySetWin = ClickThruBlocker.GUIWindow(673467792, KeySetWin, KeySetWindow, Localizer.Format("#AGEXT_UI_key_sets"), AGXWinStyle);
                     //TrapMouse = KeySetWin.Contains(RealMousePos);
                     //ShowSelectedWin = false;
                     if (!AutoHideGroupsWin)
                     {
-                        GroupsWin = GUI.Window(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
+                        GroupsWin = ClickThruBlocker.GUIWindow(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
                     }
                     ShowCurActsWin = false;
 
@@ -1328,8 +1328,8 @@ namespace ActionGroupsExtended
                 if (ShowSelectedWin)
                 {
 
-                    // SelPartsWin = GUI.Window(673467794, SelPartsWin, SelParts, "AGExt Selected parts: " + AGEditorSelectedParts.Count(), AGXWinStyle);
-                    SelPartsWin = GUI.Window(673467794, SelPartsWin, SelParts, Localizer.Format("#AGEXT_UI_selected_parts_numbers_title") + AGEditorSelectedParts.Count(), AGXWinStyle);
+                    // SelPartsWin = ClickThruBlocker.GUIWindow(673467794, SelPartsWin, SelParts, "AGExt Selected parts: " + AGEditorSelectedParts.Count(), AGXWinStyle);
+                    SelPartsWin = ClickThruBlocker.GUIWindow(673467794, SelPartsWin, SelParts, Localizer.Format("#AGEXT_UI_selected_parts_numbers_title") + AGEditorSelectedParts.Count(), AGXWinStyle);
                     //
                     ShowCurActsWin = true;
                     //TrapMouse = SelPartsWin.Contains(RealMousePos);
@@ -1338,14 +1338,14 @@ namespace ActionGroupsExtended
                     }
                     else
                     {
-                        GroupsWin = GUI.Window(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
+                        GroupsWin = ClickThruBlocker.GUIWindow(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
                         // TrapMouse |= GroupsWin.Contains(RealMousePos);
                     }
 
                     if (ShowKeyCodeWin)
                     {
-                        // KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
-                        KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, Localizer.Format("#AGEXT_UI_keycodes"), AGXWinStyle);
+                        // KeyCodeWin = ClickThruBlocker.GUIWindow(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
+                        KeyCodeWin = ClickThruBlocker.GUIWindow(673467793, KeyCodeWin, KeyCodeWindow, Localizer.Format("#AGEXT_UI_keycodes"), AGXWinStyle);
                         //TrapMouse |= KeyCodeWin.Contains(RealMousePos);
                     }
                     string ErrLine = "1";
@@ -1396,8 +1396,8 @@ namespace ActionGroupsExtended
                 }
                 if (ShowCurActsWin && ShowSelectedWin)
                 {
-                    // CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
-                    CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, Localizer.Format("#AGEXT_UI_action_this_group") + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
+                    // CurActsWin = ClickThruBlocker.GUIWindow(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
+                    CurActsWin = ClickThruBlocker.GUIWindow(673467790, CurActsWin, CurrentActionsWindow, Localizer.Format("#AGEXT_UI_action_this_group") + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
                     // TrapMouse |= CurActsWin.Contains(RealMousePos);
 
                 }
@@ -1412,7 +1412,7 @@ namespace ActionGroupsExtended
                 Vector3 partScreenPos = FlightCamera.fetch.mainCamera.WorldToScreenPoint(partToHighlight.transform.position);
                 //EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
                 Rect partCenterWin = new Rect(partScreenPos.x - 20, (Screen.height - partScreenPos.y) - 20, 41, 41);
-                //partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
+                //partCenterWin = ClickThruBlocker.GUIWindow(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
                 GUI.DrawTexture(partCenterWin, PartCenter);
 
             }
@@ -1433,8 +1433,8 @@ namespace ActionGroupsExtended
             if (showAGXRightClickMenu && showMyUI)
             {
                 Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
-                // GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
-                GUI.Window(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
+                // ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
             }
             //print("guis " + HighLogic.Skin.font.name + " " + GUI.skin.font.name); 
 #if DEBUG

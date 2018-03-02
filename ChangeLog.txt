@@ -1,3 +1,8 @@
+2.3.2.3
+	Thanks to forum user @Arivald Ha'gel for the following:
+		Invalid conversion from uint to int fixed
+	Added support for the Click Through Blocker.  ClickThroughBlocker is now a requirement
+
 2.3.2.2
 	Fixed localization strings in the editor
 
