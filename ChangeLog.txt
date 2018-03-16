@@ -1,3 +1,9 @@
+2.3.3
+	Updated for 1.4.1
+	Added support for the Toolbar Controller
+	Added simple settings page to toggle use of the Blizzy toolbar
+	Added additional button to settings window to toggle Blizzy toolbar
+
 2.3.2.3
 	Thanks to forum user @Arivald Ha'gel for the following:
 		Invalid conversion from uint to int fixed

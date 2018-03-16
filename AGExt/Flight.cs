@@ -10,6 +10,7 @@ using KSP.Localization;
 using UnityEngine;
 using AGExt;
 using ClickThroughFix;
+using ToolbarControl_NS;
 
 namespace ActionGroupsExtended
 {
@@ -84,7 +85,7 @@ namespace ActionGroupsExtended
         private Dictionary<int, KeyCode> DefaultTen;
         private Dictionary<int, KeyCode> ActiveKeysDirect;
         private Dictionary<int, bool> DirectKeysState;
-        private IButton AGXBtn;
+        //private IButton AGXBtn;
         //public Dictionary<string, ConfigNode> loadedVessels;
         public static List<AGXRemoteTechQueueItem> AGXRemoteTechQueue;
         public static bool RTFound = false;
@@ -213,6 +214,7 @@ namespace ActionGroupsExtended
         {
 
         }
+#if true
         public void onStockToolbarClick() //void method, use delegates
         {
             //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
@@ -227,6 +229,7 @@ namespace ActionGroupsExtended
             //        onLeftButtonClick();
             //    }
             //}
+            onLeftButtonClick();
         }
 
         public Callback LeftClick = delegate
@@ -239,7 +242,7 @@ namespace ActionGroupsExtended
             thisModule.onRightButtonStockClick();
 
         };
-
+#endif
         public void onRightButtonStockClick()
         {
             showAGXRightClickMenu = !showAGXRightClickMenu;
@@ -417,12 +420,13 @@ namespace ActionGroupsExtended
                     print("AGX Default cooldown not found, using 5 Update frames");
                 }
                 errLine = "13";
+#if false
                 if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
                 {
                     errLine = "14";
 
                     AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
-                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
+                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button_24";
                     // AGXBtn.ToolTip = "Action Groups Extended";
                     AGXBtn.ToolTip = Localizer.Format("#AGEXT_UI_IN_TOOLBAR");
                     AGXBtn.OnClick += (e) =>
@@ -458,6 +462,8 @@ namespace ActionGroupsExtended
                     StartCoroutine("AddButtons");
 
                 }
+#endif
+                AddButtons();
                 errLine = "16";
                 if (AGExtNode.GetValue("FltShow") == "0")
                 {
@@ -706,21 +712,38 @@ namespace ActionGroupsExtended
             GameEvents.onHideUI.Add(onMyUIHide);
         }
 
-        IEnumerator AddButtons()
+        ToolbarControl toolbarControl = null;
+        void AddButtons()
         {
+#if false
             while (!ApplicationLauncher.Ready)
             {
                 yield return null;
             }
             if (!buttonCreated)
             {
-                AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
+                AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, 
+            ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button_38", false));
                 //GameEvents.onGUIApplicationLauncherReady.Remove(AddButtons);
                 //CLButton.onLeftClick(StockToolbarClick);
                 AGXAppFlightButton.onLeftClick = (Callback)Delegate.Combine(AGXAppFlightButton.onLeftClick, LeftClick); //combine delegates together
                 AGXAppFlightButton.onRightClick = (Callback)Delegate.Combine(AGXAppFlightButton.onRightClick, RightClick); //combine delegates together
                 buttonCreated = true;
             }
+#endif
+            Log.Info("Flight.AddButton");
+            toolbarControl = gameObject.AddComponent<ToolbarControl>();
+            toolbarControl.AddToAllToolbars(onStockToolbarClick, onStockToolbarClick,
+                ApplicationLauncher.AppScenes.FLIGHT,
+                "AGEXT_NS",
+                "agextButton",
+                "Diazo/AGExt/icon_button_38",
+                "Diazo/AGExt/icon_button_24",
+                "Action Groups Extended"
+            );
+            toolbarControl.AddLeftRightClickCallbacks(null, onRightButtonStockClick);
+            toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
+
         }
 
         public static void LoadDirectActionState(string DirectActions)
@@ -880,6 +903,7 @@ namespace ActionGroupsExtended
             }
         }
 
+#if false
         public class SettingsWindow : MonoBehaviour, IDrawable
         {
             public Rect SettingsWin = new Rect(0, 0, 150, 180);
@@ -973,7 +997,7 @@ namespace ActionGroupsExtended
 
             }
         }
-
+#endif
         public bool IsVesselLoaded(uint flightID) //is vessel loaded, wrapper to convert from flightID to vsl
         {
             try
@@ -1183,6 +1207,7 @@ namespace ActionGroupsExtended
         {
 
             SaveWindowPositions();
+#if false
             if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
             {
                 AGXBtn.Destroy();
@@ -1191,6 +1216,10 @@ namespace ActionGroupsExtended
             {
                 ApplicationLauncher.Instance.RemoveModApplication(AGXAppFlightButton);
             }
+#endif
+            toolbarControl.OnDestroy();
+            Destroy(toolbarControl);
+
             //GameEvents.onPartAttach.Remove(DockingEvent);
             //flightNodeIsLoaded = false;
             loadFinished = false;
@@ -1279,6 +1308,9 @@ namespace ActionGroupsExtended
 
         public void OnGUI()
         {
+            if (toolbarControl != null)
+                toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
+
             ////GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
 
             if (!showCareerStockAGs)
@@ -1432,7 +1464,7 @@ namespace ActionGroupsExtended
 
             if (showAGXRightClickMenu && showMyUI)
             {
-                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 205);
                 // ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
                 ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
             }
@@ -1537,6 +1569,17 @@ namespace ActionGroupsExtended
 
                 //mechjeb test stuff end
             }
+
+            string s;
+            if (HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy)
+                s = "Disable Blizzy";
+            else
+                s = "Enable Blizzy";
+            if (GUI.Button(new Rect(10, 175, 130, 25), Localizer.Format(s), AGXBtnStyle))
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy = !HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy;
+            }
+
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             //GUI.DragWindow();

@@ -1,4 +1,5 @@
-﻿/*
+﻿#if false
+/*
 Copyright (c) 2013-2014, Maik Schreiber
 All rights reserved.
 
@@ -901,3 +902,4 @@ new Func<Vector2, Vector2>((pos) => value.Draw(pos))
 
     #endregion
 }
+#endif

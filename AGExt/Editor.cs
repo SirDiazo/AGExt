@@ -10,6 +10,7 @@ using KSP.UI.Screens;
 using KSP.Localization;
 using AGExt;
 using ClickThroughFix;
+using ToolbarControl_NS;
 
 
 
@@ -85,7 +86,7 @@ namespace ActionGroupsExtended
         //public static List<AGXAction> CurrentVesselActions;
         // private static bool MouseOverExitBtns = false;
 
-        private IButton AGXBtn;
+       // private IButton AGXBtn;
 
 
 
@@ -140,17 +141,17 @@ namespace ActionGroupsExtended
         List<string> showAllPartsListTitles; //list of all parts with actions to show in group window
         KSPActionGroup KSPDefaultLastActionGroup = KSPActionGroup.Custom01;
         public static bool disablePartAttaching = true; //disable part attaching feature when loading so non-symmetric actions are not made symmetric
-        //static Part partLastHighlight = null;
-        ////static Color partHighlighLastColor;
-        //static Part.HighlightType partHighlightLastType;
-        //static Material[] partHighlightLastMaterial;
+                                                        //static Part partLastHighlight = null;
+                                                        ////static Color partHighlighLastColor;
+                                                        //static Part.HighlightType partHighlightLastType;
+                                                        //static Material[] partHighlightLastMaterial;
 
 
 
-
+#if false
         public class SettingsWindowEditor : MonoBehaviour, IDrawable
         {
-            public Rect SettingsWinEditor = new Rect(0, 0, 150, 85);
+            public Rect SettingsWinEditor = new Rect(0, 0, 150, 125);
             public Vector2 Draw(Vector2 position)
             {
                 var oldSkin = GUI.skin;
@@ -193,6 +194,15 @@ namespace ActionGroupsExtended
                 {
                     AutoHideGroupsWin = !AutoHideGroupsWin;
                 }
+                string s;
+                if (HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy)
+                    s = "Disable Blizzy";
+                else
+                    s = "Enable Blizzy";
+                if (GUI.Button(new Rect(10, 75, 130, 25), Localizer.Format(s), AGXBtnStyle))
+                {
+                    HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy = !HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy;
+                }
                 AGXBtnStyle.normal.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
             }
@@ -201,6 +211,7 @@ namespace ActionGroupsExtended
 
             }
         }
+#endif
         public void DrawSettingsWinEditor(int WindowID)
         {
 
@@ -226,6 +237,15 @@ namespace ActionGroupsExtended
             if (GUI.Button(new Rect(10, 50, 130, 25), Localizer.Format("#AGEXT_UI_setting_auto_hide_groups"), AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
+            }
+            string s;
+            if (HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy)
+                s = "Disable Blizzy";
+            else
+                s = "Enable Blizzy";
+            if (GUI.Button(new Rect(10, 75, 130, 25), Localizer.Format(s), AGXBtnStyle))
+            {
+                HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy = !HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy;
             }
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
@@ -425,11 +445,12 @@ namespace ActionGroupsExtended
                 //LoadCurrentKeyBindings();
 
                 errLine = "15";
+#if false
                 if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
                 {
 
                     AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
-                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
+                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button_24";
                     // AGXBtn.ToolTip = "Action Groups Extended";
                     AGXBtn.ToolTip = Localizer.Format("#AGEXT_UI_IN_TOOLBAR");
                     AGXBtn.OnClick += (e) =>
@@ -467,6 +488,8 @@ namespace ActionGroupsExtended
                     StartCoroutine("AddButtons");
                     //AGXAppEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
                 }
+#endif
+                AddButtons();
                 errLine = "16";
 
                 DetachedPartActions = new List<AGXAction>();
@@ -734,6 +757,7 @@ namespace ActionGroupsExtended
         {
 
         }
+#if true
         public void onStockToolbarClick() //void method, now done with the delegate method
         {
             //if (showCareerStockAGs)
@@ -748,8 +772,10 @@ namespace ActionGroupsExtended
             //        onLeftButtonClick();
             //    }
             //}
+            onLeftButtonClick();
         }
 
+#endif
         public Callback LeftClick = delegate
         {
             thisModule.onLeftButtonClick();
@@ -760,6 +786,8 @@ namespace ActionGroupsExtended
             thisModule.onRightButtonStockClick();
 
         };
+
+
         public void onRightButtonStockClick()
         {
             //forceShowDefaultEditor = false;
@@ -951,7 +979,7 @@ namespace ActionGroupsExtended
 
         public void PartAttaching(GameEvents.HostTargetAction<Part, Part> host_target)
         {
-            Log.Info("Part attache fire!"); //+ StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
+            Log.Info("Part attached fire!"); //+ StaticData.CurrentVesselActions.Count() + "||" + EditorLogic.fetch.FSMStarted);
             string ErrLine = "1";
             try
             {
@@ -1646,16 +1674,23 @@ namespace ActionGroupsExtended
             errLine = "3";
             SaveWindowPositions();
             errLine = "4";
-            if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
+#if false
+                if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
             {
                 errLine = "5";
                 AGXBtn.Destroy();
+
             }
             else
             {
                 errLine = "6";
                 ApplicationLauncher.Instance.RemoveModApplication(AGXAppEditorButton);
             }
+#endif
+
+            toolbarControl.OnDestroy();
+            Destroy(toolbarControl);
+
             //EditorSaveToFile(); //some of my data has already been deleted by this point
             errLine = "7";
             GameEvents.onPartAttach.Remove(PartAttaching);
@@ -1730,25 +1765,44 @@ namespace ActionGroupsExtended
             return s.StartsWith("Joystick");
         }
 
-        IEnumerator AddButtons()
+        ToolbarControl toolbarControl = null;
+        void AddButtons()
         {
+#if false
             while (!ApplicationLauncher.Ready)
             {
                 yield return null;
             }
             if (!buttonCreated)
             {
-                AGXAppEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
+                AGXAppEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid,
+                    ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button_38", false));
                 //GameEvents.onGUIApplicationLauncherReady.Remove(AddButtons);
                 //CLButton.onLeftClick(StockToolbarClick);
                 AGXAppEditorButton.onLeftClick = (Callback)Delegate.Combine(AGXAppEditorButton.onLeftClick, LeftClick); //combine delegates together
                 AGXAppEditorButton.onRightClick = (Callback)Delegate.Combine(AGXAppEditorButton.onRightClick, RightClick); //combine delegates together
                 buttonCreated = true;
             }
+#endif
+            Log.Info("Editor.AddButton");
+            toolbarControl = gameObject.AddComponent<ToolbarControl>();
+            toolbarControl.AddToAllToolbars(onStockToolbarClick, onStockToolbarClick, 
+               ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH,
+               "AGEXT_NS",
+               "agextButton",
+               "Diazo/AGExt/icon_button_38",
+               "Diazo/AGExt/icon_button_24",
+               "Action Groups Extended"
+           );
+           toolbarControl.AddLeftRightClickCallbacks(null, onRightButtonStockClick);
+           toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
+
         }
 
         public void OnGUI()
         {
+            if (toolbarControl != null)
+                toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
             //print("start ondraw draw");
             Vector3 RealMousePos = new Vector3();
             RealMousePos = Input.mousePosition;
@@ -1875,7 +1929,7 @@ namespace ActionGroupsExtended
                     ErrLine = "11";
                     if (showAGXRightClickMenu)
                     {
-                        Rect SettingsWinEditor = new Rect(Screen.width - 200, Screen.height - 125, 150, 85);
+                        Rect SettingsWinEditor = new Rect(Screen.width - 200, Screen.height - 150, 150, 110);
                         // ClickThruBlocker.GUIWindow(2233452, SettingsWinEditor, DrawSettingsWinEditor, "AGX Settings", AGXEditor.AGXWinStyle);
                         ClickThruBlocker.GUIWindow(2233452, SettingsWinEditor, DrawSettingsWinEditor, Localizer.Format("#AGEXT_UI_agx_settings"), AGXEditor.AGXWinStyle);
                     }
@@ -1886,7 +1940,6 @@ namespace ActionGroupsExtended
                 }
             }
             // print("Truth check " + highlightPartThisFrameActsWin + " " + highlightPartThisFrameSelWin);
-            if (!TrapMouse)
             if (highlightPartThisFrameActsWin || highlightPartThisFrameSelWin || highlightPartThisFrameGroupWin)//highlight mouse over cross
             {
                 //Camera edCam = EditorCamera.fe
