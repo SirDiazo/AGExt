@@ -2,11 +2,16 @@
   "NAME": "AGExt",
   "URL": "http://ksp-avc.cybutek.net/version.php?id=529",
   "DOWNLOAD": "https://github.com/linuxgurugamer/AGExt/releases",
+  "GITHUB" :
+  {
+	"USERNAME" : "linuxgurugamer",
+	"REPOSITORY" : "AGExt"
+  },
   "VERSION": {
     "MAJOR": 2,
     "MINOR": 3,
     "PATCH": 3,
-    "BUILD": 0
+    "BUILD": 1
   },
   "KSP_VERSION": {
     "MAJOR": 1,
