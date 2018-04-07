@@ -1,3 +1,6 @@
+2.3.3.1
+	Fixed localization typo for Group2 
+
 2.3.3
 	Updated for 1.4.1
 	Added support for the Toolbar Controller

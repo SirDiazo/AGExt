@@ -2546,7 +2546,7 @@ namespace ActionGroupsExtended
             ShowGroupInFlightNames[1] = GUI.TextField(new Rect(80, 165, 100, 20), ShowGroupInFlightNames[1]);
 
             // if (GUI.Button(new Rect(5, 190, 70, 20), "Group 2:", AGXBtnStyle))
-            if (GUI.Button(new Rect(5, 190, 70, 20), "AGEXT_UI_group_2", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 190, 70, 20), "#AGEXT_UI_group_2", AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 2;
             }
