@@ -1,5 +1,8 @@
+2.3.3.3
+	Added German Translation
+
 2.3.3.2
-	Fixed missng localization function for Group2 in Flight
+	Fixed missing localization function for Group2 in Flight
 
 2.3.3.1
 	Fixed localization typo for Group2 in Editor
