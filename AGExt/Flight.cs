@@ -19,12 +19,12 @@ namespace ActionGroupsExtended
     {
         public bool showMyUI = true;
         public static AGXFlight thisModule;
-        private bool buttonCreated = false;
+        //private bool buttonCreated = false;
         private bool showDockedSubVesselIndicators = false;
         public static Dictionary<int, bool> isDirectAction = new Dictionary<int, bool>();
         bool showCareerStockAGs = false;
         bool showCareerCustomAGs = false;
-        ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
+        //ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
         bool showAGXRightClickMenu = false;
         private static int activationCoolDown = 5;
         private static List<AGXCooldown> groupCooldowns;
@@ -158,7 +158,7 @@ namespace ActionGroupsExtended
         private static GUIStyle AGXFldStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
-        private bool ShowSettingsWin = false;
+        //private bool ShowSettingsWin = false;
         private Rect SettingsWinRect;
         public static bool FlightWinShowKeycodes = true;
         static ConfigNode AGXBaseNode = new ConfigNode();

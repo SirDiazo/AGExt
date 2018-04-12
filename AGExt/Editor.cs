@@ -25,9 +25,9 @@ namespace ActionGroupsExtended
         bool showCareerStockAGs = false; //support locking action groups in early career
         bool showCareerCustomAGs = false;
         bool showAGXRightClickMenu = false; //show stock toolbar right click menu?
-        ApplicationLauncherButton AGXAppEditorButton = null; //stock toolbar button instance
-        bool buttonCreated = false;
-        bool EditorShowToolbarPopout = false;
+        //ApplicationLauncherButton AGXAppEditorButton = null; //stock toolbar button instance
+        //bool buttonCreated = false;
+        //bool EditorShowToolbarPopout = false;
         bool defaultShowingNonNumeric = false; //are we in non-numeric (abort/brakes/gear/list) mode?
         List<BaseAction> defaultActionsListThisType; //list of default actions showing in group win when non-numeric
         List<BaseAction> defaultActionsListAll; //list of all default actions on vessel, only used in non-numeric mode when going to other mode

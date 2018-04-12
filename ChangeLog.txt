@@ -1,3 +1,7 @@
+2.3.3.4
+	Commented out MM code which was adding depreciated ModuleAGX to all parts
+	Commented out unused variables
+
 2.3.3.3
 	Added German Translation
 
