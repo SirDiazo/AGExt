@@ -238,15 +238,7 @@ namespace ActionGroupsExtended
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
             }
-            string s;
-            if (HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy)
-                s = "Disable Blizzy";
-            else
-                s = "Enable Blizzy";
-            if (GUI.Button(new Rect(10, 75, 130, 25), Localizer.Format(s), AGXBtnStyle))
-            {
-                HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy = !HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy;
-            }
+
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
 
@@ -1788,21 +1780,18 @@ namespace ActionGroupsExtended
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(onStockToolbarClick, onStockToolbarClick, 
                ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH,
-               "AGEXT_NS",
+               AGXFlight.MODID,
                "agextButton",
                "Diazo/AGExt/icon_button_38",
                "Diazo/AGExt/icon_button_24",
-               "Action Groups Extended"
+               AGXFlight.MODNAME
            );
            toolbarControl.AddLeftRightClickCallbacks(null, onRightButtonStockClick);
-           toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
 
         }
 
         public void OnGUI()
         {
-            if (toolbarControl != null)
-                toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
             //print("start ondraw draw");
             Vector3 RealMousePos = new Vector3();
             RealMousePos = Input.mousePosition;

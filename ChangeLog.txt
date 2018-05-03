@@ -1,3 +1,8 @@
+2.3.3.6
+	Updated to regsitering with Toolbar Controller
+	Removed Blizzy option from settings
+	Updated version file for all 1.4 versions
+
 2.3.3.5
 	Revert last change of the MM code
 

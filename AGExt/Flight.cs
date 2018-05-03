@@ -713,6 +713,8 @@ namespace ActionGroupsExtended
         }
 
         ToolbarControl toolbarControl = null;
+        internal const string MODID = "AGEXT_NS";
+        internal const string MODNAME = "Action Groups Extended";
         void AddButtons()
         {
 #if false
@@ -735,14 +737,13 @@ namespace ActionGroupsExtended
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
             toolbarControl.AddToAllToolbars(onStockToolbarClick, onStockToolbarClick,
                 ApplicationLauncher.AppScenes.FLIGHT,
-                "AGEXT_NS",
+                MODID,
                 "agextButton",
                 "Diazo/AGExt/icon_button_38",
                 "Diazo/AGExt/icon_button_24",
-                "Action Groups Extended"
+                MODNAME
             );
             toolbarControl.AddLeftRightClickCallbacks(null, onRightButtonStockClick);
-            toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
 
         }
 
@@ -1308,9 +1309,6 @@ namespace ActionGroupsExtended
 
         public void OnGUI()
         {
-            if (toolbarControl != null)
-                toolbarControl.UseBlizzy(HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy);
-
             ////GUISkin defaults = (GUISkin)MonoBehaviour.Instantiate(GUI.skin);
 
             if (!showCareerStockAGs)
@@ -1568,16 +1566,6 @@ namespace ActionGroupsExtended
                 //}
 
                 //mechjeb test stuff end
-            }
-
-            string s;
-            if (HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy)
-                s = "Disable Blizzy";
-            else
-                s = "Enable Blizzy";
-            if (GUI.Button(new Rect(10, 175, 130, 25), Localizer.Format(s), AGXBtnStyle))
-            {
-                HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy = !HighLogic.CurrentGame.Parameters.CustomParams<AG_Ext>().useBlizzy;
             }
 
             AGXBtnStyle.normal.background = ButtonTexture;
