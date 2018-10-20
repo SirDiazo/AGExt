@@ -1,5 +1,8 @@
+2.3.3.7
+	Version bump for 1.5 rebuild
+
 2.3.3.6
-	Updated to regsitering with Toolbar Controller
+	Updated to registering with Toolbar Controller
 	Removed Blizzy option from settings
 	Updated version file for all 1.4 versions
 
