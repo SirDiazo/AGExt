@@ -1,130 +1,57 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using UnityEngine;
+﻿#if false
+using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using UnityEngine;
 
-//namespace ActionGroupsExtended //this was all part of old keybinding, obsolete with InputLockManager
-//{
-//    [KSPAddon(KSPAddon.Startup.Settings, false)]
-//    public class AGXSettings : PartModule
-//    {
 
-//        private static ConfigNode AGExtNode;
-//        public static Dictionary<int, KeyCode> AGXguiKeys;
+namespace AGExt
+{
+    // http://forum.kerbalspaceprogram.com/index.php?/topic/147576-modders-notes-for-ksp-12/#comment-2754813
+    // search for "Mod integration into Stock Settings
 
-//        public void Start()
-//        {
-//            AGXguiKeys = new Dictionary<int, KeyCode>();
-//            AGExtNode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg");
-//            LoadCurrentKeyBindings(); //load keyset1 keybindings to assign keys 1 to 10 from KSP settings. need to load entire keyset because it saves as a single string. loading only first 10 would lose keybinds on groups 11-250 when save happens
-//            KeysWriteAGXtoKSP(); //copy over keybinds from keyset1 to KSP
-//            //KeysWriteKSPtoAGX(); //copy over keybinds from KSP to keyset1
-//           //SaveCurrentKeyBindings(); //save keyset1 back to disk
+    //   HighLogic.CurrentGame.Parameters.CustomParams<AGExt>()
 
-//        }
+    public class AG_Ext : GameParameters.CustomParameterNode
+    {
+        public override string Title { get { return "Action Groups Extended"; } }
+        public override GameParameters.GameMode GameMode { get { return GameParameters.GameMode.ANY; } }
+        public override string Section { get { return "AGExt"; } }
+        public override string DisplaySection { get { return "AGExt 2"; } }
+        public override int SectionOrder { get { return 1; } }
+        public override bool HasPresets { get { return false; } }
 
-//        //public void Update()
-//        //{
-//        //    print(GameSettings.CustomActionGroup1.primary.ToString());
-//        //}
 
-//        public void OnDisable()
-//        {
-//            KeysWriteKSPtoAGX(); //copy over keybinds from KSP to keyset1
-//            SaveCurrentKeyBindings(); //save keyset1 back to disk
-//        }
+        [GameParameters.CustomParameterUI("Use Blizzy Toolbar", toolTip = "If available")]
+        public bool useBlizzy = false;
 
-//         public void KeysWriteAGXtoKSP()
-//        {
-//            //print("A: " + GameSettings.CustomActionGroup1.primary.ToString() + " " + AGXguiKeys[1].ToString());
-//        GameSettings.CustomActionGroup1.primary = AGXguiKeys[1];
-//        //zsdprint("B: " + GameSettings.CustomActionGroup1.primary.ToString() + " " + AGXguiKeys[1].ToString());
-//        GameSettings.CustomActionGroup2.primary = AGXguiKeys[2];
-//        GameSettings.CustomActionGroup3.primary = AGXguiKeys[3];
-//        GameSettings.CustomActionGroup4.primary = AGXguiKeys[4];
-//        GameSettings.CustomActionGroup5.primary = AGXguiKeys[5];
-//        GameSettings.CustomActionGroup6.primary = AGXguiKeys[6];
-//        GameSettings.CustomActionGroup7.primary = AGXguiKeys[7];
-//        GameSettings.CustomActionGroup8.primary = AGXguiKeys[8];
-//        GameSettings.CustomActionGroup9.primary = AGXguiKeys[9];
-//        GameSettings.CustomActionGroup10.primary = AGXguiKeys[10];
-//        }
 
-//        public static void SaveCurrentKeyBindings()
-//        {
-//            string SaveString = ""; //initialize empty string
-//            int KeyID = new int();
-//            KeyID = 1;
-//            while (KeyID <= 250) //this should be a for loop, not going to mess with it now though
-//            {
-//                if (AGXguiKeys[KeyID] != KeyCode.None) //only add to string if there is a keycode
-//                {
-//                    SaveString = SaveString + '\u2023' + KeyID.ToString("000") + AGXguiKeys[KeyID].ToString();
-//                }
-//                KeyID = KeyID + 1;
-//            }
-//            AGExtNode.SetValue("KeySet1", SaveString); //save string to confignode
-//            AGExtNode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AGExt/AGExt.cfg"); //save config node to disk
-//        }
 
-//        public void KeysWriteKSPtoAGX()
-//        {
+        public override void SetDifficultyPreset(GameParameters.Preset preset)
+        {
+        }
 
-//            AGXguiKeys[1] = GameSettings.CustomActionGroup1.primary;
-//            AGXguiKeys[2] = GameSettings.CustomActionGroup2.primary;
-//            AGXguiKeys[3] = GameSettings.CustomActionGroup3.primary;
-//            AGXguiKeys[4] = GameSettings.CustomActionGroup4.primary;
-//            AGXguiKeys[5] = GameSettings.CustomActionGroup5.primary;
-//            AGXguiKeys[6] = GameSettings.CustomActionGroup6.primary;
-//            AGXguiKeys[7] = GameSettings.CustomActionGroup7.primary;
-//            AGXguiKeys[8] = GameSettings.CustomActionGroup8.primary;
-//            AGXguiKeys[9] = GameSettings.CustomActionGroup9.primary;
-//            AGXguiKeys[10] = GameSettings.CustomActionGroup10.primary;
+        public override bool Enabled(MemberInfo member, GameParameters parameters)
+        {
 
-//        }
+            return true;
+        }
 
-//        public void LoadCurrentKeyBindings()
-//        {
-//            String LoadString = AGExtNode.GetValue("KeySet1");
 
-//            for (int i = 1; i <= 250; i++)
-//            {
-//                AGXguiKeys[i] = KeyCode.None;
-//            }
+        public override bool Interactible(MemberInfo member, GameParameters parameters)
+        {
 
-//            if (LoadString.Length > 0)
-//            {
+            return true;
+        }
 
-//                while (LoadString[0] == '\u2023')
-//                {
-//                    LoadString = LoadString.Substring(1);
-
-//                    int KeyLength = new int();
-//                    int KeyIndex = new int();
-//                    KeyCode LoadKey = new KeyCode();
-//                    KeyLength = LoadString.IndexOf('\u2023');
-
-//                    if (KeyLength == -1)
-//                    {
-
-//                        KeyIndex = Convert.ToInt32(LoadString.Substring(0, 3));
-
-//                        LoadString = LoadString.Substring(3);
-
-//                        LoadKey = (KeyCode)Enum.Parse(typeof(KeyCode), LoadString);
-//                        AGXguiKeys[KeyIndex] = LoadKey;
-//                    }
-//                    else
-//                    {
-//                        KeyIndex = Convert.ToInt32(LoadString.Substring(0, 3));
-//                        LoadString = LoadString.Substring(3);
-//                        LoadKey = (KeyCode)Enum.Parse(typeof(KeyCode), LoadString.Substring(0, KeyLength - 3));
-//                        LoadString = LoadString.Substring(KeyLength - 3);
-//                        AGXguiKeys[KeyIndex] = LoadKey;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+        public override IList ValidValues(MemberInfo member)
+        {
+            return null;
+        }
+    }
+}
+#endif

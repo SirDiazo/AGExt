@@ -1,4 +1,5 @@
-﻿/*
+﻿#if false
+/*
 Copyright (c) 2013-2014, Maik Schreiber
 All rights reserved.
 
@@ -276,7 +277,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnClick += (e) => {
-        /// Debug.Log("button clicked, mouseButton: " + e.MouseButton);
+        /// Log.Info("button clicked, mouseButton: " + e.MouseButton);
         /// };
         /// </code>
         /// </example>
@@ -289,7 +290,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnMouseEnter += (e) => {
-        /// Debug.Log("mouse entered button");
+        /// Log.Info("mouse entered button");
         /// };
         /// </code>
         /// </example>
@@ -302,7 +303,7 @@ namespace ActionGroupsExtended
         /// <code>
         /// IButton button = ...
         /// button.OnMouseLeave += (e) => {
-        /// Debug.Log("mouse left button");
+        /// Log.Info("mouse left button");
         /// };
         /// </code>
         /// </example>
@@ -901,3 +902,4 @@ new Func<Vector2, Vector2>((pos) => value.Draw(pos))
 
     #endregion
 }
+#endif

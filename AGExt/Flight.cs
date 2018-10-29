@@ -6,9 +6,11 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using KSP.UI.Screens;
-
+using KSP.Localization;
 using UnityEngine;
-
+using AGExt;
+using ClickThroughFix;
+using ToolbarControl_NS;
 
 namespace ActionGroupsExtended
 {
@@ -17,12 +19,12 @@ namespace ActionGroupsExtended
     {
         public bool showMyUI = true;
         public static AGXFlight thisModule;
-        private bool buttonCreated = false;
+        //private bool buttonCreated = false;
         private bool showDockedSubVesselIndicators = false;
         public static Dictionary<int, bool> isDirectAction = new Dictionary<int, bool>();
         bool showCareerStockAGs = false;
         bool showCareerCustomAGs = false;
-        ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
+        //ApplicationLauncherButton AGXAppFlightButton = null; //stock toolbar button instance
         bool showAGXRightClickMenu = false;
         private static int activationCoolDown = 5;
         private static List<AGXCooldown> groupCooldowns;
@@ -83,14 +85,26 @@ namespace ActionGroupsExtended
         private Dictionary<int, KeyCode> DefaultTen;
         private Dictionary<int, KeyCode> ActiveKeysDirect;
         private Dictionary<int, bool> DirectKeysState;
-        private IButton AGXBtn;
+        //private IButton AGXBtn;
         //public Dictionary<string, ConfigNode> loadedVessels;
         public static List<AGXRemoteTechQueueItem> AGXRemoteTechQueue;
         public static bool RTFound = false;
         private string RTGroup = "1";
         private static bool RTWinShow = false;
 
-
+        public static readonly Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>
+                    {
+                        {1, KSPActionGroup.Custom01},
+                        {2, KSPActionGroup.Custom02},
+                        {3, KSPActionGroup.Custom03},
+                        {4, KSPActionGroup.Custom04},
+                        {5, KSPActionGroup.Custom05},
+                        {6, KSPActionGroup.Custom06},
+                        {7, KSPActionGroup.Custom07},
+                        {8, KSPActionGroup.Custom08},
+                        {9, KSPActionGroup.Custom09},
+                        {10, KSPActionGroup.Custom10}
+                    };
 
 
         public static Rect GroupsWin;
@@ -144,7 +158,7 @@ namespace ActionGroupsExtended
         private static GUIStyle AGXFldStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
         //private static GUIStyle AGXScrollStyle = null; //window style
-        private bool ShowSettingsWin = false;
+        //private bool ShowSettingsWin = false;
         private Rect SettingsWinRect;
         public static bool FlightWinShowKeycodes = true;
         static ConfigNode AGXBaseNode = new ConfigNode();
@@ -200,6 +214,7 @@ namespace ActionGroupsExtended
         {
 
         }
+#if true
         public void onStockToolbarClick() //void method, use delegates
         {
             //print("mouse " + Input.GetMouseButtonUp(1) + Input.GetMouseButtonDown(1));
@@ -214,6 +229,7 @@ namespace ActionGroupsExtended
             //        onLeftButtonClick();
             //    }
             //}
+            onLeftButtonClick();
         }
 
         public Callback LeftClick = delegate
@@ -226,7 +242,7 @@ namespace ActionGroupsExtended
             thisModule.onRightButtonStockClick();
 
         };
-
+#endif
         public void onRightButtonStockClick()
         {
             showAGXRightClickMenu = !showAGXRightClickMenu;
@@ -240,7 +256,8 @@ namespace ActionGroupsExtended
             }
             else
             {
-                ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+                // ScreenMessages.PostScreenMessage("Action Groups Unavailable. VAB/SPH Facility Upgrade Required.");
+                ScreenMessages.PostScreenMessage(Localizer.Format("#AGEXT_UI_SCREEN_MESSAGE_6"));
             }
         }
 
@@ -403,36 +420,38 @@ namespace ActionGroupsExtended
                     print("AGX Default cooldown not found, using 5 Update frames");
                 }
                 errLine = "13";
+#if false
                 if (ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
                 {
                     errLine = "14";
 
                     AGXBtn = ToolbarManager.Instance.add("AGX", "AGXBtn");
-                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button";
-                    AGXBtn.ToolTip = "Action Groups Extended";
+                    AGXBtn.TexturePath = "Diazo/AGExt/icon_button_24";
+                    // AGXBtn.ToolTip = "Action Groups Extended";
+                    AGXBtn.ToolTip = Localizer.Format("#AGEXT_UI_IN_TOOLBAR");
                     AGXBtn.OnClick += (e) =>
+                    {
+                        if (e.MouseButton == 0)
                         {
-                            if (e.MouseButton == 0)
+                            onLeftButtonClick();
+                        }
+                        if (e.MouseButton == 1)
+                        {
+                            //ShowSettingsWin = !ShowSettingsWin;
+                            if (ShowSettingsWin)
                             {
-                                onLeftButtonClick();
+                                AGXBtn.Drawable = null;
+                                ShowSettingsWin = false;
                             }
-                            if (e.MouseButton == 1)
+                            else
                             {
-                                //ShowSettingsWin = !ShowSettingsWin;
-                                if (ShowSettingsWin)
-                                {
-                                    AGXBtn.Drawable = null;
-                                    ShowSettingsWin = false;
-                                }
-                                else
-                                {
-                                    SettingsWindow Settings = new SettingsWindow();
-                                    AGXBtn.Drawable = Settings;
-                                    ShowSettingsWin = true;
-                                }
+                                SettingsWindow Settings = new SettingsWindow();
+                                AGXBtn.Drawable = Settings;
+                                ShowSettingsWin = true;
+                            }
 
-                            }
-                        };
+                        }
+                    };
                     //{
                     //    ShowAGXMod = !ShowAGXMod;
                     //};
@@ -443,6 +462,8 @@ namespace ActionGroupsExtended
                     StartCoroutine("AddButtons");
 
                 }
+#endif
+                AddButtons();
                 errLine = "16";
                 if (AGExtNode.GetValue("FltShow") == "0")
                 {
@@ -593,12 +614,12 @@ namespace ActionGroupsExtended
 
                 //foreach(Font fnt in fonts)
                 //{
-                //    Debug.Log("fnt " + fnt.name);
+                //    Log.Info("fnt " + fnt.name);
                 //}
                 AGXBtnStyle.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
                 AGXLblStyle.font = AGXBtnStyle.font;
                 AGXFldStyle.font = AGXBtnStyle.font;
-                //Debug.Log(AGXBtnStyle.font.name);
+                Log.Info(AGXBtnStyle.font.name);
 
                 //AGXScrollStyle = new GUIStyle(AGXSkin.verticalScrollbar);
 
@@ -658,7 +679,7 @@ namespace ActionGroupsExtended
                 {
                     if (Asm.dllName == "RemoteTech")
                     {
-                        //Debug.Log("RemoteTech found");
+                        Log.Info("RemoteTech found");
                         //AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, FlightGlobals.ActiveVessel.rootPart.flightID, Planetarium.GetUniversalTime() + 10, force, forceDir));
                         RTFound = true;
                     }
@@ -673,14 +694,14 @@ namespace ActionGroupsExtended
                 {
                     RTWinShow = false;
                 }
-                //Debug.Log("RemoteTech " + RTWinShow);
+                Log.Info("RemoteTech " + RTWinShow);
                 isDirectAction = new Dictionary<int, bool>();
                 for (int i = 1; i <= 250; i++)
                 {
                     isDirectAction[i] = false;
                 }
 
-                // Debug.Log("AGX Flight Started Okay"); //temporary
+                // Log.Info("Flight Started Okay"); //temporary
             }
             catch (Exception e)
             {
@@ -691,26 +712,44 @@ namespace ActionGroupsExtended
             GameEvents.onHideUI.Add(onMyUIHide);
         }
 
-        IEnumerator AddButtons()
+        ToolbarControl toolbarControl = null;
+        internal const string MODID = "AGEXT_NS";
+        internal const string MODNAME = "Action Groups Extended";
+        void AddButtons()
         {
+#if false
             while (!ApplicationLauncher.Ready)
             {
                 yield return null;
             }
             if (!buttonCreated)
             {
-                AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button", false));
+                AGXAppFlightButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, 
+            ApplicationLauncher.AppScenes.FLIGHT, (Texture)GameDatabase.Instance.GetTexture("Diazo/AGExt/icon_button_38", false));
                 //GameEvents.onGUIApplicationLauncherReady.Remove(AddButtons);
                 //CLButton.onLeftClick(StockToolbarClick);
                 AGXAppFlightButton.onLeftClick = (Callback)Delegate.Combine(AGXAppFlightButton.onLeftClick, LeftClick); //combine delegates together
                 AGXAppFlightButton.onRightClick = (Callback)Delegate.Combine(AGXAppFlightButton.onRightClick, RightClick); //combine delegates together
                 buttonCreated = true;
             }
+#endif
+            Log.Info("Flight.AddButton");
+            toolbarControl = gameObject.AddComponent<ToolbarControl>();
+            toolbarControl.AddToAllToolbars(onStockToolbarClick, onStockToolbarClick,
+                ApplicationLauncher.AppScenes.FLIGHT,
+                MODID,
+                "agextButton",
+                "Diazo/AGExt/icon_button_38",
+                "Diazo/AGExt/icon_button_24",
+                MODNAME
+            );
+            toolbarControl.AddLeftRightClickCallbacks(null, onRightButtonStockClick);
+
         }
 
         public static void LoadDirectActionState(string DirectActions)
         {
-            //Debug.Log("load state " + DirectActions);
+            Log.Info("load state " + DirectActions);
             try
             {
                 isDirectAction = new Dictionary<int, bool>();
@@ -739,7 +778,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadDirectActions Fail " + e);
+                Log.Info("LoadDirectActions Fail " + e);
                 for (int i = 1; i <= 251; i++)
                 {
                     isDirectAction[i] = false;
@@ -865,6 +904,7 @@ namespace ActionGroupsExtended
             }
         }
 
+#if false
         public class SettingsWindow : MonoBehaviour, IDrawable
         {
             public Rect SettingsWin = new Rect(0, 0, 150, 180);
@@ -876,8 +916,9 @@ namespace ActionGroupsExtended
                 SettingsWin.x = position.x;
                 SettingsWin.y = position.y;
 
-                GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
-                //RCSlaWin = GUILayout.Window(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
+                // ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
+                //RCSlaWin = ClickThruBlocker.GUILayoutWindow(42334567, RCSlaWin, DrawWin, (string)null, GUI.skin.box);
                 //GUI.skin = oldSkin;
 
                 return new Vector2(SettingsWin.width, SettingsWin.height);
@@ -886,7 +927,8 @@ namespace ActionGroupsExtended
             public void DrawSettingsWin(int WindowID)
             {
 
-                if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 25, 130, 25), Localizer.Format("#AGEXT_UI_setting_show_key_codes"), AGXBtnStyle))
                 {
                     AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
                     if (AGXFlight.FlightWinShowKeycodes)
@@ -901,12 +943,14 @@ namespace ActionGroupsExtended
                     AGXStaticData.SaveBaseConfigNode(AGExtNode);
                 }
 
-                if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 50, 130, 25), Localizer.Format("#AGEXT_UI_setting_edit_actions"), AGXBtnStyle))
                 {
                     AGXFlight.ClickEditButton();
 
                 }
-                if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 75, 130, 25), Localizer.Format("#AGEXT_UI_setting_reset_windows"), AGXBtnStyle))
                 {
                     KeySetWin.x = 250;
                     KeySetWin.y = 250;
@@ -923,20 +967,23 @@ namespace ActionGroupsExtended
                 }
                 AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
                 AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
-                if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 100, 130, 25), Localizer.Format("#AGEXT_UI_setting_auto_hide_groups"), AGXBtnStyle))
                 {
                     AutoHideGroupsWin = !AutoHideGroupsWin;
                 }
                 AGXBtnStyle.normal.background = ButtonTexture;
                 AGXBtnStyle.hover.background = ButtonTexture;
-                if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 125, 130, 25), Localizer.Format("#AGEXT_UI_setting_show_remote_tech"), AGXBtnStyle))
                 {
                     if (RTFound)
                     {
                         RTWinShow = !RTWinShow;
                     }
                 }
-                if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
+                // if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
+                if (GUI.Button(new Rect(10, 150, 130, 25), Localizer.Format("#AGEXT_UI_setting_bypass_remote_tech"), AGXBtnStyle))
                 {
                     useRT = !useRT;
                 }
@@ -951,7 +998,7 @@ namespace ActionGroupsExtended
 
             }
         }
-
+#endif
         public bool IsVesselLoaded(uint flightID) //is vessel loaded, wrapper to convert from flightID to vsl
         {
             try
@@ -1117,7 +1164,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupVisiblityNames Fail " + errLine + " " + e);
+                Log.Info("LoadGroupVisiblityNames Fail " + errLine + " " + e);
                 ShowGroupInFlightNames[1] = "Group 1";
                 ShowGroupInFlightNames[2] = "Group 2";
                 ShowGroupInFlightNames[3] = "Group 3";
@@ -1161,6 +1208,7 @@ namespace ActionGroupsExtended
         {
 
             SaveWindowPositions();
+#if false
             if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
             {
                 AGXBtn.Destroy();
@@ -1169,6 +1217,10 @@ namespace ActionGroupsExtended
             {
                 ApplicationLauncher.Instance.RemoveModApplication(AGXAppFlightButton);
             }
+#endif
+            toolbarControl.OnDestroy();
+            Destroy(toolbarControl);
+
             //GameEvents.onPartAttach.Remove(DockingEvent);
             //flightNodeIsLoaded = false;
             loadFinished = false;
@@ -1216,7 +1268,7 @@ namespace ActionGroupsExtended
         { //actions themselves are not saved via this method, just everything else
             //populate our strings to save to each partmodule
             //currentkeyset is also saved here
-            //Debug.Log("AGX Ship Data save " + vsl.id.ToString());
+            Log.Info("Ship Data save " + vsl.id.ToString());
             //string groupNamesToSave = SaveGroupNames("");  //this changes based on part now, moved to foreach below
             string groupVisibilityToSave = SaveGroupVisibility("");
             string groupVisibiltyNames = SaveGroupVisibilityNames("");
@@ -1227,11 +1279,11 @@ namespace ActionGroupsExtended
             {
                 foreach (Part p in vsl.Parts)
                 {
-                    //Debug.Log("AGX Saveing date");
+                    Log.Info("Saveing date");
                     ModuleAGX pmAGX = p.Modules.OfType<ModuleAGX>().FirstOrDefault();
 
                     pmAGX.groupNames = SaveGroupNames(pmAGX); //check against currentMissionID done inside this method
-                    
+
                     if (p.missionID == currentMissionId || !pmAGX.hasData || pmAGX.focusFlightID == 0)
                     { //only save this stuff if they are the current vessel
                         pmAGX.groupVisibility = groupVisibilityToSave;
@@ -1240,7 +1292,7 @@ namespace ActionGroupsExtended
                         pmAGX.DirectActionState = directActionsToSave; //this may be an issue if docked vessels dock with the same action group in different directaction states.
 
                     }
-                    pmAGX.focusFlightID = (int)currentMissionId;
+                    pmAGX.focusFlightID = currentMissionId;
                     pmAGX.hasData = true;
                 }
             }
@@ -1275,27 +1327,29 @@ namespace ActionGroupsExtended
                 {
                     GroupsInFlightWin.x = FlightWin.x + 235;
                     GroupsInFlightWin.y = FlightWin.y;
-                    FlightWin = GUI.Window(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
+                    // FlightWin = ClickThruBlocker.GUIWindow(673467788, FlightWin, FlightWindow, "Actions", AGXWinStyle);
+                    FlightWin = ClickThruBlocker.GUIWindow(673467788, FlightWin, FlightWindow, Localizer.Format("#AGEXT_UI_actions"), AGXWinStyle);
                     if (RTWinShow)
                     {
-                        RemoteTechQueueWin = GUI.Window(673462798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
+                        RemoteTechQueueWin = ClickThruBlocker.GUIWindow(673462798, RemoteTechQueueWin, RTQueueWindow, "RT Queued Actions", AGXWinStyle);
                     }
                     //TrapMouse |= FlightWin.Contains(RealMousePos);
 
                 }
                 if (ShowGroupsInFlightWindow)
                 {
-                    GroupsInFlightWin = GUI.Window(673461788, GroupsInFlightWin, GroupsInFlightWindow, "", AGXWinStyle);
+                    GroupsInFlightWin = ClickThruBlocker.GUIWindow(673461788, GroupsInFlightWin, GroupsInFlightWindow, "", AGXWinStyle);
 
                 }
                 if (ShowKeySetWin)
                 {
-                    KeySetWin = GUI.Window(673467792, KeySetWin, KeySetWindow, "Keysets", AGXWinStyle);
+                    // KeySetWin = ClickThruBlocker.GUIWindow(673467792, KeySetWin, KeySetWindow, "Keysets", AGXWinStyle);
+                    KeySetWin = ClickThruBlocker.GUIWindow(673467792, KeySetWin, KeySetWindow, Localizer.Format("#AGEXT_UI_key_sets"), AGXWinStyle);
                     //TrapMouse = KeySetWin.Contains(RealMousePos);
                     //ShowSelectedWin = false;
                     if (!AutoHideGroupsWin)
                     {
-                        GroupsWin = GUI.Window(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
+                        GroupsWin = ClickThruBlocker.GUIWindow(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
                     }
                     ShowCurActsWin = false;
 
@@ -1304,7 +1358,9 @@ namespace ActionGroupsExtended
                 if (ShowSelectedWin)
                 {
 
-                    SelPartsWin = GUI.Window(673467794, SelPartsWin, SelParts, "AGExt Selected parts: " + AGEditorSelectedParts.Count(), AGXWinStyle);
+                    // SelPartsWin = ClickThruBlocker.GUIWindow(673467794, SelPartsWin, SelParts, "AGExt Selected parts: " + AGEditorSelectedParts.Count(), AGXWinStyle);
+                    SelPartsWin = ClickThruBlocker.GUIWindow(673467794, SelPartsWin, SelParts, Localizer.Format("#AGEXT_UI_selected_parts_numbers_title") + AGEditorSelectedParts.Count(), AGXWinStyle);
+                    //
                     ShowCurActsWin = true;
                     //TrapMouse = SelPartsWin.Contains(RealMousePos);
                     if (AutoHideGroupsWin && !TempShowGroupsWin)
@@ -1312,13 +1368,14 @@ namespace ActionGroupsExtended
                     }
                     else
                     {
-                        GroupsWin = GUI.Window(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
+                        GroupsWin = ClickThruBlocker.GUIWindow(673467795, GroupsWin, GroupsWindow, "", AGXWinStyle);
                         // TrapMouse |= GroupsWin.Contains(RealMousePos);
                     }
 
                     if (ShowKeyCodeWin)
                     {
-                        KeyCodeWin = GUI.Window(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
+                        // KeyCodeWin = ClickThruBlocker.GUIWindow(673467793, KeyCodeWin, KeyCodeWindow, "Keycodes", AGXWinStyle);
+                        KeyCodeWin = ClickThruBlocker.GUIWindow(673467793, KeyCodeWin, KeyCodeWindow, Localizer.Format("#AGEXT_UI_keycodes"), AGXWinStyle);
                         //TrapMouse |= KeyCodeWin.Contains(RealMousePos);
                     }
                     string ErrLine = "1";
@@ -1369,7 +1426,8 @@ namespace ActionGroupsExtended
                 }
                 if (ShowCurActsWin && ShowSelectedWin)
                 {
-                    CurActsWin = GUI.Window(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
+                    // CurActsWin = ClickThruBlocker.GUIWindow(673467790, CurActsWin, CurrentActionsWindow, "Actions (This group): " + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
+                    CurActsWin = ClickThruBlocker.GUIWindow(673467790, CurActsWin, CurrentActionsWindow, Localizer.Format("#AGEXT_UI_action_this_group") + StaticData.CurrentVesselActions.FindAll(p => p.group == AGXCurActGroup).Count.ToString(), AGXWinStyle);
                     // TrapMouse |= CurActsWin.Contains(RealMousePos);
 
                 }
@@ -1384,7 +1442,7 @@ namespace ActionGroupsExtended
                 Vector3 partScreenPos = FlightCamera.fetch.mainCamera.WorldToScreenPoint(partToHighlight.transform.position);
                 //EditorLogic.fetch.editorCamera.WorldToScreenPoint(partToHighlight.transform.position);
                 Rect partCenterWin = new Rect(partScreenPos.x - 20, (Screen.height - partScreenPos.y) - 20, 41, 41);
-                //partCenterWin = GUI.Window(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
+                //partCenterWin = ClickThruBlocker.GUIWindow(673767790, partCenterWin, PartTarget, "", AGXWinStyle);
                 GUI.DrawTexture(partCenterWin, PartCenter);
 
             }
@@ -1404,13 +1462,15 @@ namespace ActionGroupsExtended
 
             if (showAGXRightClickMenu && showMyUI)
             {
-                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 180);
-                GUI.Window(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                Rect SettingsWin = new Rect(Screen.width - 200, 40, 150, 205);
+                // ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, "AGX Settings", AGXWinStyle);
+                ClickThruBlocker.GUIWindow(2233452, SettingsWin, DrawSettingsWin, Localizer.Format("#AGEXT_UI_agx_settings"), AGXWinStyle);
             }
             //print("guis " + HighLogic.Skin.font.name + " " + GUI.skin.font.name); 
-
-            //Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
-            //Debug.Log("fntc " + fonts.Count());
+#if DEBUG
+            Font[] fonts = FindObjectsOfType<UnityEngine.Font>();
+            Log.Info("fntc " + fonts.Count());
+#endif
             //// GUI.skin = defaults;
 
         }
@@ -1418,7 +1478,8 @@ namespace ActionGroupsExtended
         public void DrawSettingsWin(int WindowID)
         {
 
-            if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 25, 130, 25), "Show KeyCodes", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 25, 130, 25), Localizer.Format("#AGEXT_UI_setting_show_key_codes"), AGXBtnStyle))
             {
                 AGXFlight.FlightWinShowKeycodes = !AGXFlight.FlightWinShowKeycodes;
                 if (AGXFlight.FlightWinShowKeycodes)
@@ -1434,12 +1495,14 @@ namespace ActionGroupsExtended
                 // InputLockManager.SetControlLock(ControlTypes.All, "testing");
             }
 
-            if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 50, 130, 25), "Edit Actions", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 50, 130, 25), Localizer.Format("#AGEXT_UI_setting_edit_actions"), AGXBtnStyle))
             {
                 AGXFlight.ClickEditButton();
                 // InputLockManager.RemoveControlLock("testing");
             }
-            if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 75, 130, 25), "Reset Windows", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 75, 130, 25), Localizer.Format("#AGEXT_UI_setting_reset_windows"), AGXBtnStyle))
             {
                 KeySetWin.x = 250;
                 KeySetWin.y = 250;
@@ -1458,20 +1521,23 @@ namespace ActionGroupsExtended
             }
             AGXBtnStyle.normal.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
             AGXBtnStyle.hover.background = AutoHideGroupsWin ? ButtonTextureRed : ButtonTexture;
-            if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 100, 130, 25), "Auto-Hide Groups", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 100, 130, 25), Localizer.Format("#AGEXT_UI_setting_auto_hide_groups"), AGXBtnStyle))
             {
                 AutoHideGroupsWin = !AutoHideGroupsWin;
             }
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
-            if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 125, 130, 25), "Show RemoteTech", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 125, 130, 25), Localizer.Format("#AGEXT_UI_setting_show_remote_tech"), AGXBtnStyle))
             {
                 if (RTFound)
                 {
                     RTWinShow = !RTWinShow;
                 }
             }
-            if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
+            // if (GUI.Button(new Rect(10, 150, 130, 25), "Bypass RemoteTech", AGXBtnStyle))
+            if (GUI.Button(new Rect(10, 150, 130, 25), Localizer.Format("#AGEXT_UI_setting_bypass_remote_tech"), AGXBtnStyle))
             {
                 useRT = !useRT;
                 //mechject test stuff start
@@ -1485,15 +1551,15 @@ namespace ActionGroupsExtended
                 //        PartModule pm2 = p.Modules["MechJebCore"]; //Find our MechJeb module
                 //        if (pm2 != null) //if part does not have a mechjeb module, pm2 is null at this point
                 //        {
-                //            Debug.Log("vslstatea found");
+                //            Log.Info("vslstatea found");
                 //            object vslState = MCType.GetField("vesselState").GetValue(pm2); //get our reference to the vessel state object
-                //            Debug.Log("vslstate found");
+                //            Log.Info("vslstate found");
                 //            foreach (PropertyInfo pinfo in VSType.GetProperties())
                 //            {
-                //                Debug.Log("ping" + pinfo.Name + " " + pinfo.PropertyType);
+                //                Log.Info("ping" + pinfo.Name + " " + pinfo.PropertyType);
                 //            }
                 //            var maxThrustAvail = VSType.GetProperty("thrustAvailable").GetValue(vslState,null);
-                //            Debug.Log("found " + maxThrustAvail);
+                //            Log.Info("found " + maxThrustAvail);
                 //            break; //pull max thrust from the vessel state object. 
                 //        }
                 //    }
@@ -1501,6 +1567,7 @@ namespace ActionGroupsExtended
 
                 //mechjeb test stuff end
             }
+
             AGXBtnStyle.normal.background = ButtonTexture;
             AGXBtnStyle.hover.background = ButtonTexture;
             //GUI.DragWindow();
@@ -1543,26 +1610,26 @@ namespace ActionGroupsExtended
 
             if (RTFound)
             {
-                // Debug.Log("RemoteTech found");
-                //Debug.Log("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
-                //Debug.Log("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
+                // Log.Info("RemoteTech found");
+                Log.Info("delay " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                Log.Info("in local " + AGXRemoteTechLinks.InLocal(FlightGlobals.ActiveVessel));
                 //double curDelay = AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel);
                 //print("cur delay" + curDelay);
                 if (useRT)
                 {
                     if (FlightGlobals.ActiveVessel.Parts.Any(p => p.protoModuleCrew.Any() && p.Modules.Contains("ModuleCommand"))) //are we in local control? Kerbal on board on a part with command abilities?
                     {
-                        // Debug.Log("AGX RemoteTech local");
+                        // Log.Info("RemoteTech local");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
                     }
                     else if (double.IsInfinity(AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel))) //remotetech returns positive infinity when a vessel is in local control so no delay, note that RT also returns positive infinity when a vessel has no connection so this check has to come second.
                     {
-                        // Debug.Log("AGX RemoteTech infinity");
+                        // Log.Info("RemoteTech infinity");
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime(), force, forceDir, AGXRemoteTechItemState.NOCOMMS));
                     }
                     else
                     {
-                        //Debug.Log("AGX RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
+                        Log.Info("RemoteTech normal " + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel));
 
                         AGXRemoteTechQueue.Add(new AGXRemoteTechQueueItem(group, AGXguiNames[group], FlightGlobals.ActiveVessel, Planetarium.GetUniversalTime() + AGXRemoteTechLinks.RTTimeDelay(FlightGlobals.ActiveVessel), force, forceDir, AGXRemoteTechItemState.COUNTDOWN));
 
@@ -1583,19 +1650,7 @@ namespace ActionGroupsExtended
 
         public static void ActivateActionGroupActivation(int group, bool force, bool forceDir)
         {
-            //Debug.Log("activating group " + group);
-            Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-            CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-            CustomActions.Add(2, KSPActionGroup.Custom02);
-            CustomActions.Add(3, KSPActionGroup.Custom03);
-            CustomActions.Add(4, KSPActionGroup.Custom04);
-            CustomActions.Add(5, KSPActionGroup.Custom05);
-            CustomActions.Add(6, KSPActionGroup.Custom06);
-            CustomActions.Add(7, KSPActionGroup.Custom07);
-            CustomActions.Add(8, KSPActionGroup.Custom08);
-            CustomActions.Add(9, KSPActionGroup.Custom09);
-            CustomActions.Add(10, KSPActionGroup.Custom10);
-
+            Log.Info("activating group " + group);
             foreach (AGXAction agAct in StaticData.CurrentVesselActions.Where(agx => agx.group == group))
             {
                 //print("ActactA" + forceDir + " " + agAct.ba.name);
@@ -1623,7 +1678,7 @@ namespace ActionGroupsExtended
                         KSPActionParam actParam = new KSPActionParam(KSPActionGroup.None, KSPActionType.Deactivate);
                         bool saveNoneState = agAct.ba.listParent.part.vessel.ActionGroups[actParam.group];
                         agAct.ba.listParent.part.vessel.ActionGroups[actParam.group] = false;
-                        //Debug.Log("AGX action deactivate FIRE! " + agAct.ba.listParent.part.vessel.ActionGroups[actParam.group]);
+                        Log.Info("action deactivate FIRE! " + agAct.ba.listParent.part.vessel.ActionGroups[actParam.group]);
                         agAct.ba.Invoke(actParam);
                         agAct.activated = false;
                         if (agAct.ba.name != "kOSVoidAction")
@@ -1702,10 +1757,10 @@ namespace ActionGroupsExtended
             {
                 groupActivatedState[group] = !groupActivatedState[group];
             }
-            //Debug.Log("Endactivation");
+            Log.Info("Endactivation");
             groupCooldowns.Add(new AGXCooldown(FlightGlobals.ActiveVessel.rootPart.flightID, group, 0));
             CalculateActionsState();
-            //Debug.Log("Endactivation2");
+            Log.Info("Endactivation2");
         }
 
         public static List<BaseAction> GetActionsList(int grp) //return all actions in action gorup
@@ -1832,7 +1887,7 @@ namespace ActionGroupsExtended
         public void FlightWindow(int WindowID)
         {
 
-            //Debug.Log("flight win");
+            Log.Info("flight win");
             //AGXScrollStyle.normal.background = null;
             GUI.skin.scrollView.normal.background = null;
             //HighLogic.Skin.scrollView.normal.background = ButtonTextureRed;
@@ -2139,7 +2194,7 @@ namespace ActionGroupsExtended
 
                 catch (Exception e)
                 {
-                    Debug.Log("AGX: Reflection to RT fail " + e);
+                    Log.Info("Reflection to RT fail " + e);
                 }
             }
         }
@@ -2293,7 +2348,8 @@ namespace ActionGroupsExtended
                     TxtAnch5 = GUI.skin.label.alignment;
 
                     AGXLblStyle.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(10, 30, 274, 30), "No actions", AGXLblStyle);
+                    // GUI.Label(new Rect(10, 30, 274, 30), "No actions", AGXLblStyle);
+                    GUI.Label(new Rect(10, 30, 274, 30), Localizer.Format("#AGEXT_UI_no_actions"), AGXLblStyle);
                     AGXLblStyle.alignment = TextAnchor.MiddleLeft;
                 }
             }
@@ -2304,14 +2360,14 @@ namespace ActionGroupsExtended
 
         public void SaveNewKeyBind() //save our new keybind to the correct ModuleAGX
         {
-            foreach(Part p in FlightGlobals.ActiveVessel.Parts)
+            foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             {
-                if(p.Modules.Contains<ModuleAGX>())
+                if (p.Modules.Contains<ModuleAGX>())
                 {
-                    //Debug.Log("AGX 1");
-                    if (p.Modules.OfType<ModuleAGX>().First().focusFlightID == (int)currentMissionId)
+                    Log.Info("1");
+                    if (p.Modules.OfType<ModuleAGX>().First().focusFlightID == currentMissionId)
                     {
-                       // Debug.Log("AGX 2");
+                        // Log.Info("2");
                         p.Modules.OfType<ModuleAGX>().First().currentKeyset = CurrentKeySetFlight;
                         p.Modules.OfType<ModuleAGX>().First().hasData = true;
                     }
@@ -2348,7 +2404,8 @@ namespace ActionGroupsExtended
 
             GUI.DrawTexture(new Rect(6, (CurrentKeySetFlight * 25) + 1, 68, 18), BtnTexGrn);
 
-            if (GUI.Button(new Rect(5, 25, 70, 20), "Select 1:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 25, 70, 20), "Select 1:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 25, 70, 20), Localizer.Format("#AGEXT_UI_select_1"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 SaveCurrentKeyBindings();
@@ -2372,7 +2429,8 @@ namespace ActionGroupsExtended
             }
             KeySetNamesFlight[0] = GUI.TextField(new Rect(80, 25, 100, 20), KeySetNamesFlight[0]);
 
-            if (GUI.Button(new Rect(5, 50, 70, 20), "Select 2:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 50, 70, 20), "Select 2:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 50, 70, 20), Localizer.Format("#AGEXT_UI_select_2"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 SaveCurrentKeyBindings();
@@ -2392,7 +2450,8 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNamesFlight[1] = GUI.TextField(new Rect(80, 50, 100, 20), KeySetNamesFlight[1]);
-            if (GUI.Button(new Rect(5, 75, 70, 20), "Select 3:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 75, 70, 20), "Select 3:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 75, 70, 20), Localizer.Format("#AGEXT_UI_select_3"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 SaveCurrentKeyBindings();
@@ -2412,7 +2471,8 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNamesFlight[2] = GUI.TextField(new Rect(80, 75, 100, 20), KeySetNamesFlight[2]);
-            if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 100, 70, 20), "Select 4:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 100, 70, 20), Localizer.Format("#AGEXT_UI_select_4"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 SaveCurrentKeyBindings();
@@ -2432,7 +2492,8 @@ namespace ActionGroupsExtended
                 LoadCurrentKeyBindings();
             }
             KeySetNamesFlight[3] = GUI.TextField(new Rect(80, 100, 100, 20), KeySetNamesFlight[3]);
-            if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 125, 70, 20), "Select 5:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 125, 70, 20), Localizer.Format("#AGEXT_UI_select_5"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 SaveCurrentKeyBindings();
@@ -2458,44 +2519,51 @@ namespace ActionGroupsExtended
             AGXLblStyle.fontStyle = FontStyle.Bold;
             TextAnchor TxtAnc = GUI.skin.label.alignment;
             GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-            GUI.Label(new Rect(5, 145, 175, 25), "Actiongroup Groups", AGXLblStyle);
+            // GUI.Label(new Rect(5, 145, 175, 25), "Actiongroup Groups", AGXLblStyle);
+            GUI.Label(new Rect(5, 145, 175, 25), Localizer.Format("#AGEXT_UI_action_group_groups"), AGXLblStyle);
             AGXLblStyle.fontStyle = FontStyle.Normal;
             AGXLblStyle.alignment = TextAnchor.MiddleLeft;
             GUI.contentColor = TxtClr3;
 
             GUI.DrawTexture(new Rect(6, (ShowGroupInFlightCurrent * 25) + 141, 68, 18), BtnTexGrn);
-            if (GUI.Button(new Rect(5, 165, 70, 20), "Group 1:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 165, 70, 20), "Group 1:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 165, 70, 20), Localizer.Format("#AGEXT_UI_group_1"), AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 1;
             }
             ShowGroupInFlightNames[1] = GUI.TextField(new Rect(80, 165, 100, 20), ShowGroupInFlightNames[1]);
 
-            if (GUI.Button(new Rect(5, 190, 70, 20), "Group 2:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 190, 70, 20), "Group 2:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 190, 70, 20), Localizer.Format("#AGEXT_UI_group_2"), AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 2;
             }
             ShowGroupInFlightNames[2] = GUI.TextField(new Rect(80, 190, 100, 20), ShowGroupInFlightNames[2]);
 
-            if (GUI.Button(new Rect(5, 215, 70, 20), "Group 3:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 215, 70, 20), "Group 3:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 215, 70, 20), Localizer.Format("#AGEXT_UI_group_3"), AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 3;
             }
             ShowGroupInFlightNames[3] = GUI.TextField(new Rect(80, 215, 100, 20), ShowGroupInFlightNames[3]);
 
-            if (GUI.Button(new Rect(5, 240, 70, 20), "Group 4:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 240, 70, 20), "Group 4:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 240, 70, 20), Localizer.Format("#AGEXT_UI_group_4"), AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 4;
             }
             ShowGroupInFlightNames[4] = GUI.TextField(new Rect(80, 240, 100, 20), ShowGroupInFlightNames[4]);
 
-            if (GUI.Button(new Rect(5, 265, 70, 20), "Group 5:", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 265, 70, 20), "Group 5:", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 265, 70, 20), Localizer.Format("#AGEXT_UI_group_5"), AGXBtnStyle))
             {
                 ShowGroupInFlightCurrent = 5;
             }
             ShowGroupInFlightNames[5] = GUI.TextField(new Rect(80, 265, 100, 20), ShowGroupInFlightNames[5]);
 
 
-            if (GUI.Button(new Rect(5, 300, 175, 30), "Close Window", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 300, 175, 30), "Close Window", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 300, 175, 30), Localizer.Format("#AGEXT_UI_close_window"), AGXBtnStyle))
             {
                 FlightSaveKeysetStuff();
                 //AGExtNode.SetValue("KeySetName1", KeySetNames[0]);
@@ -2766,7 +2834,8 @@ namespace ActionGroupsExtended
         //}
         public void KeyCodeWindow(int WindowID)
         {
-            if (GUI.Button(new Rect(5, 3, 80, 25), "Clear Key", AGXBtnStyle))
+            // if (GUI.Button(new Rect(5, 3, 80, 25), "Clear Key", AGXBtnStyle))
+            if (GUI.Button(new Rect(5, 3, 80, 25), Localizer.Format("#AGEXT_UI_clear_key"), AGXBtnStyle))
             {
                 if (AGXguiMod1KeySelecting)
                 {
@@ -2848,7 +2917,8 @@ namespace ActionGroupsExtended
                 GUI.DrawTexture(new Rect(281, 3, 123, 18), BtnTexGrn);
             }
 
-            if (GUI.Button(new Rect(280, 2, 125, 20), "Show JoySticks", AGXBtnStyle))
+            // if (GUI.Button(new Rect(280, 2, 125, 20), "Show JoySticks", AGXBtnStyle))
+            if (GUI.Button(new Rect(280, 2, 125, 20), Localizer.Format("#AGEXT_UI_show_joy_Sticks"), AGXBtnStyle))
             {
                 ShowJoySticks = !ShowJoySticks;
             }
@@ -3024,7 +3094,8 @@ namespace ActionGroupsExtended
                     }
                     JoyStickCount = JoyStickCount + 1;
                 }
-                GUI.Label(new Rect(260, 665, 120, 20), "Button test:", AGXLblStyle);
+                // GUI.Label(new Rect(260, 665, 120, 20), "Button test:", AGXLblStyle);
+                GUI.Label(new Rect(260, 665, 120, 20), Localizer.Format("#AGEXT_UI_button_test"), AGXLblStyle);
                 if (Event.current.keyCode != KeyCode.None)
                 {
                     LastKeyCode = Event.current.keyCode.ToString();
@@ -3056,7 +3127,7 @@ namespace ActionGroupsExtended
 
         public void WipeVesselData() //loading screwed up, reset everything
         {
-            //Debug.Log("AGX Error loading, resetting data this vessel to defaults. If this vessel does have saved data that should load, please file a bug report.");
+            Log.Info("Error loading, resetting data this vessel to defaults. If this vessel does have saved data that should load, please file a bug report.");
             CurrentKeySetFlight = 1;
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
@@ -3081,8 +3152,8 @@ namespace ActionGroupsExtended
             CurrentKeySetFlight = rootAGX.currentKeyset;
             LoadCurrentKeyBindings();
             CurrentKeySetNameFlight = KeySetNamesFlight[CurrentKeySetFlight - 1];
-            //currentMissionId = (uint)rootAGX.focusFlightID; //set before this method is called!
-            string errLine = "7j";
+            //currentMissionId = rootAGX.focusFlightID; //set before this method is called!
+            //string errLine = "7j";
             //if (FlightGlobals.ActiveVessel.Parts.Contains(AGXRoot))
             //{
             //    errLine = "7k";
@@ -3096,30 +3167,30 @@ namespace ActionGroupsExtended
             //}
             //ResetGroupNames(); //always clear names now, we reload everything from ModuleAGX
             LoadGroupNames(); //group names check every part now based on currentMissionID, pass no values
-            errLine = "7m";
+            //errLine = "7m";
             LoadGroupVisibility(rootAGX.groupVisibility);
             LoadGroupVisibilityNames(rootAGX.groupVisibilityNames);
             LoadDirectActionState(rootAGX.DirectActionState);
-            errLine = "7n";
+            //errLine = "7n";
 
             StaticData.CurrentVesselActions.Clear(); //refreshing list, clear old actions
             foreach (Part p in rootAGX.vessel.Parts)
             {
-                errLine = "7o";
+                //errLine = "7o";
                 //if (!p.Modules.Contains("KerbalEVA"))
                 //{
                 foreach (AGXAction agAct in p.Modules.OfType<ModuleAGX>().FirstOrDefault().agxActionsThisPart)
                 {
-                    errLine = "7p";
+                    //errLine = "7p";
                     if (!StaticData.CurrentVesselActions.Contains(agAct))
                     {
-                        errLine = "7q";
+                        //errLine = "7q";
                         StaticData.CurrentVesselActions.Add(agAct); //add action from part if not already present, not sure what could cause doubles but error trap it
                     }
                 }
                 //}
             }
-            errLine = "7r";
+            //errLine = "7r";
 
             RefreshCurrentActions();
         }
@@ -3159,7 +3230,7 @@ namespace ActionGroupsExtended
 
                 showDockedSubVesselIndicators = true;
                 StartCoroutine(DockedSubVesselsIconTimer());
-                Debug.Log("AGX dd " + missionIDs.Count + "|" + currentMissionId);
+                Log.Info("dd " + missionIDs.Count + "|" + currentMissionId);
                 LoadVesselDataFromPM(missionIDsPM[currentMissionId]);
             }
             if (GUI.Button(new Rect(272, 1, 90, 20), "Next Docked", AGXBtnStyle))
@@ -3176,7 +3247,7 @@ namespace ActionGroupsExtended
                     }
                 }
                 int tempIndex = missionIDs.IndexOf(currentMissionId);
-                //Debug.Log("AGX test " + tempIndex + " " + missionIDs.Count + " " + missionIDs[tempIndex] + " " + currentMissionId);
+                Log.Info("test " + tempIndex + " " + missionIDs.Count + " " + missionIDs[tempIndex] + " " + currentMissionId);
 
                 if (tempIndex == missionIDs.Count - 1)
                 {
@@ -3186,7 +3257,7 @@ namespace ActionGroupsExtended
                 {
                     currentMissionId = missionIDs[tempIndex + 1];
                 }
-                //Debug.Log("AGX test2 " + currentMissionId);
+                Log.Info("test2 " + currentMissionId);
 
                 showDockedSubVesselIndicators = true;
                 StartCoroutine(DockedSubVesselsIconTimer());
@@ -3238,7 +3309,8 @@ namespace ActionGroupsExtended
 
             else //no parts selected, show list all parts button
             {
-                if (GUI.Button(new Rect(SelPartsLeft + 50, 45, 140, 70), "Show list of\nall parts?", AGXBtnStyle)) //button itself
+                // if (GUI.Button(new Rect(SelPartsLeft + 50, 45, 140, 70), "Show list of\nall parts?", AGXBtnStyle)) //button itself
+                if (GUI.Button(new Rect(SelPartsLeft + 50, 45, 140, 70), Localizer.Format("#AGEXT_UI_show_list_hint"), AGXBtnStyle)) //button itself
                 {
                     showAllPartsListTitles = new List<string>(); //generate list of all parts 
                     showAllPartsListTitles.Clear(); //this probably isn't needed, but it works as is, not messing with it
@@ -3269,13 +3341,15 @@ namespace ActionGroupsExtended
             {
                 //GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexGrn, ScaleMode.StretchToFill, false);
                 AGXBtnStyle.normal.background = ButtonTextureGreen;
-                BtnTxt = "Symmetry? Yes";
+                // BtnTxt = "Symmetry? Yes";
+                BtnTxt = Localizer.Format("#AGEXT_UI_select_mode_yes");
             }
             else
             {
                 //GUI.DrawTexture(new Rect(SelPartsLeft + 246, 26, 108, 23), BtnTexRed, ScaleMode.StretchToFill, false);
                 AGXBtnStyle.normal.background = ButtonTextureRed;
-                BtnTxt = "Symmetry? No";
+                // BtnTxt = "Symmetry? No";
+                BtnTxt = Localizer.Format("#AGEXT_UI_select_mode_no");
             }
 
 
@@ -3286,7 +3360,8 @@ namespace ActionGroupsExtended
 
             }
             AGXBtnStyle.normal.background = ButtonTexture;
-            if (GUI.Button(new Rect(SelPartsLeft + 245, 55, 110, 25), "Clear List", AGXBtnStyle))
+            // if (GUI.Button(new Rect(SelPartsLeft + 245, 55, 110, 25), "Clear List", AGXBtnStyle))
+            if (GUI.Button(new Rect(SelPartsLeft + 245, 55, 110, 25), Localizer.Format("#AGEXT_UI_clear_all"), AGXBtnStyle))
             {
                 AGEditorSelectedParts.Clear();
                 PartActionsList.Clear();
@@ -3414,7 +3489,8 @@ namespace ActionGroupsExtended
                 TxtAnch = GUI.skin.label.alignment;
 
                 AGXLblStyle.alignment = TextAnchor.MiddleCenter;
-                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type", AGXLblStyle);
+                // GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), "Select parts of\nthe same type", AGXLblStyle);
+                GUI.Label(new Rect(SelPartsLeft + 20, 180, 190, 40), Localizer.Format("#AGEXT_UI_select_part_hint"), AGXLblStyle);
 
 
 
@@ -3445,7 +3521,8 @@ namespace ActionGroupsExtended
 
                     Color TxtClr = GUI.contentColor;
                     GUI.contentColor = Color.green;
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:Yes", AGXBtnStyle))
+                    // if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:Yes", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), Localizer.Format("#AGEXT_UI_state_vis_yes"), AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = false;
@@ -3454,7 +3531,8 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:No", AGXBtnStyle))
+                    // if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), "StateVis:No", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 235, 160, 90, 22), Localizer.Format("#AGEXT_UI_state_vis_no"), AGXBtnStyle))
                     {
 
                         IsGroupToggle[AGXCurActGroup] = true;
@@ -3466,7 +3544,8 @@ namespace ActionGroupsExtended
                     Color btnClr = AGXBtnStyle.normal.textColor;
                     AGXBtnStyle.normal.textColor = Color.red;
                     AGXBtnStyle.hover.textColor = Color.red;
-                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Hold", AGXBtnStyle))
+                    // if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Hold", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), Localizer.Format("#AGEXT_UI_hold"), AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = false;
                     }
@@ -3475,13 +3554,15 @@ namespace ActionGroupsExtended
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Tap", AGXBtnStyle))
+                    // if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), "Tap", AGXBtnStyle))
+                    if (GUI.Button(new Rect(SelPartsLeft + 320, 160, 45, 22), Localizer.Format("#AGEXT_UI_tap"), AGXBtnStyle))
                     {
                         isDirectAction[AGXCurActGroup] = true;
                     }
                 }
 
-                GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:", AGXLblStyle);
+                // GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), "Show:", AGXLblStyle);
+                GUI.Label(new Rect(SelPartsLeft + 231, 183, 110, 22), Localizer.Format("#AGEXT_UI_show"), AGXLblStyle);
                 Color TxtClr2 = GUI.contentColor;
 
                 if (ShowGroupInFlight[1, AGXCurActGroup])
@@ -3554,11 +3635,13 @@ namespace ActionGroupsExtended
                     CalculateActionsToShow();
                 }
                 GUI.contentColor = TxtClr2;
-                GUI.Label(new Rect(SelPartsLeft + 245, 115, 110, 20), "Description:", AGXLblStyle);
+                // GUI.Label(new Rect(SelPartsLeft + 245, 115, 110, 20), "Description:", AGXLblStyle);
+                GUI.Label(new Rect(SelPartsLeft + 245, 115, 110, 20), Localizer.Format("#AGEXT_UI_action_name"), AGXLblStyle);
                 CurGroupDesc = AGXguiNames[AGXCurActGroup];
                 CurGroupDesc = GUI.TextField(new Rect(SelPartsLeft + 245, 135, 120, 22), CurGroupDesc, AGXFldStyle);
                 AGXguiNames[AGXCurActGroup] = CurGroupDesc;
-                GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), "Keybinding:", AGXLblStyle);
+                // GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), "Keybinding:", AGXLblStyle);
+                GUI.Label(new Rect(SelPartsLeft + 245, 203, 110, 25), Localizer.Format("#AGEXT_UI_keybinding"), AGXLblStyle);
                 string btnName = "";
                 if (AGXguiMod1Groups[AGXCurActGroup] && AGXguiMod2Groups[AGXCurActGroup])
                 {
@@ -3650,7 +3733,8 @@ namespace ActionGroupsExtended
             }
             if (showCareerCustomAGs)
             {
-                if (GUI.Button(new Rect(80, 3, 40, 20), "Other", AGXBtnStyle))
+                // if (GUI.Button(new Rect(80, 3, 40, 20), "Other", AGXBtnStyle))
+                if (GUI.Button(new Rect(80, 3, 40, 20), Localizer.Format("#AGEXT_UI_type_other"), AGXBtnStyle))
                 {
                     defaultShowingNonNumeric = !defaultShowingNonNumeric;
                     if (defaultShowingNonNumeric)
@@ -3781,7 +3865,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(5, 25, 58, 20), "Abort", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(5, 25, 58, 20), "Abort", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(5, 25, 58, 20), Localizer.Format("#AGEXT_UI_type_abort"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.Abort;
                     RefreshDefaultActionsListType();
@@ -3796,7 +3881,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(64, 25, 58, 20), "Brakes", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(64, 25, 58, 20), "Brakes", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(64, 25, 58, 20), Localizer.Format("#AGEXT_UI_type_brakes"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.Brakes;
                     RefreshDefaultActionsListType();
@@ -3811,7 +3897,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(122, 25, 59, 20), "Gear", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(122, 25, 59, 20), "Gear", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(122, 25, 59, 20), Localizer.Format("#AGEXT_UI_type_gear"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.Gear;
                     RefreshDefaultActionsListType();
@@ -3826,7 +3913,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(182, 25, 58, 20), "Lights", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(182, 25, 58, 20), "Lights", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(182, 25, 58, 20), Localizer.Format("#AGEXT_UI_type_lights"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.Light;
                     RefreshDefaultActionsListType();
@@ -3842,7 +3930,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(5, 45, 76, 20), "RCS", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(5, 45, 76, 20), "RCS", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(5, 45, 76, 20), Localizer.Format("#AGEXT_UI_type_rcs"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.RCS;
                     RefreshDefaultActionsListType();
@@ -3857,7 +3946,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(81, 45, 76, 20), "SAS", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(81, 45, 76, 20), "SAS", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(81, 45, 76, 20), Localizer.Format("#AGEXT_UI_type_sas"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.SAS;
                     RefreshDefaultActionsListType();
@@ -3872,7 +3962,8 @@ namespace ActionGroupsExtended
                     AGXBtnStyle.normal.background = ButtonTexture;
                     AGXBtnStyle.hover.background = ButtonTexture;
                 }
-                if (GUI.Button(new Rect(157, 45, 76, 20), "Stage", AGXBtnStyle)) //button code
+                // if (GUI.Button(new Rect(157, 45, 76, 20), "Stage", AGXBtnStyle)) //button code
+                if (GUI.Button(new Rect(157, 45, 76, 20), Localizer.Format("#AGEXT_UI_type_stage"), AGXBtnStyle)) //button code
                 {
                     defaultGroupToShow = KSPActionGroup.Stage;
                     RefreshDefaultActionsListType();
@@ -4190,14 +4281,14 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX GroupsNamesToString FAIL " + errStep + " " + e);
+                Log.Info("GroupsNamesToString FAIL " + errStep + " " + e);
                 return "";
             }
         }
 
         public static Dictionary<int, string> GroupNamesStringToDict(string str)
         {
-            string errLine = "1";
+            //string errLine = "1";
             Dictionary<int, string> DictToReturn = new Dictionary<int, string>();
             for (int i = 1; i <= 250; i++)
             {
@@ -4207,28 +4298,28 @@ namespace ActionGroupsExtended
 
             if (LoadNames.Length > 0)
             {
-                errLine = "4";
+                //errLine = "4";
                 while (LoadNames[0] == '\u2023')
                 {
-                    errLine = "5";
+                    //errLine = "5";
                     int groupNum = new int();
                     string groupName = "";
                     LoadNames = LoadNames.Substring(1);
                     groupNum = Convert.ToInt32(LoadNames.Substring(0, 3));
                     LoadNames = LoadNames.Substring(3);
-                    errLine = "6";
+                    //errLine = "6";
                     if (LoadNames.IndexOf('\u2023') == -1)
                     {
-                        errLine = "7";
+                        //errLine = "7";
                         groupName = LoadNames;
                     }
                     else
                     {
-                        errLine = "8";
+                        //errLine = "8";
                         groupName = LoadNames.Substring(0, LoadNames.IndexOf('\u2023'));
                         LoadNames = LoadNames.Substring(LoadNames.IndexOf('\u2023'));
                     }
-                    errLine = "9";
+                    //errLine = "9";
                     //print(groupName + " || " + AGXguiNames[groupNum] + " " + groupNum);
                     //if (p.missionID == currentMissionId) //missionID matchs, group names on this part have priority
                     //{
@@ -4266,7 +4357,7 @@ namespace ActionGroupsExtended
                         ModuleAGX agxPM = (ModuleAGX)p.Modules["ModuleAGX"];
                         if (agxPM.focusFlightID == 0)
                         {
-                            agxPM.focusFlightID = (int)FlightGlobals.ActiveVessel.rootPart.missionID; //error trap first load in flight mode, this will still be 0 so set it to the root part of the ship. 99% of the time this will be on launchpad
+                            agxPM.focusFlightID = FlightGlobals.ActiveVessel.rootPart.missionID; //error trap first load in flight mode, this will still be 0 so set it to the root part of the ship. 99% of the time this will be on launchpad
                         }
 
                         //string LoadNames = agxPM.groupNames;
@@ -4325,7 +4416,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupNamesFail " + errLine + " " + e);
+                Log.Info("LoadGroupNamesFail " + errLine + " " + e);
             }
         }
 
@@ -4385,7 +4476,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX LoadGroupNamesFail " + errLine + " " + e);
+                Log.Info("LoadGroupNamesFail " + errLine + " " + e);
             }
         }
 
@@ -4393,17 +4484,7 @@ namespace ActionGroupsExtended
         public void LoadDefaultActionGroups()
         {
 
-            List<KSPActionGroup> CustomActions = new List<KSPActionGroup>();
-            CustomActions.Add(KSPActionGroup.Custom01); //how do you add a range from enum?
-            CustomActions.Add(KSPActionGroup.Custom02);
-            CustomActions.Add(KSPActionGroup.Custom03);
-            CustomActions.Add(KSPActionGroup.Custom04);
-            CustomActions.Add(KSPActionGroup.Custom05);
-            CustomActions.Add(KSPActionGroup.Custom06);
-            CustomActions.Add(KSPActionGroup.Custom07);
-            CustomActions.Add(KSPActionGroup.Custom08);
-            CustomActions.Add(KSPActionGroup.Custom09);
-            CustomActions.Add(KSPActionGroup.Custom10);
+            List<KSPActionGroup> CustomActions = AGXFlight.CustomActions.Values.ToList();
 
             foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             {
@@ -4514,7 +4595,7 @@ namespace ActionGroupsExtended
         {
 
             //if(() &&  &&  &&  &&  &&  &&  &&  && )
-            //Debug.Log("AGX Mouse " + CurrentMousePosition + " " + FlightWin);
+            //Log.Info("Mouse " + CurrentMousePosition + " " + FlightWin);
             if (!CheckMouseOver())
             {
                 if (!AGEditorSelectedParts.Any(prt => prt.AGPart == p))
@@ -4687,15 +4768,15 @@ namespace ActionGroupsExtended
 
         public static bool VesselIsControlled() //check if focus vessel is controllable, use lockmask as Squad sets that when a vessel isnt/.
         {
-            //Debug.Log("AGX TEST " + InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS));
+            Log.Info("TEST " + InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS));
             if (InputLockManager.lockStack.ContainsKey("vessel_noControl_" + FlightGlobals.ActiveVessel.id.ToString()) && InputLockManager.IsLocked(ControlTypes.GROUP_LIGHTS))
             {
-                //Debug.Log("AGX Not controllable");
+                Log.Info("Not controllable");
                 return false; //if value is present in lockstack, controls are locked so not controllable
             }
             else
             {
-                //Debug.Log("AGX Ccontrollable");
+                Log.Info("Ccontrollable");
                 return true; //vessel is controlled, activate action
             }
         }
@@ -4707,7 +4788,7 @@ namespace ActionGroupsExtended
             //{
             //    foreach (Part p in FlightGlobals.ActiveVessel.Parts)
             //    {
-            //        Debug.Log("AGX " + p.Modules.OfType<ModuleAGX>().First().currentKeyset + "|" + p.Modules.OfType<ModuleAGX>().First().focusFlightID + "|" + p.Modules.OfType<ModuleAGX>().First().hasData +"|" + p.missionID);
+            //        Log.Info("" + p.Modules.OfType<ModuleAGX>().First().currentKeyset + "|" + p.Modules.OfType<ModuleAGX>().First().focusFlightID + "|" + p.Modules.OfType<ModuleAGX>().First().hasData +"|" + p.missionID);
             //    }
             //}
             //catch
@@ -4750,12 +4831,12 @@ namespace ActionGroupsExtended
                             }
                             else
                             {
-                                // Debug.Log("AGX Update save, root null");
+                                // Log.Info("Update save, root null");
                             }
                         }
                         catch (Exception e)
                         {
-                            Debug.Log("AGX Update save fail" + e);
+                            Log.Info("Update save fail" + e);
                         }
                         errLine = "7d";
                         //note we generally do not save data here, all saving of data is done by the GUI buttons to the ModuleAGX partmodule directly in flight mode
@@ -4763,7 +4844,7 @@ namespace ActionGroupsExtended
                     }
                 } //if(RootPartExists) closing bracket
                 errLine = "8";
-                //Debug.Log("AGX Testd");
+                Log.Info("Testd");
                 if (InputLockManager.GetControlLock("kOSTerminal") == ControlTypes.None && (ControlTypes.KSC_ALL & (ControlTypes)InputLockManager.lockMask) == 0)//.KSC_ALL catches both vessel not controllable via lock Squad sets as well as if ControlLock (my other mod) is engaged
                 {
                     //.Log("AGX Test");
@@ -4796,7 +4877,7 @@ namespace ActionGroupsExtended
                             {
                                 ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
                                 DirectKeysState[kcPair.Key] = true;
-                                //Debug.Log("turn on");
+                                Log.Info("turn on");
                             }
                         }
                         else if (!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
@@ -4805,7 +4886,7 @@ namespace ActionGroupsExtended
                             {
                                 ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
                                 DirectKeysState[kcPair.Key] = false;
-                                //Debug.Log("turn off");
+                                Log.Info("turn off");
                             }
                         }
                     }
@@ -4819,17 +4900,6 @@ namespace ActionGroupsExtended
                                 {
                                     if (kcPair2.Key <= 10)
                                     {
-                                        Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                                        CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                                        CustomActions.Add(2, KSPActionGroup.Custom02);
-                                        CustomActions.Add(3, KSPActionGroup.Custom03);
-                                        CustomActions.Add(4, KSPActionGroup.Custom04);
-                                        CustomActions.Add(5, KSPActionGroup.Custom05);
-                                        CustomActions.Add(6, KSPActionGroup.Custom06);
-                                        CustomActions.Add(7, KSPActionGroup.Custom07);
-                                        CustomActions.Add(8, KSPActionGroup.Custom08);
-                                        CustomActions.Add(9, KSPActionGroup.Custom09);
-                                        CustomActions.Add(10, KSPActionGroup.Custom10);
                                         FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(CustomActions[kcPair2.Key]);
                                         groupActivatedState[kcPair2.Key] = FlightGlobals.ActiveVessel.ActionGroups[CustomActions[kcPair2.Key]];
                                     }
@@ -4910,18 +4980,18 @@ namespace ActionGroupsExtended
                 {
                     CheckRTQueue();
                 }
-                //Debug.Log("AGX TEst " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS) + "|" + InputLockManager.IsUnlocked(ControlTypes.ALL_SHIP_CONTROLS)+ "|" + InputLockManager.IsAllLocked(ControlTypes.ALL_SHIP_CONTROLS) );
+                Log.Info("TEst " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS) + "|" + InputLockManager.IsUnlocked(ControlTypes.ALL_SHIP_CONTROLS)+ "|" + InputLockManager.IsAllLocked(ControlTypes.ALL_SHIP_CONTROLS) );
             } //public void Update() try close bracket
             catch (Exception e)
             {
-                Debug.Log("AGX Flight Update Error " + errLine + " " + e);
+                Log.Info("Flight Update Error " + errLine + " " + e);
             }
         }
 
         //public void UpdateOld() //not used, left for copying purposes
         //{
 
-        //    //Debug.Log("Start AGEXT update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
+        //    Log.Info("Start AGEXT update!");//print("lock " + InputLockManager.IsLocked(ControlTypes.ALL_SHIP_CONTROLS));
         //    //if ((ControlTypes.ALL_SHIP_CONTROLS & (ControlTypes)InputLockManager.lockMask) == 0)
         //    //{
         //    //    print("not Locked");
@@ -5234,15 +5304,15 @@ namespace ActionGroupsExtended
         //                    LoadGroupNames(vslNode.GetValue("groupNames"));
         //                    LoadGroupVisibility(vslNode.GetValue("groupVisibility"));
         //                    LoadGroupVisibilityNames(vslNode.GetValue("groupVisibilityNames"));
-        //                    //Debug.Log(vslNode);
+        //                    Log.Info(vslNode);
         //                    if (vslNode.HasValue("DirectActionState"))
         //                    {
-        //                        //Debug.Log("has state");
+        //                        Log.Info("has state");
         //                        LoadDirectActionState(vslNode.GetValue("DirectActionState"));
         //                    }
         //                    else
         //                    {
-        //                        //Debug.Log("no state");
+        //                        Log.Info("no state");
         //                        LoadDirectActionState("");
         //                    }
         //                    errLine = "24fg";
@@ -5444,13 +5514,13 @@ namespace ActionGroupsExtended
         //                {
         //                    ActivateActionGroupCheckModKeys(kcPair.Key, true, true);
         //                    DirectKeysState[kcPair.Key] = true;
-        //                    //Debug.Log("turn on");
+        //                    Log.Info("turn on");
         //                }
         //                else if (!Input.GetKey(kcPair.Value) && DirectKeysState[kcPair.Key])
         //                {
         //                    ActivateActionGroupCheckModKeys(kcPair.Key, true, false);
         //                    DirectKeysState[kcPair.Key] = false;
-        //                    //Debug.Log("turn off");
+        //                    Log.Info("turn off");
         //                }
         //            }
         //            foreach (KeyValuePair<int, KeyCode> kcPair2 in DefaultTen) //toggle groups if no actions are assigned
@@ -5487,7 +5557,7 @@ namespace ActionGroupsExtended
         //        //if (!ActiveActionsCalculated)
         //        //{
         //        //    CalculateActiveActions();
-        //        // Debug.Log("AGX update middel A");
+        //        // Log.Info("update middel A");
         //        //}
         //        if (Input.GetKeyDown(KeyCode.Mouse0) && ShowSelectedWin)
         //        {
@@ -5500,7 +5570,7 @@ namespace ActionGroupsExtended
         //            }
         //            errLine = "40";
         //        }
-        //        //Debug.Log("AGX update middel b");
+        //        Log.Info("update middel b");
         //        errLine = "41";
         //        if (RightClickDelay < 3)
         //        {
@@ -5532,7 +5602,7 @@ namespace ActionGroupsExtended
 
         //            errLine = "44";
         //        }
-        //        //Debug.Log("AGX update middel c");
+        //        Log.Info("update middel c");
         //        errLine = "45";
 
         //        if (Input.GetKeyUp(KeyCode.Mouse1) && ShowSelectedWin && RightLickPartAdded == true)
@@ -5542,7 +5612,7 @@ namespace ActionGroupsExtended
 
         //        }
         //        errLine = "46";
-        //        // Debug.Log("AGX update middel d");
+        //        // Log.Info("update middel d");
         //        //foreach (Part p in FlightGlobals.ActiveVessel.Parts)
         //        //{
         //        //    foreach (PartModule pm in p.Modules)
@@ -5568,7 +5638,7 @@ namespace ActionGroupsExtended
         //        //}
         //        //print("delta time " + actionsCheckFrameCount);
         //        errLine = "47";
-        //        //Debug.Log("AGX update middel e2");
+        //        Log.Info("update middel e2");
         //        //count down action cool downs
         //        groupCooldowns.RemoveAll(cd => cd.delayLeft > activationCoolDown); //remove actions from list that are finished cooldown, cooldown is in Update frame passes, pulled from .cfg
         //        foreach (AGXCooldown agCD in groupCooldowns)
@@ -5576,27 +5646,27 @@ namespace ActionGroupsExtended
         //            agCD.delayLeft = agCD.delayLeft + 1;
 
         //        }
-        //        //Debug.Log("AGX update middel e");
+        //        Log.Info("update middel e");
         //        errLine = "48";
         //        if (RTFound)
         //        {
         //            CheckRTQueue();
         //        }
-        //        //Debug.Log("AGX update middel f");
+        //        Log.Info("update middel f");
         //        errLine = "49";
         //        //PrintPartActs();
         //        //print("landed " + FlightGlobals.ActiveVessel.landedAt);
 
         //        //if (test == null)
         //        //{
-        //        //    Debug.Log("NULL");
+        //        //    Log.Info("NULL");
         //        //}
         //        //else
         //        //{
-        //        //    Debug.Log("found " + test.nodes.Count + " " + test.values.Count);
+        //        //    Log.Info("found " + test.nodes.Count + " " + test.values.Count);
         //        //}
-        //        //Debug.Log("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
-        //        //Debug.Log("End update!");
+        //        Log.Info("btn font " + HighLogic.Skin.font +);// AGXBtnStyle.font + AGXBtnStyle.fontSize + AGXBtnStyle.fontStyle);
+        //        Log.Info("End update!");
         //    }
         //    catch (Exception e)
         //    {
@@ -5604,9 +5674,9 @@ namespace ActionGroupsExtended
         //    }
         //}
 
-            IEnumerator GUIDelayCoroutine()
+        IEnumerator GUIDelayCoroutine()
         {
-            //Debug.Log("AGX Coroutine fire");
+            Log.Info("Coroutine fire");
             int i = 0;
             while (i < 4)
             {
@@ -5618,169 +5688,169 @@ namespace ActionGroupsExtended
 
         public void LoadGUIDataAfterDelay()
         {
-            //Debug.Log("AGX LoadUI call");
+            Log.Info("LoadUI call");
             string errLine = "1";
             try
-            { 
-            ModuleAGX rootAGX = null;
-            
-            //Debug.Log("AGX " + FlightGlobals.ActiveVessel.vesselType.ToString());
-            if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA") || FlightGlobals.ActiveVessel.vesselType == VesselType.Flag) //kerbals have no actions so...
             {
-                //Debug.Log("AGX oddball");
-                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
-                {
-                    if (!p.Modules.Contains("ModuleAGX"))
-                    {
-                        //Debug.Log("AGX AGXModule being added");
-                        rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
-                    }
-                }
-                rootAGX = (ModuleAGX)FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"];
-                //rootAGX = new ModuleAGX();
-                //rootAGX.hasData = true;
-                //Debug.Log("AGX EvA");
+                ModuleAGX rootAGX = null;
 
-            }
-            else
-            {
-                if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //get our root part module
+                Log.Info("" + FlightGlobals.ActiveVessel.vesselType.ToString());
+                if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("KerbalEVA") || FlightGlobals.ActiveVessel.vesselType == VesselType.Flag) //kerbals have no actions so...
                 {
-                    errLine = "7e";
-                    rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
-                    // Debug.Log("AGX root module found");
+                    Log.Info("oddball");
+                    foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                    {
+                        if (!p.Modules.Contains("ModuleAGX"))
+                        {
+                            Log.Info("AGXModule being added");
+                            rootAGX = (ModuleAGX)p.AddModule("ModuleAGX");
+                        }
+                    }
+                    rootAGX = (ModuleAGX)FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"];
+                    //rootAGX = new ModuleAGX();
+                    //rootAGX.hasData = true;
+                    Log.Info("EvA");
+
                 }
                 else
                 {
-                    errLine = "7f";
-                    rootAGX = new ModuleAGX();
-                    //  Debug.Log("AGX trap new root module");
-                }
-
-                if (!rootAGX.hasData)//make sure our moduleAGX has data, rare but can happen on docking ships launched before installing AGX
-                {
-                    // Debug.Log("AGX no datat");
-                    errLine = "7g";
-                       // Debug.Log("AGX active vessel part count " + FlightGlobals.ActiveVessel.Parts.Count);
-                    foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                    if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //get our root part module
                     {
-                           // Debug.Log("AGX active vessel part count2 " + FlightGlobals.ActiveVessel.Parts.Count);
+                        errLine = "7e";
+                        rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
+                        // Log.Info("root module found");
+                    }
+                    else
+                    {
+                        errLine = "7f";
+                        rootAGX = new ModuleAGX();
+                        //  Log.Info("trap new root module");
+                    }
+
+                    if (!rootAGX.hasData)//make sure our moduleAGX has data, rare but can happen on docking ships launched before installing AGX
+                    {
+                        // Log.Info("no datat");
+                        errLine = "7g";
+                        // Log.Info("active vessel part count " + FlightGlobals.ActiveVessel.Parts.Count);
+                        foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                        {
+                            // Log.Info("active vessel part count2 " + FlightGlobals.ActiveVessel.Parts.Count);
                             errLine = "7g1";
-                        if (p.Modules.OfType<ModuleAGX>().FirstOrDefault().hasData) //.hasData is false on Default so this works
-                        {
-                             //   Debug.Log("AGX active vessel part count3 " + FlightGlobals.ActiveVessel.Parts.Count);
-                                errLine = "7g2";
-                            rootAGX = p.Modules.OfType<ModuleAGX>().First();
-                        }
-                        if (rootAGX.hasData)
-                        {
-                            errLine = "7g3";
-                            break; //valid data found, break the forEach
-                        }
-                    }
-                    if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //no modules with data, return to root 
+                            if (p.Modules.OfType<ModuleAGX>().FirstOrDefault().hasData) //.hasData is false on Default so this works
                             {
-                                errLine = "7g4";
-                                rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
-                                // Debug.Log("AGX root module found");
+                                //   Log.Info("active vessel part count3 " + FlightGlobals.ActiveVessel.Parts.Count);
+                                errLine = "7g2";
+                                rootAGX = p.Modules.OfType<ModuleAGX>().First();
                             }
-                }
-            }
-            errLine = "7h";
-
-
-            if (FlightGlobals.ActiveVessel.isEVA)
-            {
-                errLine = "7h9b";
-                currentMissionId = 1; //we are a kerbal (or somethings screwy), just set this to 1 so it never matches. 0 is default so that might match something
-            }
-            else
-            {
-                errLine = "7h9c";
-                if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
-                {
-                    errLine = "7h10";
-                    rootAGX.focusFlightID = (int)rootAGX.vessel.rootPart.missionID;
-                    currentMissionId = rootAGX.vessel.rootPart.missionID;
-                }
-                else if (rootAGX.focusFlightID == rootAGX.part.missionID)
-                {
-                    errLine = "7h11";
-                    //  Debug.Log("agx root found");
-                    //do nothing, rootAGX is currently set to the root part's ModuleAGX
-                }
-                else //check other parts for their mission id and change to that ModuleAGX if it matchs
-                {
-                    errLine = "7h12";
-                    //string errLine = "7h12";
-                    ModuleAGX moduleReturn = null;
-                    HashSet<uint> missionIDs = new HashSet<uint>();
-                    errLine = "7h13";
-                    foreach (Part p in rootAGX.vessel.parts)
-                    {
-                        errLine = "7h14";
-                        if (!p.Modules.Contains("KerbalEVA"))
+                            if (rootAGX.hasData)
+                            {
+                                errLine = "7g3";
+                                break; //valid data found, break the forEach
+                            }
+                        }
+                        if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX")) //no modules with data, return to root 
                         {
-                            errLine = "7h14a";
-                            missionIDs.Add(p.missionID);
+                            errLine = "7g4";
+                            rootAGX = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<ModuleAGX>().First();
+                            // Log.Info("root module found");
                         }
                     }
-                    //   Debug.Log("agx not root " + missionIDs.Count);
-                    errLine = "7h15";
-                    if (missionIDs.Contains((uint)rootAGX.focusFlightID))
+                }
+                errLine = "7h";
+
+
+                if (FlightGlobals.ActiveVessel.isEVA)
+                {
+                    errLine = "7h9b";
+                    currentMissionId = 1; //we are a kerbal (or somethings screwy), just set this to 1 so it never matches. 0 is default so that might match something
+                }
+                else
+                {
+                    errLine = "7h9c";
+                    if (rootAGX.focusFlightID == 0) //check we have a master vesel assigned, this will trigger on launching a new vessel, etc.
                     {
-                        errLine = "7h16";
-                        currentMissionId = (uint)rootAGX.focusFlightID;
+                        errLine = "7h10";
+                        rootAGX.focusFlightID = rootAGX.vessel.rootPart.missionID;
+                        currentMissionId = rootAGX.vessel.rootPart.missionID;
+                    }
+                    else if (rootAGX.focusFlightID == rootAGX.part.missionID)
+                    {
+                        errLine = "7h11";
+                        //  Log.Info("agx root found");
+                        //do nothing, rootAGX is currently set to the root part's ModuleAGX
+                    }
+                    else //check other parts for their mission id and change to that ModuleAGX if it matchs
+                    {
+                        errLine = "7h12";
+                        //string errLine = "7h12";
+                        ModuleAGX moduleReturn = null;
+                        HashSet<uint> missionIDs = new HashSet<uint>();
+                        errLine = "7h13";
                         foreach (Part p in rootAGX.vessel.parts)
                         {
-                            errLine = "7h17";
-                            if (p.missionID == currentMissionId)
+                            errLine = "7h14";
+                            if (!p.Modules.Contains("KerbalEVA"))
                             {
-                                errLine = "7h18";
-                                moduleReturn = p.Modules.OfType<ModuleAGX>().First();
-                                break; //stop the foreach, found what we needed
+                                errLine = "7h14a";
+                                missionIDs.Add(p.missionID);
                             }
                         }
-                    }
-                    else //vessel does not conatain the missionID in rootAGX.focusFlightID for somereason, use root part
-                    {
-                        errLine = "7h19";
-                        currentMissionId = rootAGX.part.missionID;
+                        //   Log.Info("agx not root " + missionIDs.Count);
+                        errLine = "7h15";
+                        if (missionIDs.Contains(rootAGX.focusFlightID))
+                        {
+                            errLine = "7h16";
+                            currentMissionId = rootAGX.focusFlightID;
+                            foreach (Part p in rootAGX.vessel.parts)
+                            {
+                                errLine = "7h17";
+                                if (p.missionID == currentMissionId)
+                                {
+                                    errLine = "7h18";
+                                    moduleReturn = p.Modules.OfType<ModuleAGX>().First();
+                                    break; //stop the foreach, found what we needed
+                                }
+                            }
+                        }
+                        else //vessel does not conatain the missionID in rootAGX.focusFlightID for somereason, use root part
+                        {
+                            errLine = "7h19";
+                            currentMissionId = rootAGX.part.missionID;
+                        }
                     }
                 }
-            }
 
-            errLine = "7i";
-            if (currentMissionId != 1) //if currentMissionID = 1, we are either a Kerbal on EVA, or loading has screwed up and rootAGX is not valid so don't load
-            {
-                LoadVesselDataFromPM(rootAGX);
-            }
-            else
-            {
-                WipeVesselData();
-            }
-            AGXRoot = FlightGlobals.ActiveVessel.rootPart;
-            LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
-            SaveShipSpecificData(FlightGlobals.ActiveVessel);
-            if (currentMissionId > 1)
-            {
-                foreach (Part p in FlightGlobals.ActiveVessel.Parts)
+                errLine = "7i";
+                if (currentMissionId != 1) //if currentMissionID = 1, we are either a Kerbal on EVA, or loading has screwed up and rootAGX is not valid so don't load
                 {
-                    if (p.Modules.Contains("ModuleAGX"))
+                    LoadVesselDataFromPM(rootAGX);
+                }
+                else
+                {
+                    WipeVesselData();
+                }
+                AGXRoot = FlightGlobals.ActiveVessel.rootPart;
+                LastPartCount = FlightGlobals.ActiveVessel.parts.Count;
+                SaveShipSpecificData(FlightGlobals.ActiveVessel);
+                if (currentMissionId > 1)
+                {
+                    foreach (Part p in FlightGlobals.ActiveVessel.Parts)
                     {
-                        p.Modules["ModuleAGX"].Fields.SetValue("missionID", (float)currentMissionId);
+                        if (p.Modules.Contains("ModuleAGX"))
+                        {
+                            p.Modules["ModuleAGX"].Fields.SetValue("missionID", (float)currentMissionId);
+                        }
                     }
                 }
+                //if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX"))
+                //{
+                //    Log.Info("root flight id " + FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"].Fields.GetValue("focusFlightID"));
+                //}
+                errLine = "7s";
             }
-            //if (FlightGlobals.ActiveVessel.rootPart.Modules.Contains("ModuleAGX"))
-            //{
-            //    Debug.Log("AGX root flight id " + FlightGlobals.ActiveVessel.rootPart.Modules["ModuleAGX"].Fields.GetValue("focusFlightID"));
-            //}
-            errLine = "7s";
-            }
-            catch(Exception e)
+            catch (Exception e)
             {
-            Debug.Log("AGX Flight Load Vessel GUI Delay error " + errLine + " " + e);
+                Log.Info("Flight Load Vessel GUI Delay error " + errLine + " " + e);
             }
 
         }
@@ -5818,7 +5888,7 @@ namespace ActionGroupsExtended
                     }
                     catch (Exception e)
                     {
-                        Debug.Log("AGX RTQueue Fail&Recover " + errLine + " " + e);
+                        Log.Info("RTQueue Fail&Recover " + errLine + " " + e);
                         rtItem.state = AGXRemoteTechItemState.FAILED;
                     }
                 }
@@ -5826,7 +5896,7 @@ namespace ActionGroupsExtended
             }
             catch (Exception e)
             {
-                Debug.Log("AGX RTQueue Fail " + errLine + " " + e);
+                Log.Info("RTQueue Fail " + errLine + " " + e);
             }
         }
 
@@ -6375,7 +6445,7 @@ namespace ActionGroupsExtended
 
         public void CalculateActiveActions()
         {
-            //Debug.Log("calculateActiveActions Start" + StaticData.CurrentVesselActions.Count);
+            Log.Info("calculateActiveActions Start" + StaticData.CurrentVesselActions.Count);
             //ActiveActions.Clear();
             ActiveActionsState.Clear();
             for (int i = 1; i <= 250; i = i + 1)
@@ -6429,7 +6499,7 @@ namespace ActionGroupsExtended
             //print("Def 10 count " + DefaultTen.Count + " " + ActiveKeys.Count + " " + ActiveKeysDirect.Count);
 
 
-            //Debug.Log("calculateActiveActions22 end");
+            Log.Info("calculateActiveActions22 end");
             //if (ActiveActionsState.Count > 0)
             //{
             CalculateActionsState();
@@ -6443,11 +6513,11 @@ namespace ActionGroupsExtended
         public static void CalculateActionsState() //flag each actiongroup as activated or not
         {
             // print("Calculate start");
-            //Debug.Log("CalclateActionsState33 start!");
+            Log.Info("CalclateActionsState33 start!");
             //foreach(bool b in FlightGlobals.ActiveVessel.ActionGroups.groups)
             //{
 
-            //    Debug.Log("bool state " + b.ToString());
+            //    Log.Info("bool state " + b.ToString());
             //}
             string errLine = "1";
             try
@@ -6466,7 +6536,7 @@ namespace ActionGroupsExtended
                     foreach (AGXAction agxAct in StaticData.CurrentVesselActions)
                     {
                         //print("actions " + agxAct.ToString());
-                        //Debug.Log("cnt " + ActiveActionsState.Count);
+                        Log.Info("cnt " + ActiveActionsState.Count);
                         errLine = "5";
                         if (agxAct.activated)
                         {
@@ -6495,17 +6565,7 @@ namespace ActionGroupsExtended
                     errLine = "10";
                     if (actState.group <= 10)
                     {
-                        //Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                        //CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                        //CustomActions.Add(2, KSPActionGroup.Custom02);
-                        //CustomActions.Add(3, KSPActionGroup.Custom03);
-                        //CustomActions.Add(4, KSPActionGroup.Custom04);
-                        //CustomActions.Add(5, KSPActionGroup.Custom05);
-                        //CustomActions.Add(6, KSPActionGroup.Custom06);
-                        //CustomActions.Add(7, KSPActionGroup.Custom07);
-                        //CustomActions.Add(8, KSPActionGroup.Custom08);
-                        //CustomActions.Add(9, KSPActionGroup.Custom09);
-                        //CustomActions.Add(10, KSPActionGroup.Custom10);
+
                         if (actState.actionOn && !actState.actionOff)
                         {
                             FlightGlobals.ActiveVessel.ActionGroups.groups[actState.group + 6] = true;
@@ -6527,7 +6587,7 @@ namespace ActionGroupsExtended
                         groupActivatedState[actState.group] = false;
                     }
                 }
-                //Debug.Log("CalclateActionsState33 end!");
+                Log.Info("CalclateActionsState33 end!");
             }
             catch (Exception e)
             {
@@ -6591,23 +6651,23 @@ namespace ActionGroupsExtended
             {
                 if (agxPM.part.missionID == currentMissionId)
                 {
-                    
+
                     errStep = "2";
-                    //Debug.Log("AGX test mission id match");
+                    Log.Info("test mission id match");
                     return GroupNamesDictToString(AGXguiNames);
                 }
                 else
                 {
-                    //Debug.Log("AGX test mission id no match");
+                    Log.Info("test mission id no match");
                     Dictionary<int, string> curPMNames = GroupNamesStringToDict(agxPM.groupNames);
                     Dictionary<int, string> tempNames = new Dictionary<int, string>();
-                    for(int i = 1;i <= 250;i++)
+                    for (int i = 1; i <= 250; i++)
                     {
-                        if(curPMNames[i].Length > 0)
+                        if (curPMNames[i].Length > 0)
                         {
                             tempNames[i] = curPMNames[i];
                         }
-                        else if(AGXguiNames[i].Length >0)
+                        else if (AGXguiNames[i].Length > 0)
                         {
                             tempNames[i] = AGXguiNames[i];
                         }
@@ -6652,36 +6712,22 @@ namespace ActionGroupsExtended
 
         public static void CheckActionsActive()
         {
-            //Debug.Log("CheckActionsActice Start");
+            Log.Info("CheckActionsActice Start");
             StaticData.CurrentVesselActions = CheckActionsActiveActualCode(StaticData.CurrentVesselActions);
-            // Debug.Log("CheckActionsActice Mid");
+            // Log.Info("CheckActionsActice Mid");
             CalculateActionsState();
-            // Debug.Log("CheckActionsActice End");
+            // Log.Info("CheckActionsActice End");
         }
 
         public static List<AGXAction> CheckActionsActiveActualCode(List<AGXAction> actsListToCheck) //monitor actions state, have to add them manually
         {
-
-
             //string errLine = "1";
 
             //start toggle checking
-
             foreach (AGXAction agAct in actsListToCheck)
             {
                 try
                 {
-                    Dictionary<int, KSPActionGroup> CustomActions = new Dictionary<int, KSPActionGroup>();
-                    CustomActions.Add(1, KSPActionGroup.Custom01); //how do you add a range from enum?
-                    CustomActions.Add(2, KSPActionGroup.Custom02);
-                    CustomActions.Add(3, KSPActionGroup.Custom03);
-                    CustomActions.Add(4, KSPActionGroup.Custom04);
-                    CustomActions.Add(5, KSPActionGroup.Custom05);
-                    CustomActions.Add(6, KSPActionGroup.Custom06);
-                    CustomActions.Add(7, KSPActionGroup.Custom07);
-                    CustomActions.Add(8, KSPActionGroup.Custom08);
-                    CustomActions.Add(9, KSPActionGroup.Custom09);
-                    CustomActions.Add(10, KSPActionGroup.Custom10);
                     if (agAct.group <= 10 && agAct.ba.listParent.part.vessel == FlightGlobals.ActiveVessel)
                     {
                         agAct.activated = agAct.ba.listParent.part.vessel.ActionGroups[CustomActions[agAct.group]];
@@ -6696,563 +6742,6 @@ namespace ActionGroupsExtended
                 //errLine = "2";
                 try
                 {
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleDeployableSolarPanel") //only one state on part
-                    {
-                        if (agAct.ba.listParent.module.Fields.GetValue("deployState").ToString() == "EXTENDED")
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLandingLeg") //all acts
-                    {
-                        if (agAct.ba.name == "OnAction" || agAct.ba.name == "RaiseAction" || agAct.ba.name == "LowerAction")
-                        {
-                            if ((int)agAct.ba.listParent.module.Fields.GetValue("savedLegState") == 3)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleSuspensionLockAction") //only act
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("suspensionLocked") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEngines") //all acts not needed, checks bool directly
-                    {
-                        ModuleEngines agEng = (ModuleEngines)agAct.ba.listParent.module;
-                        agAct.activated = agEng.getIgnitionState;
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEnginesFX")//all acts not needed, checks bool directly
-                    {
-                        ModuleEnginesFX agEng = (ModuleEnginesFX)agAct.ba.listParent.module;
-                        agAct.activated = agEng.getIgnitionState;
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleEnviroSensor")
-                    {
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("sensorActive") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGenerator")
-                    {
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("generatorIsActive") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGimbal") //other acts not needed, bool check
-                    {
-
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("gimbalLock") == false)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
-                            agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleGimbalActions") //other acts not needed, bool check
-                    {
-                        agAct.activated = true;
-                        foreach (ModuleGimbal pm in agAct.ba.listParent.part.Modules.OfType<ModuleGimbal>())
-                        {
-                            if (pm.gimbalLock == true)
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleDockingNodeActions" || agAct.ba.listParent.module.moduleName == "ModuleCommandActions" && agAct.ba.name == "ControlFromHere") //other acts not needed, bool check
-                    {
-                        agAct.activated = false;
-                        if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
-                        {
-                            agAct.activated = true;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLandingGear") //all acts
-                    {
-                        if (agAct.ba.name == "OnAction")
-                        {
-                            //print((string)agAct.ba.listParent.module.Fields.GetValue("gearState") + " gear test");
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("storedGearState") == "DEPLOYED")
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleSteering") //all acts
-                    {
-                        if (agAct.ba.name == "InvertSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleLight") //all acts
-                    {
-                        if (agAct.ba.name == "ToggleLightAction" || agAct.ba.name == "LightOnAction" || agAct.ba.name == "LightOffAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isOn") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleRCS") //all ats
-                    {
-
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            ModuleRCS rcsMdl = (ModuleRCS)agAct.ba.listParent.module;
-                            if (rcsMdl.rcsEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleReactionWheel") //all acts
-                    {
-                        //print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
-                        if (agAct.ba.name == "Toggle" || agAct.ba.name == "Activate" || agAct.ba.name == "Deactivate")
-                        {
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("stateString") == "Disabled")
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleScienceExperiment")
-                    {
-                        if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Deployed") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleResourceIntake")
-                    {
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("intakeEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleWheel")
-                    {
-                        if (agAct.ba.name == "InvertSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        else if (agAct.ba.name == "ToggleMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleAnimateGeneric")
-                    {
-
-                        ModuleAnimateGeneric animPM = (ModuleAnimateGeneric)agAct.ba.listParent.module;
-                        //print(ba.name + " " + ba.guiName + " " + animPM.animationName + " " + animPM.animTime);
-
-                        if (agAct.ba.name == "ToggleAction")
-                        {
-                            if (animPM.animTime == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "SCANsat") //scansat mod
-                    {
-                        if (agAct.ba.name == "startScanAction" || agAct.ba.name == "stopScanAction" || agAct.ba.name == "toggleScanAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("scanning") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneConverter")
-                    {
-                        if (agAct.ba.name == "ActivateConverterAction" || agAct.ba.name == "DeactivateConverterAction" || agAct.ba.name == "ToggleConverterAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneGenerator")
-                    {
-                        if (agAct.ba.name == "EnableAction" || agAct.ba.name == "DisableAction" || agAct.ba.name == "ToggleAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Enabled") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneDetector")
-                    {
-                        if (agAct.ba.name == "EnableDetectionAction" || agAct.ba.name == "DisableDetectionAction" || agAct.ba.name == "ToggleDetectionAction")
-                        {
-
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsDetecting") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "KethaneExtractor")
-                    {
-                        if (agAct.ba.name == "DeployDrillAction" || agAct.ba.name == "RetractDrillAction" || agAct.ba.name == "ToggleDrillAction")
-                        {
-                            if ((string)agAct.ba.listParent.module.Fields.GetValue("Status") == "Deployed")
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSswitchEngineThrustTransform")
-                    {
-                        if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed") == false)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSairBrake")
-                    {
-                        if (agAct.ba.name == "toggleAirBrakeAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == 0)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwing")
-                    {
-                        if (agAct.ba.name == "toggleLeadingEdgeAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("leadingEdgeExtended") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "extendFlapAction" || agAct.ba.name == "retractFlapAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("flapMin") == (float)agAct.ba.listParent.module.Fields.GetValue("flapTarget"))
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwingletRangeAdjustment")
-                    {
-                        if (agAct.ba.name == "lockRangeAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("locked") == true)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSanimateGeneric")
-                    {
-
-
-                        if (agAct.ba.name == "toggleAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FARControllableSurface")
-                    {
-
-
-                        if (agAct.ba.name == "IncreaseDeflect" || agAct.ba.name == "DecreaseDeflect")
-                        {
-                            if ((int)agAct.ba.listParent.module.Fields.GetValue("flapDeflectionLevel") == 0)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-
-                        if (agAct.ba.name == "ActivateSpoiler")   //THIS CODE WORKS, just need to wait for brake to become public on the next version of FAR
-                        {
-
-
-                            Assembly FarAsm = null;
-                            foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
-                            {
-                                if (Asm.dllName == "FerramAerospaceResearch")
-                                {
-                                    //Debug.Log("far found");
-                                    FarAsm = Asm.assembly;
-                                }
-                            }
-                            //Debug.Log("far found2");
-                            if (FarAsm != null)
-                            {
-                                Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
-                                //Debug.Log("far found3");
-                                if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
-                                {
-                                    agAct.activated = true;
-                                }
-                                else
-                                {
-                                    agAct.activated = false;
-                                }
-                            }
-
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSrotorTrim")
-                    {
-
-
-                        if (agAct.ba.name == "toggleSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSswitchEngineThrustTransform")
-                    {
-
-
-                        if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSVTOLrotator")
-                    {
-                        if (agAct.ba.name == "toggleVTOLAction" || agAct.ba.name == "raiseVTOLAction" || agAct.ba.name == "lowerVTOLAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == Mathf.Abs((float)agAct.ba.listParent.module.Fields.GetValue("deployedAngle")))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "toggleVTOLsteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("VTOLsteeringActive"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
                     //if (agAct.ba.listParent.module.moduleName == "FScopterThrottle")
                     //{
                     //    if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseHeightAction" || agAct.ba.name == "decreaseHeightAction")
@@ -7267,468 +6756,605 @@ namespace ActionGroupsExtended
                     //        }
                     //    }
                     //}
-                    if (agAct.ba.listParent.module.moduleName == "FSengineHover")
+
+                    switch (agAct.ba.listParent.module.moduleName)
                     {
-                        if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseVerticalSpeed" || agAct.ba.name == "decreaseVerticalSpeed")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
+                        case "ModuleDeployableSolarPanel":
+                            agAct.activated = agAct.ba.listParent.module.Fields.GetValue("deployState").ToString() == "EXTENDED";
+                            break;
+                        case "ModuleLandingLeg":
+                            if (agAct.ba.name == "OnAction" || agAct.ba.name == "RaiseAction" || agAct.ba.name == "LowerAction")
                             {
-                                agAct.activated = true;
+                                agAct.activated =
+                                    (int)agAct.ba.listParent.module.Fields.GetValue("savedLegState") == 3;
                             }
-                            else
+                            if (agAct.ba.name == "ToggleSuspensionLockAction") //only act
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("suspensionLocked");
+                            }
+                            break;
+                        case "ModuleEngines":
+                            agAct.activated =
+                                ((ModuleEngines)agAct.ba.listParent.module).getIgnitionState;
+                            break;
+                        case "ModuleEnginesFX":
+                            agAct.activated =
+                                ((ModuleEnginesFX)agAct.ba.listParent.module).getIgnitionState;
+                            break;
+                        case "ModuleEnviroSensor":
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("sensorActive");
+                            break;
+                        case "ModuleGenerator":
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("generatorIsActive");
+                            break;
+                        case "ModuleGimbal":
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("gimbalLock") == false;
+                            break;
+                        case "ModuleCommandActions":
+                            if (agAct.ba.name == "ControlFromHere")
                             {
                                 agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FShoverThrottle")
-                    {
-                        if (agAct.ba.name == "toggleHoverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSpartTurner")
-                    {
-                        if (agAct.ba.name == "toggleSteeringAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "toggleInvertAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("reversedInput"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FSwheel")
-                    {
-                        if (agAct.ba.name == "ToggleGearAction")
-                        {
-                            if ((float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ReverseMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("reverseMotor"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ToggleMotorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "BrakesAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MuMechToggle")
-                    {
-                        if (agAct.ba.name == "LockToggle")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("isMotionLock"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "DTMagnetometer")
-                    {
-                        if (agAct.ba.name == "ActivateMagnetometerAction" || agAct.ba.name == "DeactivateMagnetometerAction" || agAct.ba.name == "ToggleMagnetometerAction")
-                        {
-                            if (agAct.ba.listParent.module.isEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNThermalHeatExchanger")
-                    {
-                        if (agAct.ba.name == "ActivateHeatExchangerAction" || agAct.ba.name == "DeactivateHeatExchangerAction" || agAct.ba.name == "ToggleHeatExchangerAction")
-                        {
-                            if (agAct.ba.listParent.module.isEnabled)
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ISRUScoop")
-                    {
-                        if (agAct.ba.name == "ActivateScoopAction" || agAct.ba.name == "DisableScoopAction" || agAct.ba.name == "ToggleScoopAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("scoopIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitter")
-                    {
-                        if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                        if (agAct.ba.name == "ActivateRelayAction" || agAct.ba.name == "DeactivateRelayAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("relay"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerTransmitterBackup")
-                    {
-                        if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleModableScienceGenerator")
-                    {
-                        if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("Deployed"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "AlcubierreDrive")
-                    {
-                        if (agAct.ba.name == "StartChargingAction" || agAct.ba.name == "StopChargingAction" || agAct.ba.name == "ToggleChargingAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsCharging"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiverBackup")
-                    {
-                        if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNGenerator")
-                    {
-                        if (agAct.ba.name == "ActivateGeneratorAction" || agAct.ba.name == "DeactivateGeneratorAction" || agAct.ba.name == "ToggleGeneratorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNRadiator")
-                    {
-                        if (agAct.ba.name == "DeployRadiatorAction" || agAct.ba.name == "RetractRadiatorAction" || agAct.ba.name == "ToggleRadiatorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("radiatorIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "FNReactor")
-                    {
-                        if (agAct.ba.name == "ActivateReactorAction" || agAct.ba.name == "DeactivateReactorAction" || agAct.ba.name == "ToggleReactorAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "MicrowavePowerReceiver")
-                    {
-                        if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("receiverIsEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "TacGenericConverter")
-                    {
-                        if (agAct.ba.name == "ToggleConverter")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled"))
-                            {
-                                agAct.activated = true;
-                            }
-                            else
-                            {
-                                agAct.activated = false;
-                            }
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleControlSurfaceActions") //other acts not needed, bool check
-                    {
-                        //Debug.Log("surface found");
-                        agAct.activated = true;
-                        foreach (PartModule pm in agAct.ba.listParent.part.Modules)
-                        //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
-                        {
-                            if (pm is ModuleControlSurface)
-                            {
-                                //Debug.Log("surface found2");
-                                ModuleControlSurface CS = (ModuleControlSurface)pm;
-                                if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
+                                if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
                                 {
-                                    //Debug.Log("surface found3");
-                                    if (CS.ignorePitch == true)
-                                    {
-                                        //Debug.Log("surface found4");
-                                        agAct.activated = false;
-                                    }
-                                }
-                                else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                {
-                                    if (CS.ignoreYaw == true)
-                                    {
-                                        agAct.activated = false;
-                                    }
-                                }
-                                else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                {
-                                    if (CS.ignoreRoll == true)
-                                    {
-                                        agAct.activated = false;
-                                    }
+                                    agAct.activated =
+                                        agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId;
                                 }
                             }
-                            else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
-                            {
-                                //Debug.Log("Start FAR Module");
-                                int i;
-                                if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
-                                {
-                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("yawaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                    {
-                                        if ((float)pm.Fields.GetValue("rollaxis") == 0f)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                }
-                                else //NEAR installed
-                                {
-                                    if (agAct.ba.name == "TogglePitchAction" || agAct.ba.name == "EnablePitchAction" || agAct.ba.name == "DisablePitchAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("pitchaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleYawAction" || agAct.ba.name == "EnableYawAction" || agAct.ba.name == "DisableYawAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("yawaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                    else if (agAct.ba.name == "ToggleRollAction" || agAct.ba.name == "EnableRollAction" || agAct.ba.name == "DisableRollAction")
-                                    {
-                                        if ((bool)pm.Fields.GetValue("rollaxis") == false)
-                                        {
-                                            agAct.activated = false;
-                                        }
-                                    }
-                                }
-                                //Debug.Log("end FAR Module");
-                            }
-                        }
-                    }
-
-
-                    if (agAct.ba.listParent.module.moduleName == "ModuleFuelCrossfeedActions")
-                    {
-                        agAct.activated = agAct.ba.listParent.part.fuelCrossFeed;
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleResourceActions") //scansat mod
-                    {
-
-                        if (agAct.ba.name == "ToggleResource" || agAct.ba.name == "EnableResource" || agAct.ba.name == "DisableResource")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockResource") == true)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-                        if (agAct.ba.name == "ToggleElec" || agAct.ba.name == "EnableElec" || agAct.ba.name == "DisableElec")
-                        {
-                            if ((bool)agAct.ba.listParent.module.Fields.GetValue("lockEC") == true)
-                            {
-                                agAct.activated = false;
-                            }
-                            else
-                            {
-                                agAct.activated = true;
-                            }
-                        }
-
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "USI_ModuleAsteroidDrill")
-                    {
-                        agAct.activated = false;
-                        if ((bool)agAct.ba.listParent.module.Fields.GetValue("IsActivated") == true)
-                        {
-                            agAct.activated = true;
-                        }
-                        else
-                        {
+                            break;
+                        case "ModuleDockingNodeActions":
                             agAct.activated = false;
-                        }
-                    }
-                    if (agAct.ba.listParent.module.moduleName == "ModuleControlSurface")
-                    {
-                        agAct.activated = false;
-                        ModuleControlSurface ctrlSurf = (ModuleControlSurface)agAct.ba.listParent.module;
-
-                        if (ctrlSurf.deploy)
-                        {
+                            if (agAct.ba.listParent.part.flightID == agAct.ba.listParent.part.vessel.referenceTransformId)
+                            {
+                                agAct.activated = true;
+                            }
+                            break;
+                        case "ModuleGimbalActions":
                             agAct.activated = true;
-                        }
-                        else
-                        {
+                            foreach (ModuleGimbal pm in agAct.ba.listParent.part.Modules.OfType<ModuleGimbal>())
+                            {
+                                if (pm.gimbalLock)
+                                {
+                                    agAct.activated = false;
+                                }
+                            }
+                            break;
+                        case "ModuleLandingGear":
+                            if (agAct.ba.name == "OnAction")
+                            {
+                                agAct.activated =
+                                   (string)agAct.ba.listParent.module.Fields.GetValue("storedGearState") == "DEPLOYED";
+                            }
+                            else if (agAct.ba.name == "BrakesAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                            }
+                            break;
+                        case "ModuleSteering":
+                            if (agAct.ba.name == "InvertSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering");
+                            }
+                            if (agAct.ba.name == "ToggleSteeringAction" || agAct.ba.name == "LockSteeringAction" || agAct.ba.name == "UnlockSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false;
+                            }
+                            break;
+                        case "ModuleLight":
+                            if (agAct.ba.name == "ToggleLightAction" || agAct.ba.name == "LightOnAction" || agAct.ba.name == "LightOffAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isOn");
+                            }
+                            break;
+                        case "ModuleRCS":
+
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    ((ModuleRCS)agAct.ba.listParent.module).rcsEnabled;
+                            }
+                            break;
+                        case "ModuleReactionWheel":
+                            //print((string)agAct.ba.listParent.module.Fields.GetValue("stateString"));
+                            if (agAct.ba.name == "Toggle" || agAct.ba.name == "Activate" || agAct.ba.name == "Deactivate")
+                            {
+                                agAct.activated =
+                                    !((string)agAct.ba.listParent.module.Fields.GetValue("stateString") ==
+                                      "Disabled");
+                            }
+                            break;
+                        case "ModuleScienceExperiment":
+                            if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Deployed");
+                            }
+                            break;
+                        case "ModuleResourceIntake":
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("intakeEnabled");
+                            }
+                            break;
+                        case "ModuleWheel":
+                            switch (agAct.ba.name)
+                            {
+                                case "InvertSteeringAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("invertSteering");
+                                    break;
+                                case "ToggleSteeringAction":
+                                case "LockSteeringAction":
+                                case "UnlockSteeringAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("steeringLocked") == false;
+                                    break;
+                                case "BrakesAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                                    break;
+                                case "ToggleMotorAction":
+                                    agAct.activated =
+                                        (bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled");
+                                    break;
+                            }
+                            break;
+                        case "ModuleAnimateGeneric":
+
+                            //ModuleAnimateGeneric animPM = (ModuleAnimateGeneric)agAct.ba.listParent.module;
+                            //print(ba.name + " " + ba.guiName + " " + animPM.animationName + " " + animPM.animTime);
+
+                            if (agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    ((ModuleAnimateGeneric)agAct.ba.listParent.module).animTime == 1f;
+                            }
+                            break;
+                        case "SCANsat":
+                            if (agAct.ba.name == "startScanAction" || agAct.ba.name == "stopScanAction" || agAct.ba.name == "toggleScanAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("scanning");
+                            }
+                            break;
+                        case "KethaneConverter":
+                            if (agAct.ba.name == "ActivateConverterAction" || agAct.ba.name == "DeactivateConverterAction" || agAct.ba.name == "ToggleConverterAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "KethaneGenerator":
+                            if (agAct.ba.name == "EnableAction" || agAct.ba.name == "DisableAction" || agAct.ba.name == "ToggleAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Enabled");
+                            }
+                            break;
+                        case "KethaneDetector":
+                            if (agAct.ba.name == "EnableDetectionAction" || agAct.ba.name == "DisableDetectionAction" || agAct.ba.name == "ToggleDetectionAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsDetecting");
+                            }
+                            break;
+                        case "KethaneExtractor":
+                            if (agAct.ba.name == "DeployDrillAction" || agAct.ba.name == "RetractDrillAction" || agAct.ba.name == "ToggleDrillAction")
+                            {
+                                agAct.activated =
+                                    (string)agAct.ba.listParent.module.Fields.GetValue("Status") == "Deployed";
+                            }
+                            break;
+                        case "FSswitchEngineThrustTransform":
+                            if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isReversed");
+                            }
+                            break;
+                        //case "FSswitchEngineThrustTransform":
+                        //    if (agAct.ba.name == "switchTTAction" || agAct.ba.name == "reverseTTAction" || agAct.ba.name == "normalTTAction")
+                        //    {
+                        //        if ((bool)agAct.ba.listParent.module.Fields.GetValue("isReversed") == false)
+                        //        {
+                        //            agAct.activated = true;
+                        //        }
+                        //        else
+                        //        {
+                        //            agAct.activated = false;
+                        //        }
+                        //    }
+                        //    break;???
+                        case "FSairBrake":
+                            if (agAct.ba.name == "toggleAirBrakeAction")
+                            {
+                                agAct.activated =
+                                    !((float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == 0);
+                            }
+                            break;
+                        case "FSwing":
+                            if (agAct.ba.name == "toggleLeadingEdgeAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("leadingEdgeExtended");
+                            }
+                            if (agAct.ba.name == "extendFlapAction" || agAct.ba.name == "retractFlapAction")
+                            {
+                                agAct.activated =
+                                    !((float)agAct.ba.listParent.module.Fields.GetValue("flapMin") == (float)agAct.ba.listParent.module.Fields.GetValue("flapTarget"));
+                            }
+                            break;
+                        case "FSwingletRangeAdjustment":
+                            if (agAct.ba.name == "lockRangeAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("locked");
+                            }
+                            break;
+                        case "FSanimateGeneric":
+                            if (agAct.ba.name == "toggleAction")
+                            {
+                                agAct.activated =
+                                     (float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f;
+                            }
+                            break;
+                        case "FARControllableSurface":
+                            if (agAct.ba.name == "IncreaseDeflect" || agAct.ba.name == "DecreaseDeflect")
+                            {
+                                agAct.activated =
+                                    !((int)agAct.ba.listParent.module.Fields.GetValue("flapDeflectionLevel") == 0);
+                            }
+
+                            if (agAct.ba.name == "ActivateSpoiler")   //THIS CODE WORKS, just need to wait for brake to become public on the next version of FAR
+                            {
+                                Assembly FarAsm = null;
+                                foreach (AssemblyLoader.LoadedAssembly Asm in AssemblyLoader.loadedAssemblies)
+                                {
+                                    if (Asm.dllName == "FerramAerospaceResearch")
+                                    {
+                                        Log.Info("far found");
+                                        FarAsm = Asm.assembly;
+                                    }
+                                }
+                                Log.Info("far found2");
+                                if (FarAsm != null)
+                                {
+                                    Type FarCtrlSurf = FarAsm.GetType("FARControllableSurface");
+                                    Log.Info("far found3");
+                                    if ((bool)agAct.ba.listParent.module.GetType().GetField("brake").GetValue(agAct.ba.listParent.module))//.GetValue(FarCtrlSurf));
+                                    {
+                                        agAct.activated = true;
+                                    }
+                                    else
+                                    {
+                                        agAct.activated = false;
+                                    }
+                                }
+
+                            }
+                            break;
+                        case "FSrotorTrim":
+                            if (agAct.ba.name == "toggleSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled");
+                            }
+                            break;
+
+                        case "FSVTOLrotator":
+                            if (agAct.ba.name == "toggleVTOLAction" || agAct.ba.name == "raiseVTOLAction" || agAct.ba.name == "lowerVTOLAction")
+                            {
+                                agAct.activated =
+                                    (float)agAct.ba.listParent.module.Fields.GetValue("targetAngle") == Mathf.Abs((float)agAct.ba.listParent.module.Fields.GetValue("deployedAngle"));
+                            }
+                            if (agAct.ba.name == "toggleVTOLsteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("VTOLsteeringActive");
+                            }
+                            break;
+                        case "FSengineHover":
+                            if (agAct.ba.name == "toggleHoverAction" || agAct.ba.name == "increaseVerticalSpeed" || agAct.ba.name == "decreaseVerticalSpeed")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive");
+                            }
+                            break;
+                        case "FShoverThrottle":
+                            if (agAct.ba.name == "toggleHoverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("hoverActive");
+                            }
+                            break;
+                        case "FSpartTurner":
+                            if (agAct.ba.name == "toggleSteeringAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("steeringEnabled");
+                            }
+                            if (agAct.ba.name == "toggleInvertAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("reversedInput");
+                            }
+                            break;
+                        case "FSwheel":
+                            if (agAct.ba.name == "ToggleGearAction")
+                            {
+                                agAct.activated =
+                                    (float)agAct.ba.listParent.module.Fields.GetValue("animTime") == 1f;
+                            }
+                            if (agAct.ba.name == "ReverseMotorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("reverseMotor");
+
+                            }
+                            if (agAct.ba.name == "ToggleMotorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("motorEnabled");
+                            }
+                            if (agAct.ba.name == "BrakesAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("brakesEngaged");
+                            }
+                            break;
+                        case "MuMechToggle":
+                            if (agAct.ba.name == "LockToggle")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("isMotionLock");
+                            }
+                            break;
+                        case "DTMagnetometer":
+                            if (agAct.ba.name == "ActivateMagnetometerAction" || agAct.ba.name == "DeactivateMagnetometerAction" || agAct.ba.name == "ToggleMagnetometerAction")
+                            {
+                                agAct.activated =
+                                   agAct.ba.listParent.module.isEnabled;
+                            }
+                            break;
+                        case "FNThermalHeatExchanger":
+                            if (agAct.ba.name == "ActivateHeatExchangerAction" || agAct.ba.name == "DeactivateHeatExchangerAction" || agAct.ba.name == "ToggleHeatExchangerAction")
+                            {
+                                agAct.activated =
+                                    agAct.ba.listParent.module.isEnabled;
+                            }
+                            break;
+                        case "ISRUScoop":
+                            if (agAct.ba.name == "ActivateScoopAction" || agAct.ba.name == "DisableScoopAction" || agAct.ba.name == "ToggleScoopAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("scoopIsEnabled");
+                            }
+                            break;
+                        case "MicrowavePowerTransmitter":
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            if (agAct.ba.name == "ActivateRelayAction" || agAct.ba.name == "DeactivateRelayAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("relay");
+                            }
+                            break;
+                        case "MicrowavePowerTransmitterBackup":
+                            if (agAct.ba.name == "ActivateTransmitterAction" || agAct.ba.name == "DeactivateTransmitterAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "ModuleModableScienceGenerator":
+                            if (agAct.ba.name == "DeployAction" || agAct.ba.name == "ResetAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("Deployed");
+                            }
+                            break;
+                        case "AlcubierreDrive":
+                            if (agAct.ba.name == "StartChargingAction" || agAct.ba.name == "StopChargingAction" || agAct.ba.name == "ToggleChargingAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsCharging");
+                            }
+                            break;
+                        case "MicrowavePowerReceiverBackup":
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+
+                        case "FNGenerator":
+                            if (agAct.ba.name == "ActivateGeneratorAction" || agAct.ba.name == "DeactivateGeneratorAction" || agAct.ba.name == "ToggleGeneratorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "FNRadiator":
+                            if (agAct.ba.name == "DeployRadiatorAction" || agAct.ba.name == "RetractRadiatorAction" || agAct.ba.name == "ToggleRadiatorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("radiatorIsEnabled");
+                            }
+                            break;
+                        case "FNReactor":
+                            if (agAct.ba.name == "ActivateReactorAction" || agAct.ba.name == "DeactivateReactorAction" || agAct.ba.name == "ToggleReactorAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("IsEnabled");
+                            }
+                            break;
+                        case "MicrowavePowerReceiver":
+                            if (agAct.ba.name == "ActivateReceiverAction" || agAct.ba.name == "DisableReceiverAction" || agAct.ba.name == "ToggleReceiverAction")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("receiverIsEnabled");
+                            }
+                            break;
+                        case "TacGenericConverter":
+                            if (agAct.ba.name == "ToggleConverter")
+                            {
+                                agAct.activated =
+                                    (bool)agAct.ba.listParent.module.Fields.GetValue("converterEnabled");
+                            }
+                            break;
+                        case "ModuleControlSurfaceActions":
+                            Log.Info("surface found");
+                            agAct.activated = true;
+                            //foreach (ModuleControlSurface pm in agAct.ba.listParent.part.Modules.OfType<ModuleControlSurface>())
+                            foreach (PartModule pm in agAct.ba.listParent.part.Modules)
+                            {
+                                if (pm is ModuleControlSurface)
+                                {
+                                    Log.Info("surface found2");
+                                    ModuleControlSurface CS = (ModuleControlSurface)pm;
+                                    switch (agAct.ba.name)
+                                    {
+                                        case "TogglePitchAction":
+                                        case "EnablePitchAction":
+                                        case "DisablePitchAction":
+                                            Log.Info("surface found3");
+                                            if (CS.ignorePitch)
+                                            {
+                                                Log.Info("surface found4");
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                        case "ToggleYawAction":
+                                        case "EnableYawAction":
+                                        case "DisableYawAction":
+                                            if (CS.ignoreYaw)
+                                            {
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                        case "ToggleRollAction":
+                                        case "EnableRollAction":
+                                        case "DisableRollAction":
+                                            if (CS.ignoreRoll)
+                                            {
+                                                agAct.activated = false;
+                                            }
+                                            break;
+                                    }
+                                }
+                                else if (pm.moduleName == "FARControllableSurface") //FAR adds this after stock ModuleControlSurface always, so this runs second
+                                {
+                                    Log.Info("Start FAR Module");
+                                    int i;
+                                    if (int.TryParse(pm.Fields.GetValue("rollaxis").ToString(), out i)) //true if FAR installed, false if NEAR installed. Only need to check once, not three times for pitch/roll/yaw
+                                    {
+                                        switch (agAct.ba.name)
+                                        {
+                                            case "TogglePitchAction":
+                                            case "EnablePitchAction":
+                                            case "DisablePitchAction":
+                                                if ((float)pm.Fields.GetValue("pitchaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleYawAction":
+                                            case "EnableYawAction":
+                                            case "DisableYawAction":
+                                                if ((float)pm.Fields.GetValue("yawaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleRollAction":
+                                            case "EnableRollAction":
+                                            case "DisableRollAction":
+                                                if ((float)pm.Fields.GetValue("rollaxis") == 0f)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                        }
+                                    }
+                                    else //NEAR installed
+                                    {
+                                        switch (agAct.ba.name)
+                                        {
+                                            case "TogglePitchAction":
+                                            case "EnablePitchAction":
+                                            case "DisablePitchAction":
+                                                if ((bool)pm.Fields.GetValue("pitchaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleYawAction":
+                                            case "EnableYawAction":
+                                            case "DisableYawAction":
+                                                if ((bool)pm.Fields.GetValue("yawaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                            case "ToggleRollAction":
+                                            case "EnableRollAction":
+                                            case "DisableRollAction":
+                                                if ((bool)pm.Fields.GetValue("rollaxis") == false)
+                                                {
+                                                    agAct.activated = false;
+                                                }
+                                                break;
+                                        }
+                                    }
+                                    Log.Info("end FAR Module");
+                                }
+                            }
+                            break;
+                        case "ModuleFuelCrossfeedActions":
+                            agAct.activated =
+                                agAct.ba.listParent.part.fuelCrossFeed;
+                            break;
+                        case "ModuleResourceActions":
+
+                            if (agAct.ba.name == "ToggleResource" || agAct.ba.name == "EnableResource" || agAct.ba.name == "DisableResource")
+                            {
+                                agAct.activated =
+                                    !(bool)agAct.ba.listParent.module.Fields.GetValue("lockResource");
+                            }
+
+                            if (agAct.ba.name == "ToggleElec" || agAct.ba.name == "EnableElec" || agAct.ba.name == "DisableElec")
+                            {
+                                agAct.activated =
+                                    !(bool)agAct.ba.listParent.module.Fields.GetValue("lockEC");
+                            }
+                            break;
+                        case "USI_ModuleAsteroidDrill":
                             agAct.activated = false;
-                        }
+
+                            agAct.activated =
+                                (bool)agAct.ba.listParent.module.Fields.GetValue("IsActivated");
+
+                            break;
+                        case "ModuleControlSurface":
+                            agAct.activated = false;
+                            ModuleControlSurface ctrlSurf = (ModuleControlSurface)agAct.ba.listParent.module;
+
+                            agAct.activated =
+                                ctrlSurf.deploy;
+                            break;
                     }
-
-
-                    //Debug.Log("End calc active action!");
                 }
 
                 catch (Exception e)
@@ -7737,14 +7363,12 @@ namespace ActionGroupsExtended
                 }
 
 
-
                 //else //all other modules, check the isEnabled bool
                 //{
                 //    agAct.activated = agAct.ba.listParent.module.isEnabled;
                 //}
             }
             return actsListToCheck;
-
         }
     }
 
